@@ -12,6 +12,8 @@ Credits follow-up: creator credit now links directly to **https://tahmidraven.co
 
 Startup follow-up: enable LittleJS's **actual built-in animated splash** via `setShowSplashScreen(true)`, not a recreated logo. A “Built with LittleJS” status credit remains visible during startup. Initial phase is loading, all menus stay hidden, and async engine init awaits `artReady` before showing the title. Slow assets use the engine's built-in loading screen. Branding fits below the logo on short landscape screens. No additional logo download or external runtime request is introduced.
 
+Refresh/first-paint follow-up: the user saw raw HTML briefly before CSS loaded. `index.html` now contains critical inline background/visibility styles, preserved in the built HTML. The application adds `html.game-styled` only after CSS imports and engine canvas initialization. Do not remove this gate or move it into the external stylesheet. Browser regression checks fresh navigation and refresh with application JS disabled and external CSS unavailable: dark background, hidden markup, no raw loading text; normal startup still reveals the real splash and menu.
+
 ## Current gameplay
 
 - Grow toward the pointer (or arrow-key light + G), avoid mossy terrain and bugs, collect dew, and restore **all three flowers** to advance. No early finish/partial victory. Water exhaustion is failure even after some flowers bloom.
@@ -63,6 +65,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 - `386f07e`: full-screen forest arcade, variable enemy AI, three-garden progression, HUD and menus.
 - `925ec80`: illustrated How to Play guide in the main and pause menus.
 - `e8c6756`: creator website link and separate in-game Credits page.
+- `bf58d9a`: native LittleJS startup splash and Built with LittleJS branding.
 - The user disliked pure tracing, then explicitly rejected a three-light plan/launch experiment. That experiment was removed, not shipped as the current mode.
 - Earlier generated mockups are not playable levels and are not shipped assets. Do not reuse employer/Two Dots art without verified rights. Leaf maintenance/shading was discussed but is not implemented.
 

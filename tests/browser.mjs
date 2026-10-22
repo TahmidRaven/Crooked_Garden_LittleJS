@@ -13,6 +13,16 @@ try{
     p.on('pageerror',error=>errors.push(error.message));
     p.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
   }
+  // Simulate the first paint before either application JS or CSS is available.
+  const bare=await browser.newPage({viewport:{width:390,height:844},javaScriptEnabled:false});watch(bare);
+  await bare.route('**/*.css',route=>route.fulfill({status:200,contentType:'text/css',body:''}));
+  for(let refresh=0;refresh<2;refresh++){
+    if(refresh)await bare.reload();else await bare.goto(url);
+    const boot=await bare.evaluate(()=>({background:getComputedStyle(document.documentElement).backgroundColor,visibility:getComputedStyle(document.getElementById('game')).visibility,styled:document.documentElement.classList.contains('game-styled')}));
+    assert.equal(boot.background,'rgb(7, 31, 36)');assert.equal(boot.visibility,'hidden');assert.equal(boot.styled,false);
+    assert.equal(await bare.locator('#startup-credit').isVisible(),false,'Unstyled loading markup cannot flash before CSS');
+  }
+  await bare.close();
   // Seed the source of randomness, not game state. Retries still receive new seeds.
   const seedSource=()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(12344);return array;}});
   watch(page);await page.addInitScript(seedSource);
@@ -23,6 +33,7 @@ try{
   await page.clock.pauseAt(new Date('2026-10-22T12:00:01Z'));
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.crookedGarden);
+  assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('game-styled')),true);
   assert.equal(await page.evaluate(()=>window.crookedGarden.getState().phase),'loading');
   assert.equal(await page.locator('#title-screen').isVisible(),false,'The menu cannot cover the engine splash');
   assert.match(await page.locator('#startup-credit').textContent(),/BUILT WITH LittleJS/);

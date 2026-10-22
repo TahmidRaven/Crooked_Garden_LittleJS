@@ -2,7 +2,7 @@
 
 A full-screen browser arcade built with LittleJS. Grow a luminous vine through three wild gardens, dodge a changing swarm, and wake every flower. The game has a title screen, in-world HUD, pause menu, results, stage progression, score and a local best score—no website-style sidebar or framed board.
 
-Startup shows **LittleJS's native animated engine splash** with a “Built with LittleJS” credit. The main menu stays hidden until the splash finishes and local artwork is decoded; slower loads retain the loading screen instead of exposing unfinished menus.
+Startup shows **LittleJS's native animated engine splash** with a “Built with LittleJS” credit. A tiny inline first-paint style keeps the background dark and raw markup hidden until the application CSS and engine canvas are ready, including on refresh. The main menu stays hidden until the splash finishes and local artwork is decoded; slower loads retain the loading screen instead of exposing unfinished menus.
 
 Built for [LittleJS Jam 3](https://itch.io/jam/littlejs-jam), theme **ZIGZAG**. This is a playable prototype, not a submitted jam entry. Recheck live rules/deadlines before publishing to the jam.
 

@@ -163,4 +163,6 @@ function update(){
 L.setGLEnable(false);L.setCanvasPixelated(false);L.setShowSplashScreen(true);L.setTouchGamepadEnable(false);
 L.setCanvasFixedSize(L.vec2(Math.round(view.width*view.dpr),Math.round(view.height*view.dpr)));
 L.engineInit(init,update,()=>{},()=>renderScene(L.mainContext,{garden,light,view,ticks,phase,reducedMotion,particles,popups}),()=>{},[],$('game-root'));
+// CSS imports have run and the engine owns the canvas; it is now safe to reveal startup UI.
+document.documentElement.classList.add('game-styled');
 window.crookedGarden={getState:()=>({phase,stage:garden.index,seed:garden.seed,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,flowers:[...garden.bloomed],dew:[...garden.collected],points:garden.path.length,bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,clock:garden.clock,endedBy:garden.endedBy,score:bank+stageScore(),best,view:{...view},art:artStatus()})};
