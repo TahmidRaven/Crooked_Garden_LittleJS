@@ -1,6 +1,6 @@
 # Credits and asset provenance
 
-- **Game design/development:** Tahmid Raven, assisted by OpenAI Codex and OpenCode (GPT-6.1 Sol).
+- **Game design/development:** [TahmidRaven](https://tahmidraven.com), assisted by OpenAI Codex and OpenCode (GPT-6.1 Sol).
 - **Engine:** LittleJS, Frank Force / KilledByAPixel, MIT. Installed package includes its license. https://github.com/KilledByAPixel/LittleJS
 - **Build tooling:** Vite (MIT); see installed package license.
 - **Initial visuals:** original procedural Canvas2D drawings made for this project.

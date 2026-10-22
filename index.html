@@ -43,7 +43,7 @@
         <button id="play" class="primary-button">LET IT GROW <span>▶</span></button>
         <button id="how-to-play" class="secondary-button" aria-label="How to Play">? HOW TO PLAY</button>
         <p class="title-note">Three gardens. A different swarm every run.</p>
-        <a class="credits" href="https://github.com/TahmidRaven/Crooked_Garden_LittleJS/blob/main/CREDITS.md" target="_blank" rel="noopener">LittleJS Jam · Credits</a>
+        <div class="title-credits"><span>Made by</span><a id="creator-link" href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a><span aria-hidden="true">·</span><button id="asset-credits">Credits</button></div>
       </div>
     </section>
 
@@ -87,6 +87,23 @@
           <div class="help-keys"><h3>Controls & second chances</h3><dl><div><dt>Mouse / touch</dt><dd>Hold and move to grow toward your light.</dd></div><div><dt><kbd>Arrows</kbd> + <kbd>G</kbd></dt><dd>Aim the light; hold G to grow.</dd></div><div><dt><kbd>Shift</kbd></dt><dd>Protected Burst while growing.</dd></div><div><dt><kbd>Space</kbd> / <kbd>Esc</kbd></dt><dd>Pause. Use Resume or Esc to continue.</dd></div><div><dt><kbd>Z</kbd> / Rewind</dt><dd>Back up a mistake, with a short recovery shield. Costs 100 score.</dd></div><div><dt><kbd>R</kbd> / Retry</dt><dd>Restart this garden with a new swarm.</dd></div></dl></div>
         </div>
         <div class="help-bottom"><span>The game stays paused while you read.</span><button id="help-play" class="primary-button">LET IT GROW ▶</button></div>
+      </div>
+    </section>
+
+    <section id="asset-credits-screen" class="screen help-screen" role="dialog" aria-modal="true" aria-labelledby="asset-credits-title" hidden>
+      <div class="help-page">
+        <div class="help-topbar"><h2 id="asset-credits-title">CREDITS</h2><button id="credits-back" class="text-button">← Back to menu</button></div>
+        <div class="help-scroll" role="region" tabindex="0" aria-label="Asset sources and licenses">
+          <div class="credits-owner"><p class="overline">GAME DESIGN & DEVELOPMENT</p><h3><a href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a></h3><p>The game, original vine and flower drawings, forest scene, effects and instruction diagram were made for Crooked Garden. The external art and music used alongside them are credited below.</p></div>
+          <div class="help-grid">
+            <article class="help-card credit-card"><h3>Bug sprites · Kenney</h3><p>From <a href="https://kenney.nl/assets/platformer-art-deluxe" target="_blank" rel="noopener">Platformer Art Deluxe</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney Vleugels</a>.</p><p>Three ladybug walking/hit frames, scaled and mirrored in game. The hit silhouette is tinted for stunned bugs; original PNG files are unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-platformer.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
+            <article class="help-card credit-card"><h3>Foliage · Kenney</h3><p>From <a href="https://kenney.nl/assets/foliage-sprites" target="_blank" rel="noopener">Foliage Sprites</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney</a>.</p><p>One branch silhouette is tinted sage green, mirrored and drawn translucently around the forest edges. Decorative only; the original PNG is unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-foliage.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
+            <article class="help-card credit-card"><h3>“calm theme” · pebonius</h3><p>Music by <a href="https://pebonius.itch.io/" target="_blank" rel="noopener">pebonius</a>, from <a href="https://opengameart.org/content/calm-music-0" target="_blank" rel="noopener">OpenGameArt</a>.</p><p>The original audio is looped at reduced playback volume. Sound effects are synthesized for this game.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/pebonius-music.txt" target="_blank" rel="noopener">Source and license evidence ↗</a></p></article>
+            <article class="help-card credit-card"><h3>Engine, tools & jam</h3><p><a href="https://github.com/KilledByAPixel/LittleJS" target="_blank" rel="noopener">LittleJS</a> by Frank Force / KilledByAPixel — MIT. Built with <a href="https://vite.dev" target="_blank" rel="noopener">Vite</a> — MIT.</p><p>Made for <a href="https://itch.io/jam/littlejs-jam" target="_blank" rel="noopener">LittleJS Jam 3</a>, theme ZIGZAG.</p><p>Development assistance: OpenAI Codex and OpenCode (GPT-6.1 Sol). Generated concept images were used for discussion only and are not bundled.</p></article>
+          </div>
+          <p class="credits-license-note">The CC0 packs were downloaded free from their creators’ official pages. No paid bundle or creator logo is included. <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">About CC0 ↗</a> · <a href="./assets/manifest.json" target="_blank" rel="noopener">Exact source files and hashes ↗</a></p>
+        </div>
+        <div class="help-bottom"><span>Thank you to the artists and open-source creators.</span><button id="credits-done" class="primary-button">BACK TO MENU</button></div>
       </div>
     </section>
 

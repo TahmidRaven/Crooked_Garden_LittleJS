@@ -30,6 +30,25 @@ try{
   assert.equal(await page.locator('aside,footer,header').count(),0,'No website-style sidebar/header/footer');
   await mkdir('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/title.png',fullPage:true});
+  assert.equal(await page.locator('#creator-link').getAttribute('href'),'https://tahmidraven.com');
+  assert.equal(await page.locator('#asset-credits').textContent(),'Credits');
+  assert.equal(await page.locator('a[href*="github.com/TahmidRaven"]').count(),0,'No creator credit points to the project GitHub page');
+  const beforeCredits=await state();
+  await page.locator('#asset-credits').click();assert.equal((await state()).phase,'credits');
+  assert.equal(await page.locator('#asset-credits-title').textContent(),'CREDITS');
+  assert.match(await page.locator('#asset-credits-screen').textContent(),/Kenney/);
+  assert.match(await page.locator('#asset-credits-screen').textContent(),/pebonius/);
+  assert.match(await page.locator('#asset-credits-screen').textContent(),/CC0/);
+  await page.clock.runFor(1000);assert.equal((await state()).clock,beforeCredits.clock);assert.equal((await state()).seed,beforeCredits.seed);
+  for(const file of ['kenney-platformer.txt','kenney-foliage.txt','pebonius-music.txt']){
+    const response=await page.request.get(`${url}/assets/licenses/${file}`);assert.equal(response.status(),200);assert.match(await response.text(),/CC0/);
+  }
+  assert.equal((await page.request.get(`${url}/assets/manifest.json`)).status(),200);
+  await page.keyboard.press('Shift+Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'credits-done');
+  await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'credits-back');
+  await page.screenshot({path:'artifacts/asset-credits.png',fullPage:true});
+  await page.keyboard.press('Escape');assert.equal((await state()).phase,'title');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'asset-credits');
   const beforeHelp=await state();
   await page.locator('#how-to-play').click();
   assert.equal((await state()).phase,'help');
@@ -125,18 +144,37 @@ try{
     await page.locator('#pause').click();assert.equal((await state()).phase,'paused');
     await page.locator('#pause-help').click();assert.equal((await state()).phase,'help');
     const helpLayout=await page.evaluate(()=>{
-      const scroll=document.querySelector('.help-scroll');
+      const scroll=document.querySelector('#help-screen .help-scroll');
       return {width:scroll.scrollWidth,client:scroll.clientWidth,buttons:['help-back','help-play'].map(id=>{
         const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};
       })};
     });
     assert.ok(helpLayout.width<=helpLayout.client+1,`${label}: guide has no horizontal overflow`);
     for(const r of helpLayout.buttons)assert.ok(r.x>=-1&&r.y>=-1&&r.right<=width+1&&r.bottom<=height+1,`${label}: guide navigation stays visible`);
-    await page.locator('.help-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);
+    await page.locator('#help-screen .help-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);
     assert.equal(await page.locator('#help-back').isVisible(),true);
     if(width===390&&height===844)await page.screenshot({path:'artifacts/how-to-play-mobile.png',fullPage:true});
     await page.locator('#help-back').click();assert.equal((await state()).phase,'paused');
     await page.locator('#resume').click();assert.equal((await state()).phase,'playing');
+  }
+
+  await page.locator('#pause').click();await page.locator('#home').click();
+  for(const [width,height] of sizes){
+    await page.setViewportSize({width,height});await page.clock.runFor(100);
+    await page.locator('#title-screen').evaluate(el=>el.scrollTop=0);
+    const creator=await page.locator('#creator-link').boundingBox();
+    assert.ok(creator.y>=0&&creator.y+creator.height<=height+1,`${width}×${height}: creator credit is visible on the menu`);
+    await page.locator('#asset-credits').click();assert.equal((await state()).phase,'credits');
+    const layout=await page.evaluate(()=>{
+      const scroll=document.querySelector('#asset-credits-screen .help-scroll');
+      return {width:scroll.scrollWidth,client:scroll.clientWidth,buttons:['credits-back','credits-done'].map(id=>{
+        const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};
+      })};
+    });
+    assert.ok(layout.width<=layout.client+1,`${width}×${height}: credits have no horizontal overflow`);
+    for(const r of layout.buttons)assert.ok(r.x>=-1&&r.y>=-1&&r.right<=width+1&&r.bottom<=height+1,`${width}×${height}: credits navigation is visible`);
+    if(width===390&&height===844)await page.screenshot({path:'artifacts/asset-credits-mobile.png',fullPage:true});
+    await page.locator('#credits-done').click();assert.equal((await state()).phase,'title');
   }
 
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});watch(mobile);await mobile.addInitScript(seedSource);
@@ -156,7 +194,7 @@ try{
   await mobile.locator('#pause-retry').tap();assert.notEqual(await mobile.evaluate(()=>window.crookedGarden.getState().seed),seed);
   await mobile.screenshot({path:'artifacts/mobile.png',fullPage:true});
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: main/pause How to Play, guide navigation/focus/preserved runs/touch and 11 layouts, plus all three gardens, score, varied swarms, real input and assets.');
+  console.log('Browser checks passed: creator website, separate asset credits/licenses/navigation/focus and 11 layouts, How to Play, all three gardens, score, swarms, real input and art.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }

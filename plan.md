@@ -8,6 +8,8 @@ Latest feedback: the game looked like a website and bugs repeated the same patte
 
 Onboarding follow-up: the user could not tell how to play and requested a How to Play button/page. Both the main menu and pause menu now open an in-game full-screen guide with an original SVG sunlight/steering diagram, first-move example, flower/water/Burst/bug rules, and keyboard/touch controls. The run stays frozen; Back/Esc returns to the originating menu without resetting progress, and the guide can explicitly start/resume play. Header/footer navigation stays visible while instructions scroll, and keyboard focus is trapped/restored correctly.
 
+Credits follow-up: creator credit now links directly to **https://tahmidraven.com**, not the project GitHub page. A separate in-game page is visibly labeled **Credits** (the user explicitly shortened “Asset Credits” to “Credits”). It lists the game creator, Kenney bug/foliage sources and modifications, pebonius music, CC0 notices, engine/tools/jam and development assistance. Local notice/manifest links work in production. Back/Esc returns to the main menu with restored keyboard focus; reading credits does not advance/reset the game.
+
 ## Current gameplay
 
 - Grow toward the pointer (or arrow-key light + G), avoid mossy terrain and bugs, collect dew, and restore **all three flowers** to advance. No early finish/partial victory. Water exhaustion is failure even after some flowers bloom.
@@ -30,7 +32,7 @@ Onboarding follow-up: the user could not tell how to play and requested a How to
 
 - `src/game.js`: pure vine simulation, three level layouts, water/flower/dew/collision rules and rewind.
 - `src/arcade.js`: seeded randomness, enemy state/steering, Burst, stuns and simulation ticking.
-- `src/main.js`: title/playing/paused/help/result flow, context-aware help navigation, input, score/storage, UI and effects.
+- `src/main.js`: title/playing/paused/help/credits/result flow, context-aware guide/credits navigation, input, score/storage, UI and effects.
 - `src/scene.js`: full-window forest rendering, terrain/vine/flowers, telegraphs, sprites, particles and feedback.
 - `src/view.js`: viewport/high-DPI fitting and screen-to-world input transform. The full canvas fills the screen; the 600×720 gameplay region scales proportionally within HUD-safe space.
 - `src/art.js`: local CC0 images, runtime tints and procedural fallbacks.
@@ -46,9 +48,9 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 
 - `npm test`: **31 tests** — growth/water/terrain, all garden routes, seeded variation/replay, retry seeds, hunter reactions, charge telegraph/rest, enemy bounds, Burst/stun/score rules, source license/hash checks and viewport/DPI input mapping.
 - `npm run build`: production build.
-- `env NODE_OPTIONS='' npm run test:browser`: real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
+- `env NODE_OPTIONS='' npm run test:browser`: real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.
-- Screenshots in ignored `artifacts/`: `title.png`, `how-to-play.png`, `how-to-play-mobile.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`.
+- Screenshots in ignored `artifacts/`: `title.png`, `how-to-play.png`, `how-to-play-mobile.png`, `asset-credits.png`, `asset-credits-mobile.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`.
 - `npm run package`: builds `artifacts/crooked-garden.zip` with credits/notices and index.html at archive root. Does not publish the game.
 
 ## Prior checkpoints / decisions
@@ -57,6 +59,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 - `14a89ae`: earlier direct-steering flower restoration/responsiveness checkpoint.
 - `9e3ec41`: published direct-steering arcade + licensed assets before the full-screen/variable-enemy rework.
 - `386f07e`: full-screen forest arcade, variable enemy AI, three-garden progression, HUD and menus.
+- `925ec80`: illustrated How to Play guide in the main and pause menus.
 - The user disliked pure tracing, then explicitly rejected a three-light plan/launch experiment. That experiment was removed, not shipped as the current mode.
 - Earlier generated mockups are not playable levels and are not shipped assets. Do not reuse employer/Two Dots art without verified rights. Leaf maintenance/shading was discussed but is not implemented.
 

@@ -77,6 +77,8 @@ The full-window Canvas2D scene scales the world without stretching it, maps poin
 
 ## Build, credits and assets
 
+The main menu credits the creator with a direct link to **[tahmidraven.com](https://tahmidraven.com)**. Its separate **Credits** button opens an in-game page listing external art/music, their creators and source pages, CC0 notices, engine/tools, and development assistance. It does not send players to the project GitHub page. The page works within the packaged game; license notices and the source/hash manifest are bundled locally.
+
 Production files are in `dist/`. `npm run package` creates `artifacts/crooked-garden.zip` with `index.html` at its root, asset notices and `CREDITS.md`. It requires `zip` (included on macOS). Packaging does not upload or submit anything.
 
 Kenney's **Platformer Art Deluxe** bug frames and **Foliage Sprites** branch, plus pebonius's **calm theme**, are CC0. Only selected files are bundled; no paid bundle was purchased. Exact sources, changes, licenses and SHA-256 hashes are in [CREDITS.md](CREDITS.md), `public/assets/manifest.json` and `public/assets/licenses/`. Assets load locally with procedural image fallbacks; tests require all bundled art to decode successfully.

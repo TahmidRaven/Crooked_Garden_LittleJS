@@ -73,6 +73,13 @@ button:active:not(:disabled){translate:0 2px}
   .play-controls{bottom:8px}.play-hint{margin-bottom:5px;font-size:7px}.burst-button{height:48px;min-height:44px;min-width:145px;border-radius:14px}.burst-button>span{font-size:30px}.burst-button strong{font-size:14px}.burst-button small{font-size:7px}.dock-button{height:44px;min-height:44px;width:50px;border-radius:12px;font-size:20px}.dock-button small{font-size:6px}
   .screen{padding:12px}.title-spark{display:none}.title-content{max-width:520px}.overline{font-size:8px;margin-bottom:10px}h1{font-size:45px;line-height:.9}.tagline{font-size:9px;margin:15px 0}.primary-button{min-height:44px;min-width:210px;padding:10px 20px;font-size:13px;margin-bottom:6px}.how-to{margin:15px auto 0;font-size:7px;max-width:none}.title-note{margin:12px 0 7px;font-size:9px}.credits{font-size:8px}.menu-content h2{font-size:29px;margin-bottom:10px}.result-flowers{font-size:27px;margin-bottom:8px}.result-copy{font-size:11px;line-height:1.5;margin-bottom:10px}.result-stats{margin:10px 0 14px;gap:30px}.result-stats strong{font-size:19px}.text-button{margin:0 auto;min-height:38px;padding:7px 12px;font-size:11px}.menu-note{margin-top:10px;font-size:9px}
 }
+.title-credits{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;font-size:10px;color:#7d9f8b}
+.title-credits a,.title-credits button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:4px 6px;color:#b6cfaa;font-size:10px;text-decoration:none;background:transparent;border-radius:6px}
+.title-credits a:hover,.title-credits button:hover{color:#f0dda4;text-decoration:underline;text-underline-offset:3px}
+.credits-owner{margin-bottom:20px}.credits-owner .overline{margin-bottom:8px}.help-page .credits-owner h3{font-size:24px}
+.help-card.credit-card{padding:18px}.credit-card p+p{margin-top:10px}.credit-card a,.credits-owner a,.credits-license-note a{color:#e8d397;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.credits-license-note{padding:20px 2px 0}
+@media(max-height:500px){.title-content .tagline{margin:10px 0}.title-content .overline{margin-bottom:8px}.title-note{margin:8px 0 0}.title-content .secondary-button{margin-bottom:4px}}
 @media(prefers-reduced-motion:reduce){button:active:not(:disabled){translate:0}}
 @media(orientation:landscape) and (max-height:500px){
   .play-controls{left:auto;right:max(12px,env(safe-area-inset-right));top:50%;bottom:auto;transform:translateY(-50%);width:128px}
