@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {BUG_ART_FILES,bugFlightPose} from '../src/bug-flight.js';
+import {BUG_ART_FILES,bugFlightPose,warmHunterPixels} from '../src/bug-flight.js';
 
 const bug=(kind='wanderer')=>({kind,heading:0,state:'roam',stunned:false});
 
@@ -55,4 +55,17 @@ test('every full-colour flight frame is credited and its body anchor lies inside
     }
     assert.notDeepEqual(await readFile(`public/assets/art/${BUG_ART_FILES[poses[0].key]}`),await readFile(`public/assets/art/${BUG_ART_FILES[poses[1].key]}`));
   }
+});
+test('hunter body greys become warm amber while eyes stay darker',()=>{
+  const warm=warmHunterPixels(new Uint8ClampedArray([90,90,90,255,64,64,64,255]));
+  assert.ok(warm[0]>190&&warm[0]>warm[1]&&warm[1]>warm[2]);
+  assert.ok(warm[4]<warm[0]&&warm[5]<warm[1]);
+});
+test('hunter recolouring preserves white wings and already-coloured artwork',()=>{
+  const source=new Uint8ClampedArray([255,255,255,255,200,200,200,128,255,210,0,255,0,0,0,0]);
+  assert.deepEqual(warmHunterPixels(source),source);
+});
+test('hunter recolouring preserves alpha and does not alter source pixels',()=>{
+  const source=new Uint8ClampedArray([90,90,90,64,80,80,80,128]),before=source.slice(),warm=warmHunterPixels(source);
+  assert.deepEqual(source,before);assert.notEqual(warm,source);assert.equal(warm[3],64);assert.equal(warm[7],128);
 });

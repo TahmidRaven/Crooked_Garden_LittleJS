@@ -15,3 +15,14 @@ export function bugFlightPose(bug,index,time,{reducedMotion=false}={}){
   return {species,frame,key:style.keys[frame],glowing:!bug.stunned,anchor:style.anchors[frame],scale:style.scale,flip:right?-1:1,
     tilt:reducedMotion ? 0 : bug.stunned ? .15 : Math.sin(heading)*Math.cos(heading)*.4,offsetY:bug.stunned?1.5:0};
 }
+export function warmHunterPixels(pixels){
+  const result=new Uint8ClampedArray(pixels);
+  for(let i=0;i<result.length;i+=4){
+    const r=pixels[i],g=pixels[i+1],b=pixels[i+2],light=(r+g+b)/3;
+    // Only the neutral dark body/eyes: leave light wings, coloured pixels and alpha alone.
+    if(!pixels[i+3]||Math.max(r,g,b)>=155||Math.max(r,g,b)-Math.min(r,g,b)>12)continue;
+    if(light<72){result[i]=46+light*.5;result[i+1]=28+light*.3;result[i+2]=17+light*.18;}
+    else{const t=Math.min(1,(light-72)/83);result[i]=190+60*t;result[i+1]=113+78*t;result[i+2]=40+45*t;}
+  }
+  return result;
+}

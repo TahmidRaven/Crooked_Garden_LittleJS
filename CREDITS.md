@@ -26,7 +26,7 @@
   - `fly_fly.png` → `public/assets/art/fly-flight-2.png`.
   - `bee.png` → `public/assets/art/bee-flight-1.png`.
   - `bee_fly.png` → `public/assets/art/bee-flight-2.png`.
-- **Changes:** source PNGs unchanged; renamed, scaled, mirrored and slightly banked at runtime. Body anchors keep the insect aligned while its wings change pose. Normal sprite colours are preserved in every state: active bugs have a soft glow, while stunned bugs use a static full-colour wing pose with no glow and a star indicator. No grey hit silhouettes are bundled. Wing cycles are offset between insects, freeze on pause/stun, and respect reduced-motion settings. The old walking ladybug art is no longer bundled. AI, hitboxes and capture rules are unchanged.
+- **Changes:** source PNGs unchanged; renamed, scaled, mirrored and slightly banked at runtime. Hunter flies' neutral grey body pixels are recoloured warm amber at load time, preserving light wings and alpha. Body anchors keep the insect aligned while its wings change pose. Insect colours stay consistent across states: active bugs have a soft glow, while stunned bugs use a static full-colour wing pose with no glow and a star indicator. No grey hit silhouettes are bundled. Wing cycles are offset between insects, freeze on pause/stun, and respect reduced-motion settings. The old walking ladybug art is no longer bundled. AI, hitboxes and capture rules are unchanged.
 - **Bundled license:** `public/assets/licenses/kenney-platformer.txt` (archive notice, whitespace normalized).
 - **Integrity:** exact SHA-256 hashes for all four insect files are in `public/assets/manifest.json` and checked by `npm test`.
 

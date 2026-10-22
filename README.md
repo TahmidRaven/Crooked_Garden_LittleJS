@@ -96,9 +96,11 @@ The insects use actual wing-up/wing-down fly and bee animation pairs from Kenney
 
 Bug colours stay bright in both states. Active bugs have a soft glow; stunned bugs retain the same full-colour artwork, lose the glow, and show a dashed ring/star. There is no grey/dark stunned-sprite tint.
 
+Hunter flies use a warm amber body instead of the original grey. The palette remap happens once at image load, preserves light wings/alpha, and leaves the source PNGs unchanged. Hunters retain their coral behaviour ring and chasing rules.
+
 ## Validation
 
-- **59 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, capture rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visual safety, and seven flight-animation tests for frame changes, fixed body alignment, direction/banking, stun/pause/reduced-motion behaviour and credited source frames.
+- **62 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, capture rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visual safety, flight animation/alignment/state handling, and amber recolouring that preserves wings, alpha and source pixels.
 - **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
