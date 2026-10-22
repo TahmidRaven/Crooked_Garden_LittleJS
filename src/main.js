@@ -2,14 +2,14 @@ import './style.css';
 import * as L from 'littlejsengine';
 import { LEVELS, MAX_WATER, rewind, bloomCount } from './game.js';
 import { createArcade, tickArcade, queueBurst, bugsAt, BURST_COST } from './arcade.js';
-import { artStatus } from './art.js';
+import { artReady, artStatus } from './art.js';
 import { fitViewport, screenToGarden } from './view.js';
 import { renderScene } from './scene.js';
 
 const $=id=>document.getElementById(id);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touchControls=matchMedia('(pointer:coarse)').matches;
-let garden=createArcade(),light={x:400,y:450},phase='title',held=false,ticks=0,muted=true;
+let garden=createArcade(),light={x:400,y:450},phase='loading',held=false,ticks=0,muted=true;
 let particles=[],popups=[],bank=0,best=0;
 let helpReturn='title';
 let view=fitViewport(innerWidth,innerHeight,devicePixelRatio||1);
@@ -115,7 +115,9 @@ function resize(){
 function point(e){
   const r=L.mainCanvas.getBoundingClientRect();light=screenToGarden(view,(e.clientX-r.left)/r.width*view.width,(e.clientY-r.top)/r.height*view.height);
 }
-function init(){
+async function init(){
+  // The native LittleJS splash runs before init; keep loading visible until local art is decoded.
+  await artReady;
   const canvas=L.mainCanvas;canvas.style.touchAction='none';canvas.style.transform='none';
   canvas.addEventListener('pointerdown',e=>{if(e.button!==0||phase!=='playing'||!e.isPrimary)return;point(e);held=true;canvas.setPointerCapture(e.pointerId);focusGame();e.preventDefault();});
   canvas.addEventListener('pointermove',e=>{if(phase==='playing')point(e);});
@@ -134,7 +136,7 @@ function init(){
     }
   });
   $('flower-icons').replaceChildren(...garden.level.flowers.map((f,i)=>{const token=document.createElement('span');token.id=`flower-${i}`;token.className='flower-token';token.textContent='✿';return token;}));
-  new ResizeObserver(resize).observe($('game-root'));resize();updateUI();$('play').focus({preventScroll:true});
+  new ResizeObserver(resize).observe($('game-root'));resize();phase='title';$('startup-credit').hidden=true;$('game').setAttribute('aria-busy','false');updateUI();$('play').focus({preventScroll:true});
 }
 function keyboardGrowing(){return document.activeElement===$('game-root')&&L.keyIsDown('KeyG');}
 function update(){
@@ -158,7 +160,7 @@ function update(){
   }
   if(ticks%5===0)updateUI();
 }
-L.setGLEnable(false);L.setCanvasPixelated(false);L.setShowSplashScreen(false);L.setTouchGamepadEnable(false);
+L.setGLEnable(false);L.setCanvasPixelated(false);L.setShowSplashScreen(true);L.setTouchGamepadEnable(false);
 L.setCanvasFixedSize(L.vec2(Math.round(view.width*view.dpr),Math.round(view.height*view.dpr)));
 L.engineInit(init,update,()=>{},()=>renderScene(L.mainContext,{garden,light,view,ticks,phase,reducedMotion,particles,popups}),()=>{},[],$('game-root'));
 window.crookedGarden={getState:()=>({phase,stage:garden.index,seed:garden.seed,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,flowers:[...garden.bloomed],dew:[...garden.collected],points:garden.path.length,bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,clock:garden.clock,endedBy:garden.endedBy,score:bank+stageScore(),best,view:{...view},art:artStatus()})};

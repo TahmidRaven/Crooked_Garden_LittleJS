@@ -16,10 +16,28 @@ try{
   // Seed the source of randomness, not game state. Retries still receive new seeds.
   const seedSource=()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(12344);return array;}});
   watch(page);await page.addInitScript(seedSource);
+  let releaseArt;
+  const artGate=new Promise(resolve=>releaseArt=resolve);
+  await page.route('**/assets/art/**',async route=>{await artGate;await route.continue();});
   await page.clock.install({time:new Date('2026-10-22T12:00:00Z')});
-  await page.goto(url);
-  await page.waitForFunction(()=>window.crookedGarden&&Object.values(window.crookedGarden.getState().art).every(Boolean));
-  await page.clock.pauseAt(new Date('2026-10-22T12:00:02Z'));
+  await page.clock.pauseAt(new Date('2026-10-22T12:00:01Z'));
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.crookedGarden);
+  assert.equal(await page.evaluate(()=>window.crookedGarden.getState().phase),'loading');
+  assert.equal(await page.locator('#title-screen').isVisible(),false,'The menu cannot cover the engine splash');
+  assert.match(await page.locator('#startup-credit').textContent(),/BUILT WITH LittleJS/);
+  await mkdir('artifacts',{recursive:true});
+  await page.clock.runFor(800);
+  await page.screenshot({path:'artifacts/littlejs-splash.png',fullPage:true});
+  await page.clock.runFor(1500);
+  assert.equal(await page.evaluate(()=>window.crookedGarden.getState().phase),'loading','Slow local images keep the loading screen visible after the splash');
+  assert.equal(await page.locator('#startup-credit').isVisible(),true);
+  assert.equal(await page.locator('#game').getAttribute('aria-busy'),'true');
+  releaseArt();await page.clock.resume();
+  await page.waitForFunction(()=>window.crookedGarden.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
+  await page.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
+  assert.equal(await page.locator('#startup-credit').isVisible(),false);
+  assert.equal(await page.locator('#game').getAttribute('aria-busy'),'false');
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const point=async(x,y)=>{
     const {view:v}=await state(),r=await page.locator('#game-root canvas').boundingBox();
@@ -178,7 +196,7 @@ try{
   }
 
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});watch(mobile);await mobile.addInitScript(seedSource);
-  await mobile.goto(url);await mobile.waitForFunction(()=>window.crookedGarden&&Object.values(window.crookedGarden.getState().art).every(Boolean));
+  await mobile.goto(url);await mobile.waitForFunction(()=>window.crookedGarden?.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
   await mobile.locator('#how-to-play').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'help');
   await mobile.locator('#help-play').tap();
   await mobile.locator('#boost').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().queued),true);
@@ -193,8 +211,17 @@ try{
   await mobile.locator('#pause').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'paused');
   await mobile.locator('#pause-retry').tap();assert.notEqual(await mobile.evaluate(()=>window.crookedGarden.getState().seed),seed);
   await mobile.screenshot({path:'artifacts/mobile.png',fullPage:true});
+  const shortSplash=await browser.newPage({viewport:{width:568,height:320}});watch(shortSplash);
+  await shortSplash.clock.install({time:new Date('2026-10-22T12:00:00Z')});
+  await shortSplash.clock.pauseAt(new Date('2026-10-22T12:00:01Z'));
+  await shortSplash.goto(url,{waitUntil:'domcontentloaded'});await shortSplash.waitForFunction(()=>window.crookedGarden);
+  await shortSplash.clock.runFor(800);
+  assert.equal(await shortSplash.locator('#startup-credit').isVisible(),true);
+  const branding=await shortSplash.locator('#startup-credit').boundingBox();
+  assert.ok(branding.y>=270&&branding.y+branding.height<=320,'Short-screen branding stays below the native logo and inside the viewport');
+  await shortSplash.screenshot({path:'artifacts/littlejs-splash-landscape.png',fullPage:true});
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: creator website, separate asset credits/licenses/navigation/focus and 11 layouts, How to Play, all three gardens, score, swarms, real input and art.');
+  console.log('Browser checks passed: native LittleJS splash/branding/slow-load handoff, credits/guide and 11 layouts, all three gardens, score, swarms, real input and art.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }

@@ -8,8 +8,9 @@
   <title>Crooked Garden · Outgrow the swarm</title>
 </head>
 <body>
-  <main id="game" aria-label="Crooked Garden game">
-    <div id="game-root" role="application" tabindex="0" aria-label="Hold pointer or G to grow. Move pointer or arrows to steer. Shift bursts, Space pauses, Z rewinds."></div>
+  <main id="game" aria-label="Crooked Garden game" aria-busy="true">
+    <div id="game-root" role="application" tabindex="0" inert aria-label="Hold pointer or G to grow. Move pointer or arrows to steer. Shift bursts, Space pauses, Z rewinds."></div>
+    <div id="startup-credit" class="startup-credit" role="status"><span>BUILT WITH <strong>LittleJS</strong></span><small>Loading Crooked Garden…</small></div>
 
     <div id="hud" class="hud" hidden>
       <div class="vitals">
@@ -34,7 +35,7 @@
       </div>
     </div>
 
-    <section id="title-screen" class="screen title-screen" role="dialog" aria-modal="true" aria-label="Main menu">
+    <section id="title-screen" class="screen title-screen" role="dialog" aria-modal="true" aria-label="Main menu" hidden>
       <div class="title-content">
         <div class="title-spark">✦</div>
         <p class="overline">A WILD LITTLE ARCADE</p>
