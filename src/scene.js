@@ -80,16 +80,17 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
       c.save();c.rotate(bug.heading);c.fillStyle='#f77a7730';c.beginPath();c.moveTo(0,0);c.lineTo(130,-20);c.lineTo(130,20);c.fill();c.strokeStyle='#ffb49e';c.setLineDash([5,5]);c.beginPath();c.moveTo(0,0);c.lineTo(130,0);c.stroke();c.setLineDash([]);c.restore();
       glow(c,0,0,35,'#fc7b7844');
     }
-    c.strokeStyle=bug.stunned?'#9eb69a88':color;c.lineWidth=2;c.beginPath();c.arc(0,0,23,0,Math.PI*2);c.stroke();
     // Idle airborne bugs flap too; once play starts, the simulation clock freezes flight on pause.
     const flightTime=g.started?g.clock:(phase==='playing'||phase==='title'?t:0);
     const pose=bugFlightPose(bug,index,flightTime,{reducedMotion}),sprite=art[pose.key];
+    if(pose.glowing)glow(c,0,0,34,pose.species==='bee'?'#ffe39a38':'#d6f0e833');
+    c.strokeStyle=bug.stunned?'#e9d99a':color;c.lineWidth=2;c.setLineDash(bug.stunned?[3,5]:[]);c.beginPath();c.arc(0,0,23,0,Math.PI*2);c.stroke();c.setLineDash([]);
     c.save();c.translate(0,pose.offsetY);c.rotate(pose.tilt);c.scale(pose.flip,1);
     if(sprite)c.drawImage(sprite,-pose.anchor.x*pose.scale,-pose.anchor.y*pose.scale,sprite.width*pose.scale,sprite.height*pose.scale);
     else{
       const wing=pose.frame?9:14;
       oval(c,-7,-9,5,wing,'#d9f1e5bb',-.65);oval(c,8,-9,5,wing,'#e8f8ecdd',.65);
-      oval(c,0,0,16,11,bug.stunned?'#8b9b79':color);oval(c,-8,-2,3,3,'#102d23');
+      oval(c,0,0,16,11,pose.species==='bee'?'#f1cb39':'#899b91');oval(c,-8,-2,3,3,'#102d23');
     }
     c.restore();
     c.fillStyle=bug.stunned?'#f9d580':color;c.font='bold 17px Arial';c.textAlign='center';c.fillText(bug.stunned?'✧':bug.warning?'!':bug.kind==='hunter'?'⌁':bug.kind==='charger'?'↯':'·',0,-29);

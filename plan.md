@@ -14,6 +14,8 @@ Flying-bug follow-up: the user asked for online animated insects because walking
 
 Flight browser regression crops the same idle insect across three frames and checks that the image changes while the complete enemy-position snapshot and simulation clock remain unchanged (`artifacts/bug-flight-0.png` through `bug-flight-2.png`). Testing exposed an old menu Shift+Tab input leaking into Burst when play began; begin/resume now clear engine input so menu keys cannot arm an ability accidentally.
 
+Colour follow-up: the user disliked darkened bees and suggested glow/non-glow states. Stunned insects now retain their normal full-colour first flight frame instead of a tinted hit silhouette. Active bugs get a soft halo; stunned bugs lose the glow, stop flapping and show a dashed gold ring/star. The unused two hit-silhouette PNGs were removed from the bundle/manifest/loader. No AI or stun-rule changes. Comparison screenshots: `artifacts/bugs-active.png`, `artifacts/bugs-stunned.png`.
+
 Onboarding follow-up: the user could not tell how to play and requested a How to Play button/page. Both the main menu and pause menu now open an in-game full-screen guide with an original SVG sunlight/steering diagram, first-move example, flower/water/Burst/bug rules, and keyboard/touch controls. The run stays frozen; Back/Esc returns to the originating menu without resetting progress, and the guide can explicitly start/resume play. Header/footer navigation stays visible while instructions scroll, and keyboard focus is trapped/restored correctly.
 
 Credits follow-up: creator credit now links directly to **https://tahmidraven.com**, not the project GitHub page. A separate in-game page is visibly labeled **Credits** (the user explicitly shortened “Asset Credits” to “Credits”). It lists the game creator, Kenney bug/foliage sources and modifications, pebonius music, CC0 notices, engine/tools/jam and development assistance. Local notice/manifest links work in production. Back/Esc returns to the main menu with restored keyboard focus; reading credits does not advance/reset the game.
@@ -51,12 +53,12 @@ Refresh/first-paint follow-up: the user saw raw HTML briefly before CSS loaded. 
 - `src/vine.js`: render-only taper/spline geometry, cached ribbon paths, deterministic leaf placement and unfurling, bud shading and capture light.
 - `src/view.js`: viewport/high-DPI fitting and screen-to-world input transform. The full canvas fills the screen; the 600×720 gameplay region scales proportionally within HUD-safe space.
 - `src/art.js`: local CC0 images, runtime tints and procedural fallbacks.
-- `src/bug-flight.js`: pure flight-frame/body-anchor/banking selection and the six insect art file mappings.
+- `src/bug-flight.js`: pure flight-frame/body-anchor/banking/glow selection and the four insect art file mappings.
 - `index.html` / `src/style.css`: game HUD and menu overlays. No sidebar, website header/footer or framed courtyard panel.
 
 ## Assets and licenses
 
-Kenney CC0: six fly/bee flight/hit PNGs from Platformer Art Deluxe and one branch silhouette from Foliage Sprites. pebonius CC0: calm theme music. Individual packs were downloaded free from the creator's official pages after checking itch.io/official license evidence. Original PNG bytes are unchanged; body alignment is runtime metadata. Old walking ladybugs are no longer bundled. The paid bundle was not used. No logo or unrelated archive contents are bundled.
+Kenney CC0: four full-colour fly/bee flight PNGs from Platformer Art Deluxe and one branch silhouette from Foliage Sprites. pebonius CC0: calm theme music. Individual packs were downloaded free from the creator's official pages after checking itch.io/official license evidence. Original PNG bytes are unchanged; body alignment is runtime metadata. Old walking ladybugs and dark stunned silhouettes are no longer bundled. The paid bundle was not used. No logo or unrelated archive contents are bundled.
 
 Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/assets/manifest.json`, and bundled notices under `public/assets/licenses/`. Source PNG bytes are unchanged. All runtime assets are local. No new external assets were needed for the full-screen rework.
 
@@ -85,6 +87,7 @@ Capture browser regression uses RNG seed 44 and real pointer/Shift input, not in
 - `410ca6b`: first-paint/refresh guard; last checkpoint before loop-catching.
 - `e2e8bf2`: loop captures, combo rewards, capture feedback and anti-farming.
 - `33c8628`: procedural vine taper, shading, veined/unfurling leaves and a living bud.
+- `a082fe6`: real fly/bee wing animations and body-aligned flight poses.
 - The user disliked pure tracing, then explicitly rejected a three-light plan/launch experiment. That experiment was removed, not shipped as the current mode.
 - Earlier generated mockups are not playable levels and are not shipped assets. Do not reuse employer/Two Dots art without verified rights. Leaf maintenance/shading was discussed but is not implemented.
 

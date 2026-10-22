@@ -94,6 +94,8 @@ The insects use actual wing-up/wing-down fly and bee animation pairs from Kenney
 
 `src/bug-flight.js` keeps a fixed body scale and per-frame body anchors so flapping wings do not resize or bob the entire bug. Wing cycles are offset between insects and the body banks slightly with travel direction. Insects flap while waiting for first growth, even though their AI has not started moving. Pause and stun stop the animation; reduced motion uses a static wing pose without banking. AI positions, hitboxes, stun timing and loop captures are unchanged.
 
+Bug colours stay bright in both states. Active bugs have a soft glow; stunned bugs retain the same full-colour artwork, lose the glow, and show a dashed ring/star. There is no grey/dark stunned-sprite tint.
+
 ## Validation
 
 - **59 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, capture rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visual safety, and seven flight-animation tests for frame changes, fixed body alignment, direction/banking, stun/pause/reduced-motion behaviour and credited source frames.

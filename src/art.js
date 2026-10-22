@@ -7,9 +7,9 @@ export const artReady=Promise.all(Object.entries(files).map(async([key,file])=>{
   image.src=`${import.meta.env.BASE_URL}assets/art/${file}`;
   try{
     await image.decode();
-    if(key==='foliage'||key.endsWith('Stunned')){
+    if(key==='foliage'){
       const tinted=document.createElement('canvas');tinted.width=image.width;tinted.height=image.height;
-      const c=tinted.getContext('2d');c.drawImage(image,0,0);c.globalCompositeOperation='source-in';c.fillStyle=key==='foliage'?'#80956c':'#8b9277';c.fillRect(0,0,tinted.width,tinted.height);
+      const c=tinted.getContext('2d');c.drawImage(image,0,0);c.globalCompositeOperation='source-in';c.fillStyle='#80956c';c.fillRect(0,0,tinted.width,tinted.height);
       art[key]=tinted;
     }else art[key]=image;
   }

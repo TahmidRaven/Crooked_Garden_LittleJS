@@ -105,6 +105,7 @@ try{
   assert.ok(wingFrames.some(frame=>!frame.equals(wingFrames[0])),'Airborne bugs visibly animate while waiting for first growth');
   assert.deepEqual((await state()).bugs,idle.bugs,'Wing rendering must not move or mutate idle enemies');
   assert.equal((await state()).clock,0);
+  await page.screenshot({path:'artifacts/bugs-active.png',fullPage:true});
   assert.equal((await state()).queued,false,'Menu Shift+Tab must not leak into a gameplay Burst');
   await page.locator('#boost').click();assert.equal((await state()).queued,true);
   await page.locator('#boost').click();assert.equal((await state()).queued,false);
@@ -152,7 +153,10 @@ try{
     assert.equal((await state()).stage,stage);
     if(stage===2)assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,3);
     if(stage===0){
-      await follow(routes[0].slice(0,-1));
+      await follow(routes[0].slice(0,1));
+      assert.ok((await state()).bugs.every(b=>b.stunned),'Bloom switches both bugs to their non-glowing stunned appearance');
+      await page.screenshot({path:'artifacts/bugs-stunned.png',fullPage:true});
+      await follow(routes[0].slice(1,-1));
       await page.screenshot({path:'artifacts/arcade.png',fullPage:true});
       await follow(routes[0].slice(-1));
     }else await follow(routes[stage]);

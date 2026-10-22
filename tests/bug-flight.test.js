@@ -22,11 +22,12 @@ test('body scale stays fixed across frames instead of shrinking with changing wi
     assert.equal(a.offsetY,0);assert.equal(b.offsetY,0);
   }
 });
-test('stunned bugs stop flapping and use a matching species silhouette',()=>{
+test('stunned bugs stop flapping but retain their full-colour sprite without a glow',()=>{
   for(const kind of ['hunter','wanderer']){
     const stunned={...bug(kind),stunned:true};
     assert.deepEqual(bugFlightPose(stunned,0,0),bugFlightPose(stunned,0,.4));
-    assert.match(bugFlightPose(stunned,0,0).key,/Stunned$/);
+    const pose=bugFlightPose(stunned,0,0),active=bugFlightPose(bug(kind),0,0);
+    assert.equal(pose.key,active.key);assert.equal(pose.glowing,false);assert.equal(active.glowing,true);
   }
 });
 test('reduced motion disables decorative flapping/banking, and a frozen clock freezes the pose',()=>{
@@ -42,7 +43,7 @@ test('bank and facing follow direction without mutating simulation data',()=>{
   const left=bugFlightPose({...b,heading:Math.PI/2-.001},0,.2),right=bugFlightPose({...b,heading:Math.PI/2+.001},0,.2);
   assert.ok(Math.abs(left.tilt-right.tilt)<.01,'Banking must not snap when facing flips near vertical');
 });
-test('every flight/stun frame is credited and its body anchor lies inside the actual PNG',async()=>{
+test('every full-colour flight frame is credited and its body anchor lies inside the actual PNG',async()=>{
   const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
   const files=new Set(manifest.packs.flatMap(pack=>pack.files.map(file=>file.path)));
   for(const file of Object.values(BUG_ART_FILES))assert.ok(files.has(`art/${file}`),file);
