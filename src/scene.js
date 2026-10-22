@@ -2,6 +2,7 @@ import { art } from './art.js';
 import { bugsAt } from './arcade.js';
 import { bloomCount } from './game.js';
 import { renderVine, renderVineTip, renderCaptureFlow } from './vine.js';
+import { bugFlightPose } from './bug-flight.js';
 
 function oval(c,x,y,rx,ry,color,angle=0){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();}
 function leaf(c,x,y,size,angle,color){
@@ -71,7 +72,7 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
     }
     c.restore();
   });
-  for(const bug of bugsAt(g)){
+  for(const [index,bug] of bugsAt(g).entries()){
     if(bug.captured)continue;
     const color=bug.kind==='hunter'?'#f49a76':bug.kind==='charger'?'#ed8cae':'#e9c171';
     c.save();c.translate(bug.x,bug.y);
@@ -79,12 +80,18 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
       c.save();c.rotate(bug.heading);c.fillStyle='#f77a7730';c.beginPath();c.moveTo(0,0);c.lineTo(130,-20);c.lineTo(130,20);c.fill();c.strokeStyle='#ffb49e';c.setLineDash([5,5]);c.beginPath();c.moveTo(0,0);c.lineTo(130,0);c.stroke();c.setLineDash([]);c.restore();
       glow(c,0,0,35,'#fc7b7844');
     }
-    oval(c,0,15,20,5,'#00000044');
     c.strokeStyle=bug.stunned?'#9eb69a88':color;c.lineWidth=2;c.beginPath();c.arc(0,0,23,0,Math.PI*2);c.stroke();
-    const walking=g.started&&phase==='playing'&&!reducedMotion&&Math.floor(bug.animation*8)%2===1;
-    const sprite=bug.stunned?art.bugStunned:(walking?art.bugWalk2:art.bugWalk1);
-    if(sprite){c.save();if(Math.cos(bug.heading)>=0)c.scale(-1,1);const s=44/Math.max(sprite.width,sprite.height);c.drawImage(sprite,-sprite.width*s/2,-sprite.height*s/2,sprite.width*s,sprite.height*s);c.restore();}
-    else{oval(c,0,0,16,13,bug.stunned?'#8b9b79':color);oval(c,5,-3,3,3,'#102d23');}
+    // Idle airborne bugs flap too; once play starts, the simulation clock freezes flight on pause.
+    const flightTime=g.started?g.clock:(phase==='playing'||phase==='title'?t:0);
+    const pose=bugFlightPose(bug,index,flightTime,{reducedMotion}),sprite=art[pose.key];
+    c.save();c.translate(0,pose.offsetY);c.rotate(pose.tilt);c.scale(pose.flip,1);
+    if(sprite)c.drawImage(sprite,-pose.anchor.x*pose.scale,-pose.anchor.y*pose.scale,sprite.width*pose.scale,sprite.height*pose.scale);
+    else{
+      const wing=pose.frame?9:14;
+      oval(c,-7,-9,5,wing,'#d9f1e5bb',-.65);oval(c,8,-9,5,wing,'#e8f8ecdd',.65);
+      oval(c,0,0,16,11,bug.stunned?'#8b9b79':color);oval(c,-8,-2,3,3,'#102d23');
+    }
+    c.restore();
     c.fillStyle=bug.stunned?'#f9d580':color;c.font='bold 17px Arial';c.textAlign='center';c.fillText(bug.stunned?'✧':bug.warning?'!':bug.kind==='hunter'?'⌁':bug.kind==='charger'?'↯':'·',0,-29);
     c.restore();
   }

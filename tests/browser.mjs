@@ -96,6 +96,16 @@ try{
   assert.equal((await state()).phase,'playing');
   assert.equal(await page.locator('#hud').isVisible(),true);
   assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,2);
+  const idle=await state(),insect=idle.bugs[0],iv=idle.view;
+  const wingClip={x:Math.floor(iv.x+(insect.x-30)*iv.scale),y:Math.floor(iv.y+(insect.y-27)*iv.scale),width:Math.ceil(60*iv.scale),height:Math.ceil(54*iv.scale)};
+  const wingFrames=[];
+  for(let frame=0;frame<3;frame++){
+    await page.clock.runFor(45);wingFrames.push(await page.screenshot({path:`artifacts/bug-flight-${frame}.png`,clip:wingClip}));
+  }
+  assert.ok(wingFrames.some(frame=>!frame.equals(wingFrames[0])),'Airborne bugs visibly animate while waiting for first growth');
+  assert.deepEqual((await state()).bugs,idle.bugs,'Wing rendering must not move or mutate idle enemies');
+  assert.equal((await state()).clock,0);
+  assert.equal((await state()).queued,false,'Menu Shift+Tab must not leak into a gameplay Burst');
   await page.locator('#boost').click();assert.equal((await state()).queued,true);
   await page.locator('#boost').click();assert.equal((await state()).queued,false);
   await point(300,300);await page.mouse.down();await page.clock.runFor(100);
@@ -290,7 +300,7 @@ try{
   await reducedPage.locator('#pause').click();const pausedPlant=await reducedPage.evaluate(()=>window.crookedGarden.getState());
   await reducedPage.clock.runFor(500);assert.deepEqual(await reducedPage.evaluate(()=>window.crookedGarden.getState()),pausedPlant,'Repeated paused renders cannot mutate simulation state');
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: detailed vine/reduced motion/paused render safety, real-input double capture, startup, credits/guide, three gardens, touch, art and 11 layouts.');
+  console.log('Browser checks passed: visible idle wing cycles/stable bug positions, vine/reduced motion/pause safety, double capture, startup, credits/guide, three gardens, touch and 11 layouts.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }

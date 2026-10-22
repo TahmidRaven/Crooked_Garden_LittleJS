@@ -16,18 +16,21 @@
 - **Bundled file:** `public/assets/calm-theme.ogg`. Renamed only; playback loops at reduced volume. No audio edits.
 - **SHA-256:** `8a701a803f365c8fe1257b2e18276a7fa8b0d62a9af601f973d43ccf4e354705` (local file matches a fresh source download).
 
-## Bug sprites — Kenney
+## Flying insect sprites — Kenney
 
 - **Pack:** [Platformer Art Deluxe](https://kenney.nl/assets/platformer-art-deluxe), by [Kenney Vleugels](https://kenney.itch.io/).
 - **License:** [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/), verified on the official asset page and the archive's `license.txt`, October 22, 2026. The included notice calls this the “Platformer Art Complete Pack.”
 - **Download:** https://kenney.nl/media/pages/assets/platformer-art-deluxe/cb30f83169-1677696393/kenney_platformer-art-deluxe.zip
 - **Files used from `Extra animations and enemies/Enemy sprites/`:**
-  - `ladyBug.png` → `public/assets/art/bug-walk-1.png`.
-  - `ladyBug_walk.png` → `public/assets/art/bug-walk-2.png`.
-  - `ladyBug_hit.png` → `public/assets/art/bug-stunned.png`.
-- **Changes:** source PNGs unchanged; renamed, scaled and mirrored at runtime. The original white hit silhouette is tinted sage/gray for the stunned state. Walking frames animate only during active play, and respect reduced-motion settings. Hitboxes/gameplay are unchanged.
+  - `fly.png` → `public/assets/art/fly-flight-1.png`.
+  - `fly_fly.png` → `public/assets/art/fly-flight-2.png`.
+  - `fly_hit.png` → `public/assets/art/fly-stunned.png`.
+  - `bee.png` → `public/assets/art/bee-flight-1.png`.
+  - `bee_fly.png` → `public/assets/art/bee-flight-2.png`.
+  - `bee_hit.png` → `public/assets/art/bee-stunned.png`.
+- **Changes:** source PNGs unchanged; renamed, scaled, mirrored and slightly banked at runtime. Body anchors keep the insect aligned while its wings change pose. White hit silhouettes are tinted sage/gray for stunned insects. Wing cycles are offset between insects, freeze on pause/stun, and respect reduced-motion settings. The old walking ladybug art is no longer bundled. AI, hitboxes and capture rules are unchanged.
 - **Bundled license:** `public/assets/licenses/kenney-platformer.txt` (archive notice, whitespace normalized).
-- **Integrity:** exact SHA-256 hashes for all three files are in `public/assets/manifest.json` and checked by `npm test`.
+- **Integrity:** exact SHA-256 hashes for all six insect files are in `public/assets/manifest.json` and checked by `npm test`.
 
 ## Garden foliage — Kenney
 

@@ -33,9 +33,12 @@
       "license": "CC0-1.0",
       "licenseFile": "licenses/kenney-platformer.txt",
       "files": [
-        {"path": "art/bug-walk-1.png", "original": "Extra animations and enemies/Enemy sprites/ladyBug.png", "sha256": "777b1d5d2879cacdeb7e51de15faa54e591201bc7523d68316ae6945f31eaddc"},
-        {"path": "art/bug-walk-2.png", "original": "Extra animations and enemies/Enemy sprites/ladyBug_walk.png", "sha256": "ead7b07d938f651502a1bce38cbacb86dadeaf12624816214aa2ff451657adb8"},
-        {"path": "art/bug-stunned.png", "original": "Extra animations and enemies/Enemy sprites/ladyBug_hit.png", "sha256": "5acd8119334cec16e57f9987d92955c279e30f5e4bc05001476996c5a06eb6ee"}
+        {"path": "art/fly-flight-1.png", "original": "Extra animations and enemies/Enemy sprites/fly.png", "sha256": "101280651e14214bee74e5e9411d394a4d1cb41767c4c5842f05837090b82376"},
+        {"path": "art/fly-flight-2.png", "original": "Extra animations and enemies/Enemy sprites/fly_fly.png", "sha256": "478f33e03d6873e557f6759a0509da3d336e9b03d4b429f99eab675ffc871d0a"},
+        {"path": "art/fly-stunned.png", "original": "Extra animations and enemies/Enemy sprites/fly_hit.png", "sha256": "ddb9b44a19c4130c8e7ca9804ca2d636d328ad3d2f7d6bfd4e48882a4d7a50f8"},
+        {"path": "art/bee-flight-1.png", "original": "Extra animations and enemies/Enemy sprites/bee.png", "sha256": "b85144ba48ddf71eea8c8864b2d5791d3a1e43b06586d2a52b75cb6cfad019a8"},
+        {"path": "art/bee-flight-2.png", "original": "Extra animations and enemies/Enemy sprites/bee_fly.png", "sha256": "31ad43b14581e6cd756f39e0bcad2c2878c421d6241a5eb40155779da248d9e4"},
+        {"path": "art/bee-stunned.png", "original": "Extra animations and enemies/Enemy sprites/bee_hit.png", "sha256": "a1ab8fdf543f870ca0230ad8c2e604d67127a5ce4e5ae1a667cede8f9bb71c30"}
       ]
     }
   ]

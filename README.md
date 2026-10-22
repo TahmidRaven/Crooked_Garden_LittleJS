@@ -88,10 +88,16 @@ The full-window Canvas2D scene scales the world without stretching it, maps poin
 
 This is render-only geometry. The raw simulation path still controls movement, collision, water and captures; the visual spline retains the exact root/tip and stays close to that path. Leaves remain stable when the path grows or the viewport changes. Rewind removes future leaves and regrowth unfurls them again. Reduced motion shows leaves fully open and disables bud breathing/circulating capture light; pause freezes leaf growth. Geometry and ribbon paths are cached outside game state.
 
+### Flying insects
+
+The insects use actual wing-up/wing-down fly and bee animation pairs from Kenney's CC0 [Platformer Art Deluxe](https://kenney.nl/assets/platformer-art-deluxe), not the old ladybug walking cycle. Hunters use flies; wanderers/chargers use bees, with their existing behaviour-colour rings and warnings.
+
+`src/bug-flight.js` keeps a fixed body scale and per-frame body anchors so flapping wings do not resize or bob the entire bug. Wing cycles are offset between insects and the body banks slightly with travel direction. Insects flap while waiting for first growth, even though their AI has not started moving. Pause and stun stop the animation; reduced motion uses a static wing pose without banking. AI positions, hitboxes, stun timing and loop captures are unchanged.
+
 ## Validation
 
-- **52 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, single/combo captures, empty loops, capped rewards, last-drop rescues, rewind anti-farming, asset provenance/hashes, resized/high-DPI input mapping, and render-only vine taper/smoothing/leaf stability/unfurling/rewind/reduced-motion safety.
-- **Browser checks:** an actual moving-bug double capture through real steering, combo water/score, permanent captures after rewind and a full first-garden clear; native LittleJS splash/branding, deliberately delayed asset loading and clean menu handoff, title/play/pause/results, How to Play from both menus, all three gardens through real pointer input, scoring/best score, retry variation, keyboard/touch Burst, decoded sprites, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
+- **59 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, capture rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visual safety, and seven flight-animation tests for frame changes, fixed body alignment, direction/banking, stun/pause/reduced-motion behaviour and credited source frames.
+- **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
 

@@ -24,12 +24,12 @@ const stageScore=()=>Math.max(0,bloomCount(garden)*300+garden.swatted*100+garden
 function focusGame(){$('game-root').focus({preventScroll:true});}
 function begin(stage=0,score=0){
   garden=createArcade({stage});garden.rewinds=0;bank=score;light={x:400,y:450};
-  held=false;particles=[];popups=[];phase='playing';updateUI();focusGame();if(!muted)music.play().catch(()=>{});
+  held=false;particles=[];popups=[];phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});
 }
 function retry(){begin(garden.index,bank);}
 function home(){garden=createArcade();held=false;phase='title';particles=[];popups=[];bank=0;updateUI();$('play').focus({preventScroll:true});}
 function pause(){if(phase==='playing'){phase='paused';held=false;updateUI();$('resume').focus({preventScroll:true});}}
-function resume(){if(phase==='paused'){phase='playing';updateUI();focusGame();if(!muted)music.play().catch(()=>{});}}
+function resume(){if(phase==='paused'){phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});}}
 function openHelp(){
   if(!['title','paused'].includes(phase))return;
   helpReturn=phase;phase='help';held=false;updateUI();$('help-screen').querySelector('.help-scroll').scrollTop=0;$('help-back').focus({preventScroll:true});
