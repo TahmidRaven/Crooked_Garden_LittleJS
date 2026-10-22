@@ -1,15 +1,17 @@
 import './style.css';
 import * as L from 'littlejsengine';
-import { WIDTH, HEIGHT, MAX_WATER, createGarden, advance, rewind, bloomCount, finishGarden } from './game.js';
+import { WIDTH, HEIGHT, MAX_WATER, rewind, bloomCount, finishGarden } from './game.js';
+import { createArcade, tickArcade, queueBurst, bugsAt, BUGS, BURST_COST } from './arcade.js';
+import { art, artStatus } from './art.js';
 
 const $=id=>document.getElementById(id);
-let garden=createGarden(), light={x:400,y:260}, held=false, paused=false, ticks=0, muted=true;
+let garden=createArcade(), light={x:400,y:260}, held=false, paused=false, ticks=0, muted=true;
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const music=new Audio(`${import.meta.env.BASE_URL}assets/calm-theme.ogg`);music.loop=true;music.volume=.22;
 const chime=new L.Sound([.28,0,640,.01,.08,.2,1,1.4,0,0,220,.08]);
 let particles=[];
 function sound(){if(!muted)chime.play();}
-function start(index=0){garden=createGarden(index);held=false;paused=false;particles=[];$('result').hidden=true;light={x:400,y:450};updateUI();}
+function start(){garden=createArcade();held=false;paused=false;particles=[];$('result').hidden=true;light={x:400,y:450};updateUI();}
 function updateUI(){
   const saved=bloomCount(garden);
   $('level-number').textContent='RESTORATION EXPERIMENT';
@@ -17,7 +19,13 @@ function updateUI(){
   $('water').max=MAX_WATER;$('water').value=garden.water;$('water-label').textContent=Math.ceil(garden.water);
   $('water').classList.toggle('low',garden.water<150);
   $('flower-label').textContent=`${saved} / ${garden.bloomed.length}`;
-  $('objective-hint').textContent=saved===3?'Every flower is alive. Garden restored!':saved?`Clear! Finish now, or save ${3-saved} more.`:'Hold to grow. Save 1 flower to clear; 3 for perfect.';
+  $('objective-hint').textContent=saved===3?'Every flower is alive. Garden restored!':garden.burst>0?'Protected! Burst through bugs, not shelves.':saved?`${3-saved} flower${saved===2?'':'s'} left. Blooms stun bugs!`:'Hold to steer. Dodge bugs; Burst through danger.';
+  const ended=['won','blocked','dry'].includes(garden.status);
+  $('boost').disabled=ended||garden.cooldown>0||garden.burst>0||garden.water<=BURST_COST;
+  $('boost').textContent=garden.burst>0?'⚡ Protected':garden.cooldown>0?`⚡ ${garden.cooldown.toFixed(1)}s`:garden.queued?'⚡ Burst armed':`⚡ Burst · ${BURST_COST}`;
+  $('boost').setAttribute('aria-pressed',String(garden.queued||garden.burst>0));
+  $('pause').disabled=ended;
+  $('pause').textContent=paused?'▶ Resume':'Ⅱ Pause';$('pause').setAttribute('aria-pressed',String(paused));
   garden.level.flowers.forEach((flower,i)=>{
     const item=$(`flower-${i}`);item.classList.toggle('saved',garden.bloomed[i]);
     item.textContent=`${garden.bloomed[i]?'✿':'○'} ${flower.name}${garden.bloomed[i]?' · saved':''}`;
@@ -32,17 +40,20 @@ function updateUI(){
 function showResult(){
   const won=garden.status==='won',saved=bloomCount(garden),perfect=saved===3;held=false;
   $('result-tag').textContent=won?`${'✿'.repeat(saved)}${'○'.repeat(3-saved)} · ${saved} OF 3 FLOWERS SAVED`:'THE GARDEN STILL NEEDS YOU';
-  $('result-title').textContent=won?(perfect?'You brought it back.':'A little life returns.'):garden.status==='dry'?'The water ran out.':'A wall, not the end.';
-  $('result-copy').textContent=won?(perfect?`All three flowers are blooming, with ${Math.ceil(garden.water)} water left. Your route restored the whole courtyard.`:`${saved} flower${saved===1?' is':'s are'} alive. ${garden.endedBy==='water'?'Your water ran out. ':''}Try a tighter route and gather dew to save the rest.`):garden.status==='dry'?'No flowers saved yet. Every stretch of vine spends water; reach a flower early and collect blue dew for longer routes.':`The vine hit a shelf. Rewind and steer around its edge.${saved?' The flowers you already saved still count.':''}`;
+  $('result-title').textContent=won?(perfect?'You brought it back.':'A little life returns.'):garden.endedBy==='bug'?'Caught by a thorn bug.':garden.status==='dry'?'The water ran out.':'A wall, not the end.';
+  $('result-copy').textContent=won?(perfect?`Three flowers saved, ${garden.swatted} bugs stunned, ${Math.ceil(garden.water)} water left. The courtyard is alive again.`:`${saved} flower${saved===1?' is':'s are'} alive. ${garden.endedBy==='water'?'Your water ran out. ':''}Gather dew and time your bursts to save the rest.`):garden.endedBy==='bug'?'Watch their patrols, wait for a gap, or use Burst to stun a bug on contact. Rewind gives a short recovery shield.':garden.status==='dry'?'Every stretch and Burst spends water. Gather blue dew and save bursts for close calls.':`The vine hit a shelf. Burst protects against bugs, not walls. Rewind and try another bend.`;
   $('next').textContent=won&&!perfect?'Try for all three →':'Plant a new route →';
   $('result-undo').hidden=perfect;$('result-finish').hidden=won||!saved;$('result').hidden=false;
   updateUI();
 }
-function doRewind(){rewind(garden);held=false;paused=false;$('result').hidden=true;updateUI();}
+function doRewind(){rewind(garden);garden.grace=.9;garden.burst=0;garden.queued=false;held=false;paused=false;$('result').hidden=true;updateUI();}
 $('undo').onclick=doRewind;$('result-undo').onclick=doRewind;$('restart').onclick=()=>start(garden.index);
 $('next').onclick=()=>start();
 function finish(){if(finishGarden(garden))showResult();}
 $('finish').onclick=finish;$('result-finish').onclick=finish;
+function burst(){queueBurst(garden);updateUI();}
+$('boost').onclick=burst;
+$('pause').onclick=()=>{paused=!paused;held=false;updateUI();};
 $('music').onclick=async()=>{muted=!muted;$('music').textContent=muted?'♫ Sound off':'♫ Sound on';$('music').setAttribute('aria-pressed',String(!muted));if(muted)music.pause();else{try{await music.play();}catch{muted=true;$('music').textContent='♫ Sound unavailable';$('music').setAttribute('aria-pressed','false');}}};
 function point(e){const r=L.mainCanvas.getBoundingClientRect();light.x=Math.max(35,Math.min(565,(e.clientX-r.left)/r.width*WIDTH));light.y=Math.max(35,Math.min(660,(e.clientY-r.top)/r.height*HEIGHT));}
 function init(){
@@ -52,8 +63,8 @@ function init(){
   canvas.addEventListener('pointerdown',e=>{if(e.button!==0||!$('result').hidden)return;point(e);held=true;canvas.setPointerCapture(e.pointerId);$('game-root').focus({preventScroll:true});e.preventDefault();updateUI();});
   canvas.addEventListener('pointermove',point);
   for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,()=>{held=false;updateUI();});
-  window.addEventListener('blur',()=>held=false);
-  document.addEventListener('visibilitychange',()=>{held=false;if(document.hidden)music.pause();else if(!muted)music.play().catch(()=>{});});
+  window.addEventListener('blur',()=>{held=false;paused=true;updateUI();});
+  document.addEventListener('visibilitychange',()=>{held=false;if(document.hidden){paused=true;music.pause();updateUI();}else if(!muted)music.play().catch(()=>{});});
   $('game-root').addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
   $('flower-list').replaceChildren(...garden.level.flowers.map((flower,i)=>{const item=document.createElement('li');item.id=`flower-${i}`;return item;}));
   updateUI();
@@ -65,14 +76,15 @@ function update(){
   if(keyboardActive&&L.keyWasPressed('KeyR'))start(garden.index);
   if(keyboardActive&&L.keyWasPressed('KeyZ'))doRewind();
   if(keyboardActive&&L.keyWasPressed('Space')){paused=!paused;held=false;}
+  if(keyboardActive&&(L.keyWasPressed('ShiftLeft')||L.keyWasPressed('ShiftRight')))burst();
   const move=6;
   if(keyboardActive&&L.keyIsDown('ArrowLeft'))light.x=Math.max(35,light.x-move);
   if(keyboardActive&&L.keyIsDown('ArrowRight'))light.x=Math.min(565,light.x+move);
   if(keyboardActive&&L.keyIsDown('ArrowUp'))light.y=Math.max(35,light.y-move);
   if(keyboardActive&&L.keyIsDown('ArrowDown'))light.y=Math.min(660,light.y+move);
-  if(!paused&&(held||keyboardGrowing())&&$('result').hidden){
-    const event=advance(garden,light);
-    if(['dew','flower','won'].includes(event)){sound();const tip=garden.path.at(-1);for(let i=0;i<(reducedMotion?0:event==='won'?60:15);i++)particles.push({x:tip.x,y:tip.y,vx:(Math.random()-.5)*2.7,vy:-Math.random()*2.8,life:1,color:event==='dew'?'#78b8c3':'#e6ac69'});updateUI();}
+  if(!paused&&$('result').hidden){
+    const event=tickArcade(garden,light,{growing:held||keyboardGrowing()});
+    if(['dew','flower','won','swat'].includes(event)){sound();const tip=garden.path.at(-1);for(let i=0;i<(reducedMotion?0:event==='won'?60:15);i++)particles.push({x:tip.x,y:tip.y,vx:(Math.random()-.5)*2.7,vy:-Math.random()*2.8,life:1,color:event==='dew'?'#78b8c3':event==='swat'?'#f6d078':'#e6ac69'});updateUI();}
     if(['blocked','dry','won'].includes(event))showResult();
   }
   particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.015;p.life-=.015;});
@@ -88,7 +100,15 @@ function render(){
   for(let i=0;i<360;i++){const x=(i*137.51)%600,y=(i*73.19)%720;c.fillStyle=i%2?'#7b805009':'#ffffff28';c.fillRect(x,y,2+i%3,1+i%2);}
   c.strokeStyle='#a9a07a12';c.lineWidth=1;for(let row=0;row<8;row++){const y=90+row*77;c.beginPath();c.moveTo(40,y);c.lineTo(560,y);c.stroke();for(let col=0;col<4;col++){const x=col*180+(row%2?90:0);c.beginPath();c.moveTo(x,y);c.lineTo(x,y+77);c.stroke();}}
   c.fillStyle='#69725d';c.font='12px Georgia';c.textAlign='center';c.fillText(saved===3?'A whole garden, alive again.':'Bring the three dormant flowers back to life.',300,70);
-  // Original code-drawn wall-climbing leaves.
+  // CC0 foliage silhouettes are decorative; original leaves remain as a fallback.
+  if(art.foliage){
+    c.save();c.globalAlpha=saved ? .32 : .18;
+    for(let i=0;i<3;i++){
+      c.drawImage(art.foliage,-66,95+i*190,125,170);
+      c.save();c.translate(600,0);c.scale(-1,1);c.drawImage(art.foliage,-66,165+i*180,125,170);c.restore();
+    }
+    c.restore();
+  }
   for(let side=0;side<2;side++)for(let i=0;i<11;i++){const x=side?575:25,y=100+i*51;leaf(c,x,y,19+(i%3)*3,side?-2.2:-.9,saved?(i%2?'#8fa66d':'#a8b67c'):'#a5a28e');}
   // Beam is player-controlled; its pool visibly marks the steering target.
   c.save();const beam=c.createRadialGradient(light.x,light.y,5,light.x,light.y,105);beam.addColorStop(0,'#ffefad75');beam.addColorStop(1,'#fff3b000');c.fillStyle=beam;c.fillRect(0,0,600,720);c.strokeStyle='#d9b66c77';c.setLineDash([3,7]);c.beginPath();c.arc(light.x,light.y,25,0,Math.PI*2);c.stroke();c.setLineDash([]);c.fillStyle='#c7a251';c.fillRect(light.x-4,light.y-1,8,2);c.fillRect(light.x-1,light.y-4,2,8);c.restore();
@@ -115,7 +135,28 @@ function render(){
     c.fillStyle=alive?'#425d38':'#65654f';c.font='11px Arial';c.textAlign='center';c.fillText(`${i+1} · ${alive?'SAVED':flower.name.toUpperCase()}`,0,49);
     c.restore();
   });
-  const tip=path.at(-1);leaf(c,tip.x,tip.y,18,garden.heading-.4,'#a0af6e');leaf(c,tip.x,tip.y,13,garden.heading+.8,'#7d995e');
+  bugsAt(garden).forEach((bug,i)=>{
+    c.save();c.strokeStyle='#ad56442a';c.lineWidth=1;c.setLineDash([3,8]);c.beginPath();c.moveTo(BUGS[i].cx-BUGS[i].range,BUGS[i].cy);c.lineTo(BUGS[i].cx+BUGS[i].range,BUGS[i].cy);c.stroke();c.setLineDash([]);
+    c.translate(bug.x,bug.y);
+    const walking=garden.started&&!paused&&!reducedMotion&&Math.floor(garden.bugClocks[i]*8)%2===1;
+    const sprite=bug.stunned?art.bugStunned:(walking?art.bugWalk2:art.bugWalk1);
+    if(sprite){
+      oval(c,0,15,18,5,'#664a3822');
+      c.save();if(Math.cos(garden.bugClocks[i]*BUGS[i].rate+BUGS[i].phase)>=0)c.scale(-1,1);
+      if(bug.stunned)c.filter='grayscale(.8)';
+      const scale=42/Math.max(sprite.width,sprite.height),w=sprite.width*scale,h=sprite.height*scale;
+      c.drawImage(sprite,-w/2,-h/2,w,h);c.restore();
+    }else{
+      c.strokeStyle=bug.stunned?'#929583':'#964a3b';c.lineWidth=2;
+      for(let leg=0;leg<8;leg++){const a=leg*Math.PI/4;c.beginPath();c.moveTo(Math.cos(a)*10,Math.sin(a)*10);c.lineTo(Math.cos(a)*21,Math.sin(a)*21);c.stroke();}
+      oval(c,0,0,15,13,bug.stunned?'#a5ab92':'#bc634e');oval(c,-4,-3,3,3,'#f8e2bb');oval(c,5,-3,3,3,'#f8e2bb');oval(c,-4,-3,1.5,1.5,'#523f31');oval(c,5,-3,1.5,1.5,'#523f31');
+    }
+    if(bug.stunned){c.fillStyle='#dba953';c.font='bold 18px Arial';c.textAlign='center';c.fillText('✧',0,-24);}
+    c.restore();
+  });
+  const tip=path.at(-1);
+  if(garden.burst>0||garden.grace>0){c.strokeStyle=garden.burst>0?'#e9b450':'#f8efd0';c.lineWidth=4;c.beginPath();c.arc(tip.x,tip.y,22,0,Math.PI*2);c.stroke();}
+  leaf(c,tip.x,tip.y,18,garden.heading-.4,'#a0af6e');leaf(c,tip.x,tip.y,13,garden.heading+.8,'#7d995e');
   // Pot is foreground; root visibly grows out of the soil.
   const root=garden.level.start;oval(c,root.x,root.y+55,50,9,'#776b3b15');c.fillStyle='#bb7b58';c.beginPath();c.moveTo(root.x-34,root.y+9);c.lineTo(root.x+34,root.y+9);c.lineTo(root.x+26,root.y+53);c.quadraticCurveTo(root.x,root.y+65,root.x-26,root.y+53);c.closePath();c.fill();c.fillStyle='#ce9067';c.beginPath();c.roundRect(root.x-39,root.y+2,78,15,4);c.fill();oval(c,root.x,root.y+3,33,7,'#705a3f');c.strokeStyle='#55754b';c.lineWidth=7;c.beginPath();c.moveTo(root.x,root.y+4);c.lineTo(root.x,root.y-5);c.stroke();leaf(c,root.x,root.y-1,24,-2.6,'#748e56');
   for(const p of particles){c.globalAlpha=p.life;oval(c,p.x,p.y,3,3,p.color);}c.globalAlpha=1;
@@ -125,4 +166,4 @@ function render(){
 L.setGLEnable(false);L.setCanvasFixedSize(L.vec2(WIDTH,HEIGHT));L.setCanvasPixelated(false);L.setShowSplashScreen(false);L.setTouchGamepadEnable(false);
 L.engineInit(init,update,()=>{},render,()=>{},[],$('game-root'));
 // Read-only snapshot for debugging and browser checks; no gameplay shortcuts.
-window.crookedGarden={getState:()=>({level:garden.index,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,dew:[...garden.collected],flowers:[...garden.bloomed],endedBy:garden.endedBy,points:garden.path.length,light:{...light}})};
+window.crookedGarden={getState:()=>({level:garden.index,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,dew:[...garden.collected],flowers:[...garden.bloomed],endedBy:garden.endedBy,points:garden.path.length,light:{...light},bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,clock:garden.clock,paused,art:artStatus()})};

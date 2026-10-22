@@ -1,0 +1,12 @@
+calm theme — pebonius
+
+Source: https://opengameart.org/content/calm-music-0
+Author: https://pebonius.itch.io/
+License: CC0 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The source page identifies the track as CC0 and says:
+"its cc0 do whatever you want but if you want to credit me link to https://pebonius.itch.io/"
+
+License evidence checked October 22, 2026. Audio is unchanged, renamed from
+calm_theme.ogg to calm-theme.ogg. Playback loops at reduced volume.

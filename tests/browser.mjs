@@ -17,6 +17,7 @@ try {
   await page.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await page.goto(url);
   await page.waitForFunction(()=>window.crookedGarden?.getState().points===1);
+  await page.waitForFunction(()=>Object.values(window.crookedGarden.getState().art).every(Boolean));
   await page.clock.pauseAt(new Date('2026-10-22T12:00:02Z'));
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const canvas=page.locator('#game-root canvas').first();
@@ -28,6 +29,8 @@ try {
   assert.equal(await page.locator('#water-label').textContent(),'580');
   assert.equal(await page.locator('#flower-label').textContent(),'0 / 3');
   assert.equal(await page.locator('#finish').isDisabled(),true);
+  await page.locator('#boost').click();assert.equal((await state()).queued,true);
+  await page.locator('#boost').click();assert.equal((await state()).queued,false);
   await point(300,300);
   await page.mouse.down();
   await page.clock.runFor(100);
@@ -40,10 +43,12 @@ try {
   assert.equal((await state()).points,growing.points,'Release pauses growth');
   await page.keyboard.press('Space');
   await page.clock.runFor(100);
+  const pausedClock=(await state()).clock;
   await page.keyboard.down('g');
   await page.clock.runFor(300);
   await page.keyboard.up('g');
   assert.equal((await state()).points,growing.points,'Space pauses keyboard growth');
+  assert.equal((await state()).clock,pausedClock,'Pause also freezes the bugs');
   await page.keyboard.press('Space');
   await page.clock.runFor(100);
   await page.keyboard.down('g');
@@ -63,6 +68,8 @@ try {
       await point(x,y);
       await page.mouse.down();
       for(let i=0;i<100;i++){
+        const before=await state();
+        if(before.cooldown<=0&&before.burst<=0&&before.bugs.some(bug=>!bug.stunned&&Math.hypot(before.tip.x-bug.x,before.tip.y-bug.y)<70))await page.keyboard.press('Shift');
         await page.clock.runFor(100);
         const s=await state();
         assert.ok(!['blocked','dry'].includes(s.status),`Restoration route: ${s.status}`);
@@ -92,6 +99,7 @@ try {
   assert.equal((await state()).status,'won');
   assert.equal((await state()).endedBy,'complete');
   assert.deepEqual((await state()).flowers,[true,true,true]);
+  assert.ok((await state()).swatted>=1,'A timed burst stuns a bug on the winning route');
   assert.ok((await state()).dew.every(Boolean),'Dew detours enable the full restoration');
   assert.match(await page.locator('#result-tag').textContent(),/3 OF 3/);
   assert.equal(await page.locator('#result-undo').isVisible(),false);
@@ -120,7 +128,7 @@ try {
       return {
         pageWidth:document.documentElement.scrollWidth,pageHeight:document.documentElement.scrollHeight,
         board:rect('#game-root'),garden:rect('.garden'),resources:rect('.resources'),
-        controls:['#finish','#undo','#restart','#music','.objective'].map(rect)
+        controls:['#finish','#boost','#undo','#restart','#pause','#music','.objective'].map(rect)
       };
     });
     const label=`${width}×${height}`;
@@ -142,11 +150,14 @@ try {
   mobile.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
   await mobile.goto(url);
   await mobile.waitForFunction(()=>window.crookedGarden?.getState().points===1);
+  await mobile.waitForFunction(()=>Object.values(window.crookedGarden.getState().art).every(Boolean));
   assert.ok(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal mobile overflow');
   await mobile.locator('#game-root').scrollIntoViewIfNeeded();
   const r=await mobile.locator('#game-root canvas').first().boundingBox();
   const x=r.x+430/600*r.width,y=r.y+550/720*r.height;
   const touch=await mobile.context().newCDPSession(mobile);
+  await mobile.locator('#boost').tap();
+  assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().queued),true,'Touch can arm a burst before growing');
   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
   await mobile.waitForFunction(()=>window.crookedGarden.getState().flowers[0]);
   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
@@ -154,7 +165,7 @@ try {
   assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().status),'won');
   await mobile.screenshot({path:'artifacts/mobile.png',fullPage:true});
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: flower objectives, partial finish, full restoration via dew, rewind/reset, pointer/touch, pause, collision, music, responsive layout.');
+  console.log('Browser checks passed: restored direct steering, armed/timed burst, bug stun, full restoration, rewind, pause/world freeze, touch and 11 responsive layouts.');
 } finally {
   await browser?.close();
   await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));

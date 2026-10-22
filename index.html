@@ -12,7 +12,7 @@
     <header>
       <a class="wordmark" href="./">cg<span>✳</span></a>
       <span class="edition">A LITTLEJS JAM EXPERIMENT · 2026</span>
-      <button id="music" aria-pressed="false">♫ Sound off</button>
+      <div class="header-actions"><button id="pause" aria-pressed="false">Ⅱ Pause</button><button id="music" aria-pressed="false">♫ Sound off</button></div>
     </header>
     <div class="layout">
       <aside>
@@ -30,24 +30,24 @@
           <ol id="flower-list" aria-label="Restoration objectives"></ol>
         </div>
         <div class="guide">
-          <p><b>01</b> Hold to grow toward your light. Release to plan.</p>
-          <p><b>02</b> Every bend spends water. Blue dew adds 260.</p>
-          <p><b>03</b> Touch the closed buds to bring them back.</p>
+          <p><b>01</b> Hold to steer. Dodge the roaming thorn bugs.</p>
+          <p><b>02</b> Burst through bugs: 30 water, short protection.</p>
+          <p><b>03</b> Flowers stun bugs. Gather dew to keep going.</p>
         </div>
         <div class="resources">
           <div><span>WATER REMAINING</span><strong id="water-label">580</strong></div>
           <progress id="water" max="1100" value="580" aria-label="Water remaining"></progress>
           <div class="dew-row"><span>DEW COLLECTED</span><strong id="dew-label">0 / 2</strong></div>
         </div>
-        <button id="finish" class="finish" disabled>Save a flower to finish</button>
+        <div class="abilities"><button id="boost" class="boost" title="Burst costs 30 water. Protects against bugs, not shelves. Use Shift while growing, or tap to arm the next growth.">⚡ Burst · 30</button><button id="finish" class="finish" disabled>Save a flower to finish</button></div>
         <nav class="actions">
           <button id="undo">↶ Rewind <kbd>Z</kbd></button>
           <button id="restart">↻ Restart <kbd>R</kbd></button>
         </nav>
-        <p class="keyboard">Keyboard: arrows move light · hold G to grow<br>Space pauses · Z rewinds · R restarts</p>
+        <p class="keyboard">Arrows aim · hold G to grow · Shift bursts<br>Space pauses · Z rewinds · R restarts</p>
       </aside>
       <section class="garden" aria-label="Interactive garden">
-        <div id="game-root" role="application" tabindex="0" aria-label="Restore three flowers with limited water. Move pointer or arrow keys to guide light. Hold pointer or G to grow."></div>
+        <div id="game-root" role="application" tabindex="0" aria-label="Restore three flowers and dodge thorn bugs. Move pointer or arrows to guide light. Hold pointer or G to grow. Shift bursts. Space pauses."></div>
         <div class="board-label"><span id="courtyard-label">THE FORGOTTEN COURTYARD</span><span id="state-label" aria-live="polite">Hold to grow</span></div>
         <div id="result" class="result" hidden>
           <div>

@@ -39,19 +39,19 @@ export function finishGarden(g) {
   g.status='won';g.endedBy='finish';
   return true;
 }
-export function advance(g, target, dt=1/60) {
-  if(!Number.isFinite(dt)||dt<=0) return null;
+export function advance(g, target, dt=1/60, speed=GROW_SPEED) {
+  if(!Number.isFinite(dt)||dt<=0||!Number.isFinite(speed)||speed<=0) return null;
   if(['won','blocked','dry'].includes(g.status)) return null;
   // Faster growth still sweeps in <=2px increments so shelves/pickups cannot be skipped.
-  const elapsed=Math.min(dt,.05),steps=Math.ceil(GROW_SPEED*elapsed/2);
+  const elapsed=Math.min(dt,.05),steps=Math.ceil(speed*elapsed/2);
   let event=null;
   for(let i=0;i<steps;i++){
-    event=advanceStep(g,target,elapsed/steps)||event;
+    event=advanceStep(g,target,elapsed/steps,speed)||event;
     if(['won','blocked','dry'].includes(g.status))return event;
   }
   return event;
 }
-function advanceStep(g,target,dt){
+function advanceStep(g,target,dt,speed){
   const tip=g.path.at(-1);
   const remaining=distance(tip,target);
   if(remaining<TARGET_RADIUS) return null;
@@ -59,7 +59,7 @@ function advanceStep(g,target,dt){
   let delta=Math.atan2(target.y-tip.y,target.x-tip.x)-g.heading;
   delta=Math.atan2(Math.sin(delta),Math.cos(delta));
   const heading=g.heading+Math.max(-TURN_SPEED*dt,Math.min(TURN_SPEED*dt,delta));
-  const length=Math.min(GROW_SPEED*dt,g.water,remaining);
+  const length=Math.min(speed*dt,g.water,remaining);
   const next={x:tip.x+Math.cos(heading)*length,y:tip.y+Math.sin(heading)*length};
   if(next.x<42||next.x>558||next.y<45||next.y>655||g.level.rocks.some(r=>hitsRock(next,r))){
     g.status='blocked';return 'blocked';

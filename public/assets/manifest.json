@@ -1,0 +1,42 @@
+{
+  "verifiedOn": "2026-10-22",
+  "packs": [
+    {
+      "name": "calm theme",
+      "author": "pebonius",
+      "source": "https://opengameart.org/content/calm-music-0",
+      "itch": "https://pebonius.itch.io/",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/pebonius-music.txt",
+      "files": [
+        {"path": "calm-theme.ogg", "original": "calm_theme.ogg", "sha256": "8a701a803f365c8fe1257b2e18276a7fa8b0d62a9af601f973d43ccf4e354705"}
+      ]
+    },
+    {
+      "name": "Foliage Sprites",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/foliage-sprites",
+      "itch": "https://kenney.itch.io/kenney-game-assets",
+      "download": "https://kenney.nl/media/pages/assets/foliage-sprites/b65bd70c69-1677495980/kenney_foliage-sprites.zip",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/kenney-foliage.txt",
+      "files": [
+        {"path": "art/foliage.png", "original": "PNG/Flat/sprite_0042.png", "sha256": "8e701f5e6582de9e453b5b50a143bf8677721540eb37469820993583aa411264"}
+      ]
+    },
+    {
+      "name": "Platformer Art Deluxe",
+      "author": "Kenney Vleugels",
+      "source": "https://kenney.nl/assets/platformer-art-deluxe",
+      "itch": "https://kenney.itch.io/kenney-game-assets",
+      "download": "https://kenney.nl/media/pages/assets/platformer-art-deluxe/cb30f83169-1677696393/kenney_platformer-art-deluxe.zip",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/kenney-platformer.txt",
+      "files": [
+        {"path": "art/bug-walk-1.png", "original": "Extra animations and enemies/Enemy sprites/ladyBug.png", "sha256": "777b1d5d2879cacdeb7e51de15faa54e591201bc7523d68316ae6945f31eaddc"},
+        {"path": "art/bug-walk-2.png", "original": "Extra animations and enemies/Enemy sprites/ladyBug_walk.png", "sha256": "ead7b07d938f651502a1bce38cbacb86dadeaf12624816214aa2ff451657adb8"},
+        {"path": "art/bug-stunned.png", "original": "Extra animations and enemies/Enemy sprites/ladyBug_hit.png", "sha256": "5acd8119334cec16e57f9987d92955c279e30f5e4bc05001476996c5a06eb6ee"}
+      ]
+    }
+  ]
+}
