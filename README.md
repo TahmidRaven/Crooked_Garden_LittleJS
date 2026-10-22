@@ -82,12 +82,18 @@ If Node has `NODE_OPTIONS=--no-experimental-fetch`, clear it for Playwright: `en
 
 The full-window Canvas2D scene scales the world without stretching it, maps pointer coordinates through a tested camera transform, and supports high-DPI displays. HUD and touch controls stay in screen space across portrait/landscape sizes. Reduced-motion settings suppress particles/ambient movement and sprite animation.
 
+### Procedural vine visuals
+
+`src/vine.js` draws the plant directly in Canvas2D: a smoothly tapered, shaded stem; deterministic alternating/paired leaves with gradients and veins; leaves that unfurl over 0.45 seconds; and a growing bud at the live tip. Captured loops get a circulating light accent. No extra image assets or rendering library are required.
+
+This is render-only geometry. The raw simulation path still controls movement, collision, water and captures; the visual spline retains the exact root/tip and stays close to that path. Leaves remain stable when the path grows or the viewport changes. Rewind removes future leaves and regrowth unfurls them again. Reduced motion shows leaves fully open and disables bud breathing/circulating capture light; pause freezes leaf growth. Geometry and ribbon paths are cached outside game state.
+
 ## Validation
 
-- **43 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, single/combo captures, empty loops, capped rewards, last-drop rescues, rewind anti-farming, asset provenance/hashes, and resized/high-DPI input mapping.
+- **52 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, single/combo captures, empty loops, capped rewards, last-drop rescues, rewind anti-farming, asset provenance/hashes, resized/high-DPI input mapping, and render-only vine taper/smoothing/leaf stability/unfurling/rewind/reduced-motion safety.
 - **Browser checks:** an actual moving-bug double capture through real steering, combo water/score, permanent captures after rewind and a full first-garden clear; native LittleJS splash/branding, deliberately delayed asset loading and clean menu handoff, title/play/pause/results, How to Play from both menus, all three gardens through real pointer input, scoring/best score, retry variation, keyboard/touch Burst, decoded sprites, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
-- Screenshots are in ignored `artifacts/` (`double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
+- Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
 
 ## Build, credits and assets
 

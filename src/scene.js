@@ -1,6 +1,7 @@
 import { art } from './art.js';
 import { bugsAt } from './arcade.js';
 import { bloomCount } from './game.js';
+import { renderVine, renderVineTip, renderCaptureFlow } from './vine.js';
 
 function oval(c,x,y,rx,ry,color,angle=0){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();}
 function leaf(c,x,y,size,angle,color){
@@ -57,15 +58,8 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
     for(const bug of capture.bugs){glow(c,bug.x,bug.y,40,'#e6ef9255');oval(c,bug.x,bug.y,7,7,'#fff0b6');}
     c.restore();
   }
-  if(path.length>1){
-    c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(path[0].x,path[0].y);for(const p of path)c.lineTo(p.x,p.y);
-    c.strokeStyle='#0a281c';c.lineWidth=13;c.stroke();c.strokeStyle=g.burst>0?'#ffe69a':'#8bd365';c.lineWidth=7;c.stroke();c.strokeStyle='#d4f69c88';c.lineWidth=2;c.stroke();
-    let length=0,side=0;
-    for(let i=1;i<path.length;i++){
-      const p=path[i],q=path[i-1];length+=Math.hypot(p.x-q.x,p.y-q.y);
-      if(length>32){leaf(c,p.x,p.y,18,Math.atan2(p.y-q.y,p.x-q.x)+(side++%2?-.9:2.2),'#71b95b');length=0;}
-    }
-  }
+  renderVine(c,g,{reducedMotion});
+  if(g.lastCapture)renderCaptureFlow(c,g.lastCapture,g.clock-g.lastCapture.clock,{reducedMotion});
   g.level.flowers.forEach((f,i)=>{
     const alive=g.bloomed[i];glow(c,f.x,f.y,alive?65:43,alive?`${f.color}44`:`${f.color}20`);
     c.save();c.translate(f.x,f.y);c.strokeStyle='#58844d';c.lineWidth=4;c.beginPath();c.moveTo(0,30);c.quadraticCurveTo(-5,12,0,0);c.stroke();leaf(c,0,23,19,-.65,'#609b52');
@@ -104,7 +98,7 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
   }
   glow(c,tip.x,tip.y,g.burst>0?60:30,g.burst>0?'#ffcf6d55':'#c9f48130');
   if(g.burst>0||g.grace>0){c.strokeStyle=g.burst>0?'#ffdc89':'#ccf3ce';c.lineWidth=4;c.beginPath();c.arc(tip.x,tip.y,23,0,Math.PI*2);c.stroke();}
-  leaf(c,tip.x,tip.y,21,g.heading-.5,'#d4ee93');leaf(c,tip.x,tip.y,15,g.heading+.7,'#86c967');
+  renderVineTip(c,g,{reducedMotion,phase});
   for(const p of particles){c.globalAlpha=p.life;oval(c,p.x,p.y,p.size||3,p.size||3,p.color);}c.globalAlpha=1;
   for(const p of popups){c.globalAlpha=Math.min(1,p.life*2);c.font='bold 17px Arial';c.textAlign='center';c.lineWidth=4;c.strokeStyle='#071f20';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y);}c.globalAlpha=1;
   c.restore();

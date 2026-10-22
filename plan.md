@@ -8,6 +8,8 @@ Latest feedback: the game looked like a website and bugs repeated the same patte
 
 Latest gameplay hook (user approved): **loop-catching**, keeping the same direct controls. Grow around bugs and reconnect to older stem to capture them. Each bug gives 180 water + 300 score; each additional bug in the same closure adds an extra 80 water + 200 points, so a double catch pays 440 water + 800 score. Captures remove bugs permanently for the attempt, refresh Burst and grant .45s recovery protection. A join hint, glowing enclosure, conversion particles, distinct capture/combo chimes and popup/HUD rewards make the action visible. The first garden's two enemy roaming regions now overlap in the open root gap to support a realistically sized multi-catch. Existing later layouts are unchanged; the shared capture rule also works there. First-garden playtesting comes before expanding the mechanic.
 
+Vine visual follow-up (user approved): `src/vine.js` replaces uniform strokes with a render-only quadratic spline/ribbon, thick near older growth and fine at the tip, layered cylindrical shading, stable alternating/paired veined leaves with palette/size variation, .45s leaf unfurling, and a small shaded growing bud. Capture light travels around closed enclosures. Geometry/Path2D/leaf birth caches live in WeakMaps, never on simulation state. Raw paths, steering, collision, water and capture rules are untouched. Spline endpoints exactly match physics and smoothing stays within a small local hull. Rewind prunes future leaf births; reduced motion opens leaves immediately and suppresses bud breathing/capture circulation. Pause uses the frozen simulation clock for leaf animation.
+
 Onboarding follow-up: the user could not tell how to play and requested a How to Play button/page. Both the main menu and pause menu now open an in-game full-screen guide with an original SVG sunlight/steering diagram, first-move example, flower/water/Burst/bug rules, and keyboard/touch controls. The run stays frozen; Back/Esc returns to the originating menu without resetting progress, and the guide can explicitly start/resume play. Header/footer navigation stays visible while instructions scroll, and keyboard focus is trapped/restored correctly.
 
 Credits follow-up: creator credit now links directly to **https://tahmidraven.com**, not the project GitHub page. A separate in-game page is visibly labeled **Credits** (the user explicitly shortened “Asset Credits” to “Credits”). It lists the game creator, Kenney bug/foliage sources and modifications, pebonius music, CC0 notices, engine/tools/jam and development assistance. Local notice/manifest links work in production. Back/Esc returns to the main menu with restored keyboard focus; reading credits does not advance/reset the game.
@@ -42,6 +44,7 @@ Refresh/first-paint follow-up: the user saw raw HTML briefly before CSS loaded. 
 - `src/arcade.js`: seeded randomness, enemy state/steering, Burst, stuns and simulation ticking.
 - `src/main.js`: loading/title/playing/paused/help/credits/result flow, native engine splash and async asset readiness, context-aware guide/credits navigation, input, score/storage, UI and effects.
 - `src/scene.js`: full-window forest rendering, terrain/vine/flowers, telegraphs, sprites, particles and feedback.
+- `src/vine.js`: render-only taper/spline geometry, cached ribbon paths, deterministic leaf placement and unfurling, bud shading and capture light.
 - `src/view.js`: viewport/high-DPI fitting and screen-to-world input transform. The full canvas fills the screen; the 600×720 gameplay region scales proportionally within HUD-safe space.
 - `src/art.js`: local CC0 images, runtime tints and procedural fallbacks.
 - `index.html` / `src/style.css`: game HUD and menu overlays. No sidebar, website header/footer or framed courtyard panel.
@@ -54,12 +57,14 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 
 ## Validation and useful commands
 
-- `npm test`: **43 tests** — growth/water/terrain, all garden routes, seeded variation/replay, retry seeds, hunter reactions, charge telegraph/rest, enemy bounds, Burst/stun/score rules, source license/hash checks, viewport/DPI input mapping, plus loop geometry, boundary/outside cases, empty closures, single/combo rewards, last-drop rescue, water caps, rewind/replay anti-farming and join hints.
+- `npm test`: **52 tests** — growth/water/terrain, all garden routes, seeded variation/replay, retry seeds, hunter reactions, charge telegraph/rest, enemy bounds, Burst/stun/score rules, source license/hash checks, viewport/DPI input mapping, loop geometry/rewards/anti-farming, and nine visual-geometry tests for endpoint fidelity, taper, bounded smoothing, duplicate-point safety, deterministic leaves, unfurling, paused state immutability and rewind/regrowth.
 - `npm run build`: production build.
 - `env NODE_OPTIONS='' npm run test:browser`: native LittleJS splash/branding (desktop + short landscape), deliberately delayed images proving the menu waits for readiness, real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.
 - Screenshots in ignored `artifacts/`: `title.png`, `how-to-play.png`, `how-to-play-mobile.png`, `asset-credits.png`, `asset-credits-mobile.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`.
 - `npm run package`: builds `artifacts/crooked-garden.zip` with credits/notices and index.html at archive root. Does not publish the game.
+
+Vine browser checks also grow a plant in reduced-motion mode, verify the flower is collected, and compare complete simulation snapshots across paused renders. Visual examples: `artifacts/vine-mobile.png`, `artifacts/vine-reduced-motion.png`, `artifacts/arcade.png`, `artifacts/double-catch.png`. No new external assets are used by this visual pass.
 
 Capture browser regression uses RNG seed 44 and real pointer/Shift input, not injected game state: (430,550) → (500,550) → (500,435) → (380,435) → (380,360) → (300,360) → (300,435) → (395,435). It captures both moving bugs, awards the combo, tests permanence through rewind, then clears the remaining flowers. Screenshot: `artifacts/double-catch.png`. The main no-capture campaign regression uses a separate seeded sequence because the first-garden swarm layout changed.
 
@@ -73,6 +78,7 @@ Capture browser regression uses RNG seed 44 and real pointer/Shift input, not in
 - `e8c6756`: creator website link and separate in-game Credits page.
 - `bf58d9a`: native LittleJS startup splash and Built with LittleJS branding.
 - `410ca6b`: first-paint/refresh guard; last checkpoint before loop-catching.
+- `e2e8bf2`: loop captures, combo rewards, capture feedback and anti-farming.
 - The user disliked pure tracing, then explicitly rejected a three-light plan/launch experiment. That experiment was removed, not shipped as the current mode.
 - Earlier generated mockups are not playable levels and are not shipped assets. Do not reuse employer/Two Dots art without verified rights. Leaf maintenance/shading was discussed but is not implemented.
 

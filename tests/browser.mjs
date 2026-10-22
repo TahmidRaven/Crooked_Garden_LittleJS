@@ -218,6 +218,7 @@ try{
   await mobile.waitForFunction(()=>window.crookedGarden.getState().flowers[0]);
   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'playing');
+  await mobile.screenshot({path:'artifacts/vine-mobile.png',fullPage:true});
   const seed=await mobile.evaluate(()=>window.crookedGarden.getState().seed);
   await mobile.locator('#pause').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'paused');
   await mobile.locator('#pause-retry').tap();assert.notEqual(await mobile.evaluate(()=>window.crookedGarden.getState().seed),seed);
@@ -277,8 +278,19 @@ try{
   assert.equal((await captureState()).captureScore,800);assert.match(await capturePage.locator('#result-copy').textContent(),/2 bugs caught/);
   await capturePage.locator('#next').click();
   assert.equal((await captureState()).captures,0);assert.ok((await captureState()).captured.every(value=>!value));
+  const reducedPage=await browser.newPage({viewport:{width:960,height:720},reducedMotion:'reduce'});watch(reducedPage);await reducedPage.addInitScript(seedSource);
+  await reducedPage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
+  await reducedPage.goto(url);await reducedPage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
+  await reducedPage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));await reducedPage.locator('#play').click();
+  const reducedState=await reducedPage.evaluate(()=>window.crookedGarden.getState()),rr=await reducedPage.locator('#game-root canvas').boundingBox(),rv=reducedState.view;
+  await reducedPage.mouse.move(rr.x+(rv.x+430*rv.scale)/rv.width*rr.width,rr.y+(rv.y+550*rv.scale)/rv.height*rr.height);
+  await reducedPage.mouse.down();await reducedPage.clock.runFor(1300);await reducedPage.mouse.up();
+  assert.equal(await reducedPage.evaluate(()=>window.crookedGarden.getState().flowers[0]),true,'Detailed vine rendering also works with reduced motion');
+  await reducedPage.screenshot({path:'artifacts/vine-reduced-motion.png',fullPage:true});
+  await reducedPage.locator('#pause').click();const pausedPlant=await reducedPage.evaluate(()=>window.crookedGarden.getState());
+  await reducedPage.clock.runFor(500);assert.deepEqual(await reducedPage.evaluate(()=>window.crookedGarden.getState()),pausedPlant,'Repeated paused renders cannot mutate simulation state');
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: real-input double loop capture/bonus/rewind/reset, startup, credits/guide, three gardens, score, touch, art and 11 layouts.');
+  console.log('Browser checks passed: detailed vine/reduced motion/paused render safety, real-input double capture, startup, credits/guide, three gardens, touch, art and 11 layouts.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }
