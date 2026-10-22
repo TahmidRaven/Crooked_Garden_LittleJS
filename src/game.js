@@ -6,19 +6,34 @@ export const GROW_SPEED = 150;
 export const TURN_SPEED = 16;
 const TARGET_RADIUS = 5;
 
-// One restoration experiment. The original three-level prototype is preserved in Git.
+// Three gardens, each with a distinct route and enemy roaming regions.
 export const LEVELS = [{
-  name: 'The forgotten courtyard',
-  hint: 'Save one flower to clear. Save all three to restore the whole garden.',
+  name: 'Moonlit clearing',
+  hint: 'Wake all three flowers. Outgrow the swarm.',
   start: {x:300,y:635},
-  water: 580,
+  water: 660,
   rocks: [{x:85,y:475,w:280,h:26},{x:280,y:310,w:235,h:26}],
   flowers: [
     {x:430,y:550,name:'Marigold',color:'#e2a347'},
     {x:205,y:390,name:'Poppy',color:'#dc826e'},
     {x:345,y:170,name:'Aster',color:'#b09bc8'}
   ],
-  dew: [{x:500,y:435},{x:130,y:280}]
+  dew: [{x:500,y:435},{x:130,y:280}],
+  enemyZones:[{left:100,right:520,top:365,bottom:445},{left:90,right:520,top:180,bottom:275}]
+},{
+  name:'The overgrown terraces',hint:'Three ledges. Keep your burst ready.',
+  start:{x:250,y:635},water:760,
+  rocks:[{x:65,y:510,w:295,h:26},{x:285,y:355,w:250,h:26},{x:65,y:205,w:270,h:26}],
+  flowers:[{x:425,y:570,name:'Marigold',color:'#e2a347'},{x:205,y:420,name:'Poppy',color:'#dc826e'},{x:405,y:160,name:'Aster',color:'#b09bc8'}],
+  dew:[{x:425,y:455},{x:205,y:300},{x:405,y:170}],
+  enemyZones:[{left:100,right:510,top:400,bottom:475},{left:85,right:520,top:255,bottom:315}]
+},{
+  name:'Heart of the wild',hint:'The whole garden is awake. So is everything in it.',
+  start:{x:350,y:635},water:800,
+  rocks:[{x:280,y:530,w:255,h:26},{x:65,y:390,w:270,h:26},{x:285,y:245,w:250,h:26}],
+  flowers:[{x:205,y:590,name:'Marigold',color:'#e2a347'},{x:410,y:450,name:'Poppy',color:'#dc826e'},{x:205,y:190,name:'Aster',color:'#b09bc8'}],
+  dew:[{x:205,y:485},{x:410,y:345},{x:205,y:200}],
+  enemyZones:[{left:85,right:520,top:440,bottom:500},{left:80,right:520,top:290,bottom:350},{left:90,right:520,top:110,bottom:200}]
 }];
 
 export const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -33,11 +48,6 @@ export function createGarden(index=0) {
     collected:level.dew.map(()=>false),bloomed:level.flowers.map(()=>false),
     status:'ready',steps:0,history:[],endedBy:null
   };
-}
-export function finishGarden(g) {
-  if(!bloomCount(g)||g.status==='won')return false;
-  g.status='won';g.endedBy='finish';
-  return true;
 }
 export function advance(g, target, dt=1/60, speed=GROW_SPEED) {
   if(!Number.isFinite(dt)||dt<=0||!Number.isFinite(speed)||speed<=0) return null;
@@ -77,8 +87,7 @@ function advanceStep(g,target,dt,speed){
   });
   if(bloomCount(g)===g.bloomed.length){g.status='won';g.endedBy='complete';return 'won';}
   if(g.water<=0){
-    g.status=bloomCount(g)?'won':'dry';g.endedBy='water';
-    return g.status;
+    g.status='dry';g.endedBy='water';return 'dry';
   }
   return event;
 }

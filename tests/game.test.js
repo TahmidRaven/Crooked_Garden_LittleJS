@@ -1,12 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createGarden,advance,rewind,hitsRock,LEVELS,bloomCount,finishGarden,DEW_WATER} from '../src/game.js';
+import {createGarden,advance,rewind,hitsRock,LEVELS,bloomCount,DEW_WATER} from '../src/game.js';
 
-function follow(g,route){
+function follow(g,route,allowFailure=false){
   for(const [x,y] of route){
-    for(let f=0;f<800&&Math.hypot(g.path.at(-1).x-x,g.path.at(-1).y-y)>12&&g.status!=='won';f++){
+    for(let f=0;f<800&&Math.hypot(g.path.at(-1).x-x,g.path.at(-1).y-y)>12&&!['won','blocked','dry'].includes(g.status);f++){
       advance(g,{x,y});
-      assert.ok(!['blocked','dry'].includes(g.status),`${g.status} at ${JSON.stringify(g.path.at(-1))}`);
+      if(!allowFailure)assert.ok(!['blocked','dry'].includes(g.status),`${g.status} at ${JSON.stringify(g.path.at(-1))}`);
       assert.ok(f<799,'Waypoint is reachable');
     }
   }
@@ -25,22 +25,22 @@ test('dew replenishes growth and rewind restores the collectible and water',()=>
   assert.equal(g.collected[0],true);assert.ok(g.water>before);
   rewind(g,30);assert.equal(g.collected[0],false);assert.equal(g.water,before);
 });
-test('a flower is a clear, but growth continues until the player finishes',()=>{
+test('one flower keeps the run alive; only all three flowers win',()=>{
   const g=follow(createGarden(),[[430,550]]);
   assert.equal(bloomCount(g),1);assert.equal(g.status,'growing');
-  assert.equal(finishGarden(g),true);assert.equal(g.status,'won');assert.equal(g.endedBy,'finish');
+  follow(g,fullRoute);assert.equal(g.status,'won');assert.equal(g.endedBy,'complete');
   const n=g.path.length;advance(g,{x:500,y:435});assert.equal(g.path.length,n);
 });
 test('the empty courtyard cannot be claimed as a win',()=>{
-  const g=createGarden();assert.equal(finishGarden(g),false);assert.equal(g.status,'ready');
+  const g=createGarden();assert.equal(bloomCount(g),0);assert.equal(g.status,'ready');
 });
 test('water exhaustion without a flower fails',()=>{
   const g=createGarden();g.water=.5;
   assert.equal(advance(g,{x:300,y:500}),'dry');assert.equal(g.water,0);assert.equal(bloomCount(g),0);
 });
-test('water exhaustion after saving a flower preserves a partial clear',()=>{
+test('water exhaustion after one flower is still a failed garden',()=>{
   const g=follow(createGarden(),[[430,550]]);g.water=.5;
-  assert.equal(advance(g,{x:500,y:550}),'won');assert.equal(g.water,0);
+  assert.equal(advance(g,{x:500,y:550}),'dry');assert.equal(g.water,0);
   assert.equal(bloomCount(g),1);assert.equal(g.endedBy,'water');
 });
 test('all three flowers are reachable with a planned dew route',()=>{
@@ -49,8 +49,8 @@ test('all three flowers are reachable with a planned dew route',()=>{
   assert.equal(bloomCount(g),3);assert.ok(g.collected.every(Boolean));assert.ok(g.water>0);
 });
 test('the same long route without dew cannot restore all three flowers',()=>{
-  const g=createGarden();g.collected.fill(true);follow(g,fullRoute);
-  assert.equal(g.status,'won');assert.ok(bloomCount(g)<3);assert.equal(g.endedBy,'water');
+  const g=createGarden();g.collected.fill(true);follow(g,fullRoute,true);
+  assert.equal(g.status,'dry');assert.ok(bloomCount(g)<3);assert.equal(g.endedBy,'water');
 });
 test('dew adds water only once, and flowers never grant free water',()=>{
   const g=createGarden();g.path=[{x:500,y:450}];g.heading=-Math.PI/2;
@@ -62,9 +62,9 @@ test('dew adds water only once, and flowers never grant free water',()=>{
   advance(flower,{x:430,y:500});assert.equal(bloomCount(flower),1);assert.ok(flower.water<flower.level.water);
 });
 test('rewind restores flower objectives and reopens a finished route',()=>{
-  const g=follow(createGarden(),[[430,550]]);finishGarden(g);rewind(g,2000);
+  const g=follow(createGarden(),fullRoute);rewind(g,2000);
   assert.equal(g.status,'ready');assert.equal(g.endedBy,null);assert.equal(bloomCount(g),0);
-  assert.equal(g.water,g.level.water);assert.equal(finishGarden(g),false);
+  assert.equal(g.water,g.level.water);
 });
 test('flowers and dew are clear of collision geometry',()=>{
   for(const l of LEVELS)for(const p of [...l.dew,...l.flowers])assert.ok(!l.rocks.some(r=>hitsRock(p,r,25)));
@@ -96,4 +96,8 @@ test('faster growth cannot tunnel through shelves during a slow update',()=>{
   const g=createGarden();g.path=[{x:200,y:509}];
   assert.equal(advance(g,{x:200,y:400},.5),'blocked');
   assert.ok(g.path.at(-1).y>=506);
+});
+test('each of the three gardens has a reachable full-restoration route',()=>{
+  const routes=[fullRoute,[[425,570],[425,455],[205,420],[205,300],[405,275],[405,160]],[[205,590],[205,475],[410,450],[410,335],[205,310],[205,190]]];
+  routes.forEach((route,index)=>{const g=follow(createGarden(index),route);assert.equal(bloomCount(g),3,`Garden ${index+1}`);assert.equal(g.status,'won');});
 });
