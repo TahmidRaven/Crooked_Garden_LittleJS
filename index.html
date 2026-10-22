@@ -10,12 +10,12 @@
     #game{visibility:hidden}
     html.game-styled #game{visibility:visible}
   </style>
-  <meta name="description" content="A wild little garden arcade. Grow, dodge the swarm, and bloom your way through three gardens.">
+  <meta name="description" content="Grow loops to capture bugs, reclaim water, and bloom your way through three wild gardens.">
   <title>Crooked Garden · Outgrow the swarm</title>
 </head>
 <body>
   <main id="game" aria-label="Crooked Garden game" aria-busy="true">
-    <div id="game-root" role="application" tabindex="0" inert aria-label="Hold pointer or G to grow. Move pointer or arrows to steer. Shift bursts, Space pauses, Z rewinds."></div>
+    <div id="game-root" role="application" tabindex="0" inert aria-label="Hold pointer or G to grow. Move pointer or arrows to steer. Close loops around bugs to capture them. Shift bursts, Space pauses, Z rewinds."></div>
     <div id="startup-credit" class="startup-credit" role="status"><span>BUILT WITH <strong>LittleJS</strong></span><small>Loading Crooked Garden…</small></div>
 
     <div id="hud" class="hud" hidden>
@@ -46,10 +46,10 @@
         <div class="title-spark">✦</div>
         <p class="overline">A WILD LITTLE ARCADE</p>
         <h1>CROOKED<br><em>GARDEN</em></h1>
-        <p class="tagline">OUTGROW THE SWARM.</p>
+        <p class="tagline">GROW. LOOP. BLOOM.</p>
         <button id="play" class="primary-button">LET IT GROW <span>▶</span></button>
         <button id="how-to-play" class="secondary-button" aria-label="How to Play">? HOW TO PLAY</button>
-        <p class="title-note">Three gardens. A different swarm every run.</p>
+        <p class="title-note">Catch bugs in loops. Bloom your way through three gardens.</p>
         <div class="title-credits"><span>Made by</span><a id="creator-link" href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a><span aria-hidden="true">·</span><button id="asset-credits">Credits</button></div>
       </div>
     </section>
@@ -86,6 +86,7 @@
           </div>
           <div class="first-move"><span aria-hidden="true">01</span><div><h3>Try this first</h3><p>In the first garden, find the glowing seed at the bottom. <strong>Hold over the orange bud on the lower right.</strong> Once it blooms, guide the tip up the right side of the lowest mossy ledge toward the blue water drop.</p></div></div>
           <div class="help-grid">
+            <article class="help-card"><span class="help-symbol burst-symbol" aria-hidden="true">⌁</span><h3>Loop a bug. Catch it.</h3><p><strong>Grow around a bug, then touch an older part of your stem to close the loop.</strong> Bugs inside are captured for 180 water and 300 points each. Catch two together for an extra 80 water and 200 points. Burst can stun a bug while you wrap around it. Captured bugs stay gone when you rewind; each only pays once per attempt.</p></article>
             <article class="help-card"><span class="help-symbol flower-symbol" aria-hidden="true">✿</span><h3>Bloom all three</h3><p>Touch every closed flower bud with the growing tip. The three flowers in the HUD light up as you save them. Restore all three to unlock the next garden; finish all three gardens to complete a run.</p></article>
             <article class="help-card"><span class="help-symbol water-symbol" aria-hidden="true">◆</span><h3>Keep your vine watered</h3><p>Growing spends water. <strong>Blue drops restore 260 water.</strong> Take useful detours, but avoid wasting growth on loops. Running out of water ends the attempt.</p></article>
             <article class="help-card"><span class="help-symbol burst-symbol" aria-hidden="true">↯</span><h3>Burst through danger</h3><p>Press <kbd>Shift</kbd> while growing, or <strong>tap Burst to arm it, then grow</strong>. It gives a short speed boost and bug shield for 30 water. <strong>It does not protect against solid mossy ledges.</strong> Blooming a flower stuns the bugs and refreshes Burst.</p></article>

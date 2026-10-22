@@ -1,6 +1,8 @@
-import { advance, createGarden, distance, GROW_SPEED } from './game.js';
+import { advance, createGarden, distance, GROW_SPEED, MAX_WATER } from './game.js';
+import { findClosedLoop, pointInLoop } from './loops.js';
 
 export const BURST_COST=30, BURST_DURATION=.45, BURST_COOLDOWN=2, BURST_SPEED=280;
+export const CAPTURE_WATER=180, CAPTURE_POINTS=300, COMBO_WATER=80, COMBO_POINTS=200;
 const terminal=g=>['won','blocked','dry'].includes(g.status);
 let nonce=0;
 function freshSeed(){
@@ -20,7 +22,7 @@ function pickTarget(g,bug){
   bug.retarget=between(g,.65,1.7);
 }
 export function createArcade({seed=freshSeed(),stage=0}={}){
-  const g=Object.assign(createGarden(stage),{seed:seed>>>0,rngState:(seed>>>0)||0x6d2b79f5,clock:0,started:false,burst:0,cooldown:0,queued:false,swatted:0,grace:0,hitBugs:[]});
+  const g=Object.assign(createGarden(stage),{seed:seed>>>0,rngState:(seed>>>0)||0x6d2b79f5,clock:0,started:false,burst:0,cooldown:0,queued:false,swatted:0,grace:0,hitBugs:[],captures:0,captureScore:0,captureWaterTotal:0,captureSerial:0,maxCombo:0,loopStart:0,loopHint:null,lastCapture:null});
   const kinds=['wanderer','hunter','charger'];
   for(let i=kinds.length-1;i>0;i--){const j=Math.floor(random(g)*(i+1));[kinds[i],kinds[j]]=[kinds[j],kinds[i]];}
   g.enemies=g.level.enemyZones.map((zone,i)=>{
@@ -31,11 +33,11 @@ export function createArcade({seed=freshSeed(),stage=0}={}){
     }
     pickTarget(g,bug);return bug;
   });
-  g.stunned=g.enemies.map(()=>0);g.hitBugs=g.enemies.map(()=>false);
+  g.stunned=g.enemies.map(()=>0);g.hitBugs=g.enemies.map(()=>false);g.captured=g.enemies.map(()=>false);
   return g;
 }
 export function bugsAt(g){
-  return g.enemies.map((bug,i)=>({x:bug.x,y:bug.y,radius:bug.radius,heading:bug.heading,kind:bug.kind,state:bug.state,warning:bug.state==='windup',animation:bug.animation,stunned:g.stunned[i]>0}));
+  return g.enemies.map((bug,i)=>({x:bug.x,y:bug.y,radius:bug.radius,heading:bug.heading,kind:bug.kind,state:bug.state,warning:!g.captured[i]&&bug.state==='windup',animation:bug.animation,stunned:g.stunned[i]>0,captured:g.captured[i]}));
 }
 function moveBug(g,bug,dt){
   const tip=g.path.at(-1),d=distance(bug,tip);bug.timer-=dt;bug.retarget-=dt;
@@ -80,13 +82,29 @@ export function queueBurst(g){
 function bugContact(g){
   let event=null;
   for(const [i,bug] of bugsAt(g).entries()){
-    if(bug.stunned||distance(g.path.at(-1),bug)>bug.radius+6)continue;
+    if(bug.captured||bug.stunned||distance(g.path.at(-1),bug)>bug.radius+6)continue;
     if(g.burst>0){
       g.stunned[i]=1.5;g.enemies[i].state='roam';g.enemies[i].timer=between(g,1,2);
       if(!g.hitBugs[i]){g.hitBugs[i]=true;g.swatted++;}event='swat';
     }else if(g.grace<=0){g.status='blocked';g.endedBy='bug';return 'blocked';}
   }
   return event;
+}
+function captureLoop(g){
+  const loop=findClosedLoop(g.path,g.loopStart);
+  if(!loop)return null;
+  // Consume the closure even if empty: old loops are not passive traps.
+  g.loopStart=g.path.length-1;
+  const caught=g.enemies.map((bug,i)=>({bug,i})).filter(({bug,i})=>!g.captured[i]&&pointInLoop(bug,loop.polygon));
+  if(!caught.length)return null;
+  const count=caught.length,bonus=count-1,reward=CAPTURE_WATER*count+COMBO_WATER*bonus,points=CAPTURE_POINTS*count+COMBO_POINTS*bonus;
+  const credited=Math.min(MAX_WATER-g.water,reward);
+  g.water+=credited;g.captureWaterTotal+=credited;g.captureScore+=points;g.captures+=count;g.captureSerial++;g.maxCombo=Math.max(g.maxCombo,count);
+  const bugs=caught.map(({bug,i})=>{g.captured[i]=true;g.stunned[i]=0;bug.state='captured';return {x:bug.x,y:bug.y};});
+  g.lastCapture={count,water:credited,points,bugs,polygon:loop.polygon,join:loop.join,clock:g.clock};
+  g.cooldown=0;g.grace=Math.max(g.grace,.45);
+  if(g.status==='dry'&&g.water>0){g.status='growing';g.endedBy=null;}
+  return 'capture';
 }
 export function tickArcade(g,target,{growing=false}={},dt=1/60){
   if(terminal(g)||!Number.isFinite(dt)||dt<=0)return null;
@@ -100,11 +118,15 @@ export function tickArcade(g,target,{growing=false}={},dt=1/60){
   let event=null;
   for(let i=0;i<steps;i++){
     g.clock+=step;g.burst=Math.max(0,g.burst-step);g.cooldown=Math.max(0,g.cooldown-step);g.grace=Math.max(0,g.grace-step);
-    g.enemies.forEach((bug,j)=>{if(g.stunned[j]<=0)moveBug(g,bug,step);});
+    g.enemies.forEach((bug,j)=>{if(!g.captured[j]&&g.stunned[j]<=0)moveBug(g,bug,step);});
     g.stunned=g.stunned.map(time=>Math.max(0,time-step));
     let contact=bugContact(g);if(contact==='blocked')return contact;event=contact||event;
     if(growing){
-      const result=advance(g,target,step,g.burst>0?BURST_SPEED:GROW_SPEED);
+      const previousLength=g.path.length;
+      let result=advance(g,target,step,g.burst>0?BURST_SPEED:GROW_SPEED);
+      if(g.path.length>previousLength&&captureLoop(g)){
+        event='capture';if(result==='dry'&&!terminal(g))result=null;
+      }
       if(result==='flower'){
         g.stunned=g.stunned.map(time=>Math.max(time,.8));g.cooldown=0;
         g.enemies.forEach(bug=>{bug.state='roam';bug.timer=between(g,1,2);});
@@ -113,5 +135,8 @@ export function tickArcade(g,target,{growing=false}={},dt=1/60){
     }
     contact=bugContact(g);if(contact==='blocked')return contact;event=contact||event;
   }
+  const preview=growing?findClosedLoop(g.path,g.loopStart,32):null;
+  const inside=preview?g.enemies.filter((bug,i)=>!g.captured[i]&&pointInLoop(bug,preview.polygon)).length:0;
+  g.loopHint=inside?{join:preview.join,count:inside}:null;
   return event;
 }

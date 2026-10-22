@@ -24,7 +24,7 @@ try{
   }
   await bare.close();
   // Seed the source of randomness, not game state. Retries still receive new seeds.
-  const seedSource=()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(12344);return array;}});
+  const seedSource=()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(97);return array;}});
   watch(page);await page.addInitScript(seedSource);
   let releaseArt;
   const artGate=new Promise(resolve=>releaseArt=resolve);
@@ -124,7 +124,7 @@ try{
       await point(x,y);await page.mouse.down();
       for(let i=0;i<200;i++){
         const before=await state();
-        if(before.cooldown<=0&&before.burst<=0&&before.water>30&&before.bugs.some(b=>!b.stunned&&Math.hypot(before.tip.x-b.x,before.tip.y-b.y)<70))await page.keyboard.press('Shift');
+        if(before.cooldown<=0&&before.burst<=0&&before.water>30&&before.bugs.some(b=>!b.captured&&!b.stunned&&Math.hypot(before.tip.x-b.x,before.tip.y-b.y)<70))await page.keyboard.press('Shift');
         await page.clock.runFor(50);const s=await state();
         if(s.phase==='result'){assert.ok(s.flowers.every(Boolean),`Garden ${s.stage+1}, seed ${s.seed} failed: ${s.endedBy}, flowers ${s.flowers}, water ${s.water}`);break;}
         if(Math.hypot(s.tip.x-x,s.tip.y-y)<10)break;
@@ -231,8 +231,54 @@ try{
   const branding=await shortSplash.locator('#startup-credit').boundingBox();
   assert.ok(branding.y>=270&&branding.y+branding.height<=320,'Short-screen branding stays below the native logo and inside the viewport');
   await shortSplash.screenshot({path:'artifacts/littlejs-splash-landscape.png',fullPage:true});
+  // A seeded encounter, but real controls: trace a lasso and capture two moving bugs.
+  const capturePage=await browser.newPage({viewport:{width:1280,height:800}});watch(capturePage);
+  await capturePage.addInitScript(()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(42);return array;}}));
+  await capturePage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
+  await capturePage.goto(url);await capturePage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
+  await capturePage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
+  await capturePage.locator('#play').click();
+  const captureState=()=>capturePage.evaluate(()=>window.crookedGarden.getState());
+  const captureRoute=[[430,550],[500,550],[500,435],[380,435],[380,360],[300,360],[300,435],[395,435]];
+  for(const [x,y] of captureRoute){
+    if((await captureState()).captures)break;
+    const {view:v}=await captureState(),r=await capturePage.locator('#game-root canvas').boundingBox();
+    await capturePage.mouse.move(r.x+(v.x+x*v.scale)/v.width*r.width,r.y+(v.y+y*v.scale)/v.height*r.height);
+    await capturePage.mouse.down();
+    for(let i=0;i<200;i++){
+      const before=await captureState();
+      if(before.cooldown<=0&&before.burst<=0&&before.bugs.some(b=>!b.captured&&!b.stunned&&Math.hypot(before.tip.x-b.x,before.tip.y-b.y)<65))await capturePage.keyboard.press('Shift');
+      await capturePage.clock.runFor(50);const after=await captureState();
+      assert.equal(after.phase,'playing','The capture route remains playable');
+      if(after.captures||Math.hypot(after.tip.x-x,after.tip.y-y)<8)break;
+      assert.ok(i<199,'Capture waypoint is reachable');
+    }
+    await capturePage.mouse.up();
+  }
+  const caught=await captureState();
+  assert.equal(caught.captures,2);assert.equal(caught.maxCombo,2);assert.equal(caught.captureScore,800);
+  assert.equal(caught.lastCapture.water,440);assert.ok(caught.captured.every(Boolean));assert.ok(caught.score>=1150);
+  assert.match(await capturePage.locator('#state-label').textContent(),/COMBO CATCH/);
+  await capturePage.screenshot({path:'artifacts/double-catch.png',fullPage:true});
+  await capturePage.locator('#undo').click();
+  assert.equal((await captureState()).captureScore,800);assert.ok((await captureState()).captured.every(Boolean),'Rewind cannot respawn paid captures');
+  for(const [x,y] of [[205,390],[130,390],[130,280],[345,170]]){
+    const {view:v}=await captureState(),r=await capturePage.locator('#game-root canvas').boundingBox();
+    await capturePage.mouse.move(r.x+(v.x+x*v.scale)/v.width*r.width,r.y+(v.y+y*v.scale)/v.height*r.height);
+    await capturePage.mouse.down();
+    for(let i=0;i<200;i++){
+      await capturePage.clock.runFor(50);const after=await captureState();
+      if(after.phase==='result'||Math.hypot(after.tip.x-x,after.tip.y-y)<10)break;
+      assert.ok(i<199,'A captured arena still has a route to the remaining flowers');
+    }
+    await capturePage.mouse.up();
+  }
+  assert.ok((await captureState()).flowers.every(Boolean),'The loop bonus funds a full first-garden clear');
+  assert.equal((await captureState()).captureScore,800);assert.match(await capturePage.locator('#result-copy').textContent(),/2 bugs caught/);
+  await capturePage.locator('#next').click();
+  assert.equal((await captureState()).captures,0);assert.ok((await captureState()).captured.every(value=>!value));
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: native LittleJS splash/branding/slow-load handoff, credits/guide and 11 layouts, all three gardens, score, swarms, real input and art.');
+  console.log('Browser checks passed: real-input double loop capture/bonus/rewind/reset, startup, credits/guide, three gardens, score, touch, art and 11 layouts.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }

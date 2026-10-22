@@ -1,6 +1,6 @@
 # Crooked Garden — Outgrow the swarm
 
-A full-screen browser arcade built with LittleJS. Grow a luminous vine through three wild gardens, dodge a changing swarm, and wake every flower. The game has a title screen, in-world HUD, pause menu, results, stage progression, score and a local best score—no website-style sidebar or framed board.
+A full-screen browser arcade built with LittleJS. Grow a luminous vine, **close loops around bugs to capture them**, reclaim water, and wake every flower across three wild gardens. The game has a title screen, in-world HUD, pause menu, results, stage progression, score and a local best score—no website-style sidebar or framed board.
 
 Startup shows **LittleJS's native animated engine splash** with a “Built with LittleJS” credit. A tiny inline first-paint style keeps the background dark and raw markup hidden until the application CSS and engine canvas are ready, including on refresh. The main menu stays hidden until the splash finishes and local artwork is decoded; slower loads retain the loading screen instead of exposing unfinished menus.
 
@@ -15,6 +15,18 @@ Built for [LittleJS Jam 3](https://itch.io/jam/littlejs-jam), theme **ZIGZAG**. 
 5. A flower briefly stuns the whole swarm and refreshes Burst. Clear all three gardens to finish a run.
 
 Running out of water is a failed attempt even if you saved some flowers; there is no early-finish/partial-clear button. Bugs wait for your first growth, then continue moving after release. Use Pause when you need to stop the world.
+
+### Loop-catching
+
+Grow around a bug, then return to an older part of your own stem to close the loop. A small glowing join cue appears when you're close to enclosing a bug. Tiny curls, straight retracing and loops with no bugs do not award captures.
+
+- **One bug:** removed for the rest of the attempt, **+180 water and +300 points**.
+- **Two in one loop:** **+440 water and +800 points** total, including the combo bonus. Larger catches add the same extra bonus per additional bug.
+- Burst can stun a bug while you wrap around it. Captures also refresh Burst and give a short recovery shield.
+- Capture rewards respect the 1,100-water capacity. An empty completed loop is not a passive trap for bugs entering later.
+- Captures and their actual credited rewards survive rewind. The same bug cannot pay again; a fresh attempt resets eligibility.
+
+The first garden's bugs share the open gap between roots, making a double catch possible without an enormous loop across terrain. This is the initial playtest focus; the existing later gardens remain, and the same capture rule works there without new controls or more levels.
 
 ### In-game How to Play
 
@@ -46,7 +58,7 @@ Enemy motion is bounded to clear areas between roots. Earlier gardens have two d
 
 ## Score and progression
 
-Restore flowers, gather dew, stun distinct bugs, and preserve water. Score carries between gardens; rewind applies a penalty. A bug only awards stun credit once per attempt. Best score is stored locally in this browser under `crooked-garden-best-v2`; there is no online leaderboard or account sync. Storage failures do not prevent play.
+Restore flowers, gather dew, capture bugs (especially in combos), stun distinct bugs, and preserve water. Score carries between gardens; rewind applies a penalty. A bug only awards stun credit once and capture credit once per attempt. Best score is stored locally in this browser under `crooked-garden-best-v2`; there is no online leaderboard or account sync. Storage failures do not prevent play.
 
 ## Develop
 
@@ -72,10 +84,10 @@ The full-window Canvas2D scene scales the world without stretching it, maps poin
 
 ## Validation
 
-- **31 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, asset provenance/hashes, and resized/high-DPI input mapping.
-- **Browser checks:** native LittleJS splash/branding, deliberately delayed asset loading and clean menu handoff, title/play/pause/results, How to Play from both menus (navigation, focus, frozen run, touch and responsive layout), all three gardens through real pointer input, scoring/best score, retry variation, keyboard/touch Burst, decoded sprites, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
+- **43 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, single/combo captures, empty loops, capped rewards, last-drop rescues, rewind anti-farming, asset provenance/hashes, and resized/high-DPI input mapping.
+- **Browser checks:** an actual moving-bug double capture through real steering, combo water/score, permanent captures after rewind and a full first-garden clear; native LittleJS splash/branding, deliberately delayed asset loading and clean menu handoff, title/play/pause/results, How to Play from both menus, all three gardens through real pointer input, scoring/best score, retry variation, keyboard/touch Burst, decoded sprites, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
-- Screenshots are in ignored `artifacts/` (`title.png`, `how-to-play.png`, `how-to-play-mobile.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
+- Screenshots are in ignored `artifacts/` (`double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
 
 ## Build, credits and assets
 

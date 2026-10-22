@@ -19,7 +19,8 @@ export const LEVELS = [{
     {x:345,y:170,name:'Aster',color:'#b09bc8'}
   ],
   dew: [{x:500,y:435},{x:130,y:280}],
-  enemyZones:[{left:100,right:520,top:365,bottom:445},{left:90,right:520,top:180,bottom:275}]
+  // Shared capture arena: the first garden allows a two-bug lasso without spanning terrain.
+  enemyZones:[{left:100,right:520,top:365,bottom:445},{left:140,right:500,top:365,bottom:445}]
 },{
   name:'The overgrown terraces',hint:'Three ledges. Keep your burst ready.',
   start:{x:250,y:635},water:760,
@@ -74,7 +75,7 @@ function advanceStep(g,target,dt,speed){
   if(next.x<42||next.x>558||next.y<45||next.y>655||g.level.rocks.some(r=>hitsRock(next,r))){
     g.status='blocked';return 'blocked';
   }
-  g.history.push({water:g.water,collected:[...g.collected],bloomed:[...g.bloomed],heading:g.heading});
+  g.history.push({water:g.water,collected:[...g.collected],bloomed:[...g.bloomed],heading:g.heading,captureWater:g.captureWaterTotal||0});
   g.heading=heading;g.path.push(next);g.water-=length;g.steps++;
   let event=null;
   g.level.dew.forEach((d,i)=>{
@@ -94,6 +95,12 @@ function advanceStep(g,target,dt,speed){
 export function rewind(g, count=85){
   let snapshot;
   for(let i=0;i<count&&g.path.length>1;i++){g.path.pop();snapshot=g.history.pop();g.steps--;}
-  if(snapshot){g.water=snapshot.water;g.collected=snapshot.collected;g.bloomed=snapshot.bloomed;g.heading=snapshot.heading;}
+  if(snapshot){
+    // Captures are permanent for this attempt. Preserve only the water actually credited,
+    // not nominal rewards clipped by the water cap, when restoring older growth history.
+    const captureCredit=Math.max(0,(g.captureWaterTotal||0)-(snapshot.captureWater||0));
+    g.water=Math.min(MAX_WATER,snapshot.water+captureCredit);g.collected=snapshot.collected;g.bloomed=snapshot.bloomed;g.heading=snapshot.heading;
+  }
+  if(Number.isInteger(g.loopStart)){g.loopStart=Math.min(g.loopStart,g.path.length-1);g.loopHint=null;}
   g.status='ready';g.endedBy=null;
 }
