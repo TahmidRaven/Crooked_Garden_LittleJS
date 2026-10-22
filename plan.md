@@ -12,7 +12,7 @@ Side-view cozy garden. Player moves a light; the vine grows toward it, existing 
 - [x] First playable: pointer-controlled light, hold to grow, collisions, dew, win/retry, three levels, rewind, keyboard and touch input.
 - [x] Find permissively licensed assets/music, download selected files, record original URL, creator, license and modifications in CREDITS.md. CC0 pebonius music bundled; original code-drawn art. Kenney foliage considered but not bundled.
 - [x] Build, test steering/collisions/win/restart and browser load.
-- [ ] Commit and push first playable checkpoint.
+- [x] Commit and push first playable checkpoint (`07fa900`, pushed to `origin/main` on October 22, 2026).
 - [ ] Playtest fun: responsive steering, short levels, fast restart; refine based on user feedback.
 - [ ] Later: evaluate leaf shading; accessibility, touch, more levels, itch ZIP.
 
