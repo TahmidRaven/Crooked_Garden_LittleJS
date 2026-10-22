@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Guide a stubborn vine with sunlight. A LittleJS Jam 3 prototype.",
+  "description": "Restore three dormant flowers with one thirsty vine. A LittleJS Jam 3 prototype.",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
