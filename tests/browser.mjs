@@ -30,7 +30,21 @@ try{
   assert.equal(await page.locator('aside,footer,header').count(),0,'No website-style sidebar/header/footer');
   await mkdir('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/title.png',fullPage:true});
-  await page.locator('#play').click();
+  const beforeHelp=await state();
+  await page.locator('#how-to-play').click();
+  assert.equal((await state()).phase,'help');
+  assert.equal(await page.locator('#help-title').textContent(),'HOW TO PLAY');
+  assert.match(await page.locator('#help-screen').textContent(),/You do not drag the seed itself/i);
+  await page.clock.runFor(1000);
+  assert.equal((await state()).clock,beforeHelp.clock);assert.equal((await state()).seed,beforeHelp.seed);
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'help-play','Guide traps keyboard focus');
+  await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'help-back');
+  await page.screenshot({path:'artifacts/how-to-play.png',fullPage:true});
+  await page.keyboard.press('Escape');
+  assert.equal((await state()).phase,'title');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'how-to-play');
+  await page.locator('#how-to-play').click();await page.locator('#help-play').click();
   assert.equal((await state()).phase,'playing');
   assert.equal(await page.locator('#hud').isVisible(),true);
   assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,2);
@@ -43,7 +57,13 @@ try{
   await page.keyboard.press('Space');await page.clock.runFor(100);
   assert.equal((await state()).phase,'paused');const frozen=(await state()).clock;
   await page.clock.runFor(1000);assert.equal((await state()).clock,frozen,'Pause freezes enemies too');
-  await page.locator('#resume').click();
+  const pausedState=await state();
+  await page.locator('#pause-help').click();assert.equal((await state()).phase,'help');
+  await page.clock.runFor(1000);assert.equal((await state()).clock,frozen,'Help never advances the run');
+  await page.locator('#help-back').click();assert.equal((await state()).phase,'paused');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'pause-help');
+  await page.locator('#pause-help').click();await page.locator('#help-play').click();
+  assert.equal((await state()).phase,'playing');assert.equal((await state()).seed,pausedState.seed);assert.equal((await state()).points,pausedState.points);
   await page.keyboard.down('g');await page.clock.runFor(4000);await page.keyboard.up('g');
   assert.equal((await state()).phase,'result');assert.equal((await state()).status,'blocked');
   await page.locator('#result-undo').click();assert.equal((await state()).phase,'playing');
@@ -103,12 +123,26 @@ try{
     for(const r of layout.controls)assert.ok(r.x>=-1&&r.y>=-1&&r.right<=width+1&&r.bottom<=height+1,`${label}: HUD/action controls fit: ${JSON.stringify(r)}`);
     if([[390,844],[1280,720],[844,390]].some(([w,h])=>w===width&&h===height))await page.screenshot({path:`artifacts/game-${width}x${height}.png`,fullPage:true});
     await page.locator('#pause').click();assert.equal((await state()).phase,'paused');
+    await page.locator('#pause-help').click();assert.equal((await state()).phase,'help');
+    const helpLayout=await page.evaluate(()=>{
+      const scroll=document.querySelector('.help-scroll');
+      return {width:scroll.scrollWidth,client:scroll.clientWidth,buttons:['help-back','help-play'].map(id=>{
+        const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};
+      })};
+    });
+    assert.ok(helpLayout.width<=helpLayout.client+1,`${label}: guide has no horizontal overflow`);
+    for(const r of helpLayout.buttons)assert.ok(r.x>=-1&&r.y>=-1&&r.right<=width+1&&r.bottom<=height+1,`${label}: guide navigation stays visible`);
+    await page.locator('.help-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);
+    assert.equal(await page.locator('#help-back').isVisible(),true);
+    if(width===390&&height===844)await page.screenshot({path:'artifacts/how-to-play-mobile.png',fullPage:true});
+    await page.locator('#help-back').click();assert.equal((await state()).phase,'paused');
     await page.locator('#resume').click();assert.equal((await state()).phase,'playing');
   }
 
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});watch(mobile);await mobile.addInitScript(seedSource);
   await mobile.goto(url);await mobile.waitForFunction(()=>window.crookedGarden&&Object.values(window.crookedGarden.getState().art).every(Boolean));
-  await mobile.locator('#play').tap();
+  await mobile.locator('#how-to-play').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'help');
+  await mobile.locator('#help-play').tap();
   await mobile.locator('#boost').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().queued),true);
   const s=await mobile.evaluate(()=>window.crookedGarden.getState()),r=await mobile.locator('#game-root canvas').boundingBox();
   const x=r.x+(s.view.x+430*s.view.scale)/s.view.width*r.width,y=r.y+(s.view.y+550*s.view.scale)/s.view.height*r.height;
@@ -122,7 +156,7 @@ try{
   await mobile.locator('#pause-retry').tap();assert.notEqual(await mobile.evaluate(()=>window.crookedGarden.getState().seed),seed);
   await mobile.screenshot({path:'artifacts/mobile.png',fullPage:true});
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: fullscreen game/title/pause/results, variable retry swarms, all three gardens, score/best, real pointer/keyboard/touch bursts, asset decoding and 11 viewport layouts.');
+  console.log('Browser checks passed: main/pause How to Play, guide navigation/focus/preserved runs/touch and 11 layouts, plus all three gardens, score, varied swarms, real input and assets.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }

@@ -11,6 +11,7 @@ const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touchControls=matchMedia('(pointer:coarse)').matches;
 let garden=createArcade(),light={x:400,y:450},phase='title',held=false,ticks=0,muted=true;
 let particles=[],popups=[],bank=0,best=0;
+let helpReturn='title';
 let view=fitViewport(innerWidth,innerHeight,devicePixelRatio||1);
 try{best=Number(localStorage.getItem('crooked-garden-best-v2'))||0;}catch{}
 const music=new Audio(`${import.meta.env.BASE_URL}assets/calm-theme.ogg`);music.loop=true;music.volume=.2;
@@ -27,6 +28,14 @@ function retry(){begin(garden.index,bank);}
 function home(){garden=createArcade();held=false;phase='title';particles=[];popups=[];bank=0;updateUI();$('play').focus({preventScroll:true});}
 function pause(){if(phase==='playing'){phase='paused';held=false;updateUI();$('resume').focus({preventScroll:true});}}
 function resume(){if(phase==='paused'){phase='playing';updateUI();focusGame();if(!muted)music.play().catch(()=>{});}}
+function openHelp(){
+  if(!['title','paused'].includes(phase))return;
+  helpReturn=phase;phase='help';held=false;updateUI();$('help-screen').querySelector('.help-scroll').scrollTop=0;$('help-back').focus({preventScroll:true});
+}
+function closeHelp(){
+  if(phase!=='help')return;
+  phase=helpReturn;updateUI();$(helpReturn==='title'?'how-to-play':'pause-help').focus({preventScroll:true});
+}
 function doRewind(){
   if(phase==='title'||perfect()||garden.path.length<2)return;
   rewind(garden,140);garden.grace=.9;garden.burst=0;garden.queued=false;garden.rewinds=(garden.rewinds||0)+1;
@@ -54,7 +63,10 @@ function showResult(){
 }
 function updateUI(){
   $('title-screen').hidden=phase!=='title';$('pause-screen').hidden=phase!=='paused';$('result-screen').hidden=phase!=='result';
-  $('hud').hidden=phase==='title';$('play-controls').hidden=phase!=='playing';
+  $('help-screen').hidden=phase!=='help';
+  $('help-back').textContent=helpReturn==='title'?'← Back to menu':'← Back to pause';
+  $('help-play').textContent=helpReturn==='title'?'LET IT GROW ▶':'RESUME GAME ▶';
+  $('hud').hidden=phase==='title'||(phase==='help'&&helpReturn==='title');$('play-controls').hidden=phase!=='playing';
   $('game-root').inert=phase!=='playing';
   $('game').dataset.phase=phase;
   $('water').max=MAX_WATER;$('water').value=garden.water;$('water').classList.toggle('low',garden.water<150);$('water-label').textContent=Math.ceil(garden.water);
@@ -76,6 +88,8 @@ function updateUI(){
 $('play').onclick=()=>begin();$('resume').onclick=resume;$('pause').onclick=pause;
 $('restart').onclick=retry;$('pause-retry').onclick=retry;$('undo').onclick=doRewind;$('result-undo').onclick=doRewind;
 $('home').onclick=home;$('result-home').onclick=home;$('boost').onclick=burst;
+$('how-to-play').onclick=openHelp;$('pause-help').onclick=openHelp;$('help-back').onclick=closeHelp;
+$('help-play').onclick=()=>{if(helpReturn==='title')begin();else{phase='paused';resume();}};
 $('next').onclick=()=>{if(perfect()){if(garden.index+1<LEVELS.length)begin(garden.index+1,bank+stageScore());else begin();}else retry();};
 $('music').onclick=async()=>{
   muted=!muted;
@@ -100,10 +114,10 @@ function init(){
   document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();music.pause();}else if(!muted&&phase==='playing')music.play().catch(()=>{});});
   $('game-root').addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
   window.addEventListener('keydown',e=>{
-    if(e.code==='Escape'){e.preventDefault();if(phase==='playing')pause();else if(phase==='paused')resume();}
+    if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(phase==='help')closeHelp();else if(phase==='playing')pause();else if(phase==='paused')resume();}
     if(e.code==='Tab'&&phase!=='playing'){
-      const panel=$(phase==='title'?'title-screen':phase==='paused'?'pause-screen':'result-screen');
-      const items=[...panel.querySelectorAll('button,a[href]')].filter(el=>!el.disabled&&!el.hidden);
+      const panel=$(phase==='title'?'title-screen':phase==='paused'?'pause-screen':phase==='help'?'help-screen':'result-screen');
+      const items=[...panel.querySelectorAll('button,a[href],[tabindex="0"]')].filter(el=>!el.disabled&&!el.hidden);
       const first=items[0],last=items.at(-1);
       if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
@@ -128,7 +142,7 @@ function update(){
     if(['dew','flower','won','swat'].includes(event))feedback(event);
     if(['blocked','dry','won'].includes(event))showResult();
   }
-  if(phase!=='paused'){
+  if(phase!=='paused'&&phase!=='help'){
     particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.025;p.life-=.018;});
     popups=popups.filter(p=>p.life>0);popups.forEach(p=>{if(!reducedMotion)p.y-=.5;p.life-=1/60;});
   }

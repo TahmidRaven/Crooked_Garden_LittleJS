@@ -14,6 +14,12 @@ Built for [LittleJS Jam 3](https://itch.io/jam/littlejs-jam), theme **ZIGZAG**. 
 
 Running out of water is a failed attempt even if you saved some flowers; there is no early-finish/partial-clear button. Bugs wait for your first growth, then continue moving after release. Use Pause when you need to stop the world.
 
+### In-game How to Play
+
+Choose **How to Play** from the main menu or pause menu to open the full-screen guide. It includes a sunlight/steering diagram, a first-move example, the flower objective, water and Burst rules, enemy warnings, and mouse/touch/keyboard controls. The guide scrolls on small screens while Back and Play/Resume stay visible.
+
+Opening the guide never resets or advances a run. Back or Esc returns to the menu you came from; from Pause, **Resume Game** continues the same run. Keyboard focus stays inside the guide until it closes.
+
 ### Controls
 
 | Action | Pointer/touch | Keyboard |
@@ -65,9 +71,9 @@ The full-window Canvas2D scene scales the world without stretching it, maps poin
 ## Validation
 
 - **31 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, asset provenance/hashes, and resized/high-DPI input mapping.
-- **Browser checks:** title/play/pause/results, all three gardens through real pointer input, scoring/best score, retry variation, keyboard/touch Burst, decoded sprites, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
+- **Browser checks:** title/play/pause/results, How to Play from both menus (navigation, focus, frozen run, touch and responsive layout), all three gardens through real pointer input, scoring/best score, retry variation, keyboard/touch Burst, decoded sprites, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
-- Screenshots are in ignored `artifacts/` (`title.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
+- Screenshots are in ignored `artifacts/` (`title.png`, `how-to-play.png`, `how-to-play-mobile.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
 
 ## Build, credits and assets
 

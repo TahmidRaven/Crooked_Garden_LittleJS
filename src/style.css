@@ -80,3 +80,29 @@ button:active:not(:disabled){translate:0 2px}
   .burst-button{order:-1;width:128px;min-width:0;height:56px;padding:0 10px;gap:7px}.burst-button strong{font-size:13px}.burst-button>span{font-size:28px}.burst-button small{font-size:6px;letter-spacing:.5px}
   .dock-button{width:128px;height:44px;flex-direction:row;gap:12px;font-size:23px}.dock-button small{font-size:8px}
 }
+.secondary-button{display:block;min-width:240px;max-width:100%;margin:0 auto 18px;min-height:46px;padding:10px 18px;border:1px solid #99bd8f66;border-radius:14px;background:#153a31cc;color:#cce2b6;font-size:12px;font-weight:800;letter-spacing:1px}
+.help-screen{padding:24px;overflow:hidden;background:#061e23f2;backdrop-filter:blur(8px)}
+.help-page{width:min(900px,100%);height:100%;max-height:820px;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;text-align:left}
+.help-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #81ad9133;padding-bottom:12px}
+.help-topbar h2{margin:0;color:#eaf3d2;font-size:26px;letter-spacing:-.5px}.help-topbar .text-button{margin:0;white-space:nowrap;border:1px solid #81ad9133}
+.help-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px 10px 24px 0;scrollbar-color:#517a60 #112e29;scrollbar-width:thin;outline-offset:-3px}
+.help-scroll:focus-visible{outline:2px solid #e8d599}
+.help-intro{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}.help-intro .overline{font-size:9px;letter-spacing:2px;margin-bottom:10px}
+.help-page h3{margin:0 0 9px;color:#d5e7b7;font-size:18px;line-height:1.3}.help-page p{font-size:13px;line-height:1.65;color:#a5c3ae;margin:0}.help-page strong{color:#edf0cc;font-weight:700}
+.help-diagram{width:100%;height:auto;display:block;background:#14382b77;border:1px solid #71966333;border-radius:18px;padding:10px}
+.first-move{display:flex;gap:16px;padding:18px;margin:22px 0;background:#41603b33;border:1px solid #b8d88244;border-radius:14px}.first-move>span{color:#e8d18e;font-size:26px;font-weight:900;line-height:1.2}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.help-card{position:relative;padding:18px 18px 18px 54px;border:1px solid #81ad9129;border-radius:14px;background:#0f302b99}.help-card h3{font-size:15px}.help-card p{font-size:12px}
+.help-symbol{position:absolute;top:15px;left:17px;font-size:27px;font-weight:bold}.flower-symbol{color:#e5b36c}.water-symbol{color:#7ad7e2}.burst-symbol{color:#f0d28a}.bug-symbol{color:#ec9d8c}
+.help-page kbd{display:inline-block;padding:1px 5px;border:1px solid #84a68a55;border-radius:4px;background:#1c3e33;color:#dde9c8;font:11px/1.5 Arial,sans-serif}
+.help-keys{margin-top:24px;padding:0 2px}.help-keys dl{margin:12px 0 0}.help-keys dl>div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid #71966322;font-size:12px;line-height:1.5}.help-keys dt{color:#d2dfb8}.help-keys dd{margin:0;color:#9ebbab}
+.help-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid #81ad9133;padding-top:16px}.help-bottom>span{font-size:11px;color:#8cad99}.help-bottom .primary-button{margin:0;min-width:220px;min-height:50px}
+@media(hover:hover){.secondary-button:hover{background:#214a39}}
+@media(max-width:600px){
+  .secondary-button{min-width:220px}.help-screen{padding:14px}.help-topbar{padding-bottom:8px}.help-topbar h2{font-size:20px}.help-topbar .text-button{font-size:11px;padding:8px 10px}
+  .help-scroll{padding-top:16px;padding-right:4px}.help-intro{grid-template-columns:1fr;gap:14px}.help-intro .overline{font-size:8px}.help-page h3{font-size:17px}.help-page p{font-size:12px}.help-diagram{max-height:170px;padding:6px}
+  .first-move{padding:14px;gap:10px;margin:16px 0}.first-move>span{font-size:22px}.help-grid{grid-template-columns:1fr;gap:10px}.help-card{padding:14px 14px 14px 48px}.help-card h3{font-size:15px}.help-symbol{top:12px;left:14px}
+  .help-keys dl>div{grid-template-columns:108px 1fr;gap:10px;font-size:11px}.help-bottom{flex-direction:column;gap:9px;padding-top:12px}.help-bottom>span{font-size:10px}.help-bottom .primary-button{width:100%;min-height:48px}
+}
+@media(max-height:500px){
+  .secondary-button{min-height:40px;margin-bottom:8px;font-size:11px}.help-screen{padding:10px 18px}.help-topbar{padding-bottom:6px}.help-topbar h2{font-size:20px}.help-topbar .text-button{min-height:38px}.help-scroll{padding-top:12px}.help-bottom{padding-top:8px}.help-bottom .primary-button{min-height:42px;font-size:12px}.help-page h3{font-size:16px}.help-page p{font-size:12px}.help-intro{gap:16px}.help-intro .overline{font-size:8px}.help-keys dl>div{padding:8px 0}
+}

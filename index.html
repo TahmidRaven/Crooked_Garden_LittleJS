@@ -41,7 +41,7 @@
         <h1>CROOKED<br><em>GARDEN</em></h1>
         <p class="tagline">OUTGROW THE SWARM.</p>
         <button id="play" class="primary-button">LET IT GROW <span>▶</span></button>
-        <div class="how-to"><span>☀ HOLD TO GROW</span><span>↯ BURST THROUGH BUGS</span><span>✿ BLOOM ALL THREE</span></div>
+        <button id="how-to-play" class="secondary-button" aria-label="How to Play">? HOW TO PLAY</button>
         <p class="title-note">Three gardens. A different swarm every run.</p>
         <a class="credits" href="https://github.com/TahmidRaven/Crooked_Garden_LittleJS/blob/main/CREDITS.md" target="_blank" rel="noopener">LittleJS Jam · Credits</a>
       </div>
@@ -51,9 +51,42 @@
       <div class="menu-content">
         <p class="overline">TAKE A BREATH</p><h2>PAUSED</h2>
         <button id="resume" class="primary-button">KEEP GROWING ▶</button>
+        <button id="pause-help" class="text-button">How to Play</button>
         <button id="pause-retry" class="text-button">New attempt · new swarm</button>
         <button id="home" class="text-button">Back to main menu</button>
         <p class="menu-note">Arrows aim · G grows · Shift bursts<br>Space pauses · Z rewinds · R retries</p>
+      </div>
+    </section>
+
+    <section id="help-screen" class="screen help-screen" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+      <div class="help-page">
+        <div class="help-topbar"><h2 id="help-title">HOW TO PLAY</h2><button id="help-back" class="text-button">← Back to menu</button></div>
+        <div class="help-scroll" role="region" tabindex="0" aria-label="Game instructions">
+          <div class="help-intro">
+            <div><p class="overline">YOU CONTROL THE SUNLIGHT</p><h3>The vine follows your light.</h3><p><strong>Hold anywhere ahead of the growing tip.</strong> Your mouse or finger becomes its sunlight. Move while holding to bend the vine—you do not drag the seed itself.</p></div>
+            <svg class="help-diagram" viewBox="0 0 360 165" role="img" aria-label="A vine grows from a seed toward a flower and the pointer's sunlight">
+              <defs><radialGradient id="help-glow"><stop stop-color="#ffe4a1" stop-opacity=".35"/><stop offset="1" stop-color="#ffe4a1" stop-opacity="0"/></radialGradient></defs>
+              <circle cx="291" cy="45" r="58" fill="url(#help-glow)"/>
+              <path d="M45 132 Q85 132 99 101 Q115 68 164 88 Q191 101 222 76" fill="none" stroke="#244d38" stroke-width="14" stroke-linecap="round"/>
+              <path d="M45 132 Q85 132 99 101 Q115 68 164 88 Q191 101 222 76" fill="none" stroke="#a7df79" stroke-width="6" stroke-linecap="round"/>
+              <path d="M223 76 Q254 52 290 45" fill="none" stroke="#f4d791" stroke-width="2" stroke-dasharray="5 6"/>
+              <ellipse cx="43" cy="138" rx="23" ry="10" fill="#457a44"/><ellipse cx="111" cy="83" rx="14" ry="6" fill="#7bbc5e" transform="rotate(-35 111 83)"/>
+              <g fill="#e9ad58"><ellipse cx="224" cy="60" rx="8" ry="14"/><ellipse cx="239" cy="74" rx="14" ry="8"/><ellipse cx="224" cy="88" rx="8" ry="14"/><ellipse cx="209" cy="74" rx="14" ry="8"/></g><circle cx="224" cy="74" r="8" fill="#ffe6a1"/>
+              <circle cx="291" cy="45" r="20" fill="none" stroke="#f4d791" stroke-dasharray="3 5"/><path d="M291 28v34M274 45h34" stroke="#ffe9b0" stroke-width="2"/>
+              <path d="M304 48v20l6-5 5 11 5-3-5-10h9Z" fill="#fff4d6" stroke="#183c32" stroke-width="2"/>
+              <g fill="#a9c7ad" font-family="Arial,sans-serif" font-size="11" text-anchor="middle"><text x="44" y="161">SEED</text><text x="224" y="119">BLOOM</text><text x="291" y="15">YOUR POINTER</text></g>
+            </svg>
+          </div>
+          <div class="first-move"><span aria-hidden="true">01</span><div><h3>Try this first</h3><p>In the first garden, find the glowing seed at the bottom. <strong>Hold over the orange bud on the lower right.</strong> Once it blooms, guide the tip up the right side of the lowest mossy ledge toward the blue water drop.</p></div></div>
+          <div class="help-grid">
+            <article class="help-card"><span class="help-symbol flower-symbol" aria-hidden="true">✿</span><h3>Bloom all three</h3><p>Touch every closed flower bud with the growing tip. The three flowers in the HUD light up as you save them. Restore all three to unlock the next garden; finish all three gardens to complete a run.</p></article>
+            <article class="help-card"><span class="help-symbol water-symbol" aria-hidden="true">◆</span><h3>Keep your vine watered</h3><p>Growing spends water. <strong>Blue drops restore 260 water.</strong> Take useful detours, but avoid wasting growth on loops. Running out of water ends the attempt.</p></article>
+            <article class="help-card"><span class="help-symbol burst-symbol" aria-hidden="true">↯</span><h3>Burst through danger</h3><p>Press <kbd>Shift</kbd> while growing, or <strong>tap Burst to arm it, then grow</strong>. It gives a short speed boost and bug shield for 30 water. <strong>It does not protect against solid mossy ledges.</strong> Blooming a flower stuns the bugs and refreshes Burst.</p></article>
+            <article class="help-card"><span class="help-symbol bug-symbol" aria-hidden="true">!</span><h3>Read the swarm</h3><p>Wanderers roam, hunters turn toward you, and chargers show a warning line before lunging. Watch for a gap or use Burst. <strong>Releasing stops the vine, not the bugs.</strong> Use Pause to freeze everything safely.</p></article>
+          </div>
+          <div class="help-keys"><h3>Controls & second chances</h3><dl><div><dt>Mouse / touch</dt><dd>Hold and move to grow toward your light.</dd></div><div><dt><kbd>Arrows</kbd> + <kbd>G</kbd></dt><dd>Aim the light; hold G to grow.</dd></div><div><dt><kbd>Shift</kbd></dt><dd>Protected Burst while growing.</dd></div><div><dt><kbd>Space</kbd> / <kbd>Esc</kbd></dt><dd>Pause. Use Resume or Esc to continue.</dd></div><div><dt><kbd>Z</kbd> / Rewind</dt><dd>Back up a mistake, with a short recovery shield. Costs 100 score.</dd></div><div><dt><kbd>R</kbd> / Retry</dt><dd>Restart this garden with a new swarm.</dd></div></dl></div>
+        </div>
+        <div class="help-bottom"><span>The game stays paused while you read.</span><button id="help-play" class="primary-button">LET IT GROW ▶</button></div>
       </div>
     </section>
 
