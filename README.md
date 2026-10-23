@@ -1,5 +1,7 @@
 # Crooked Garden — Outgrow the swarm
 
+An **After Hours Arcade** game by [TahmidRaven](https://tahmidraven.com). The title and Credits page use the studio's original orange raven mark from FeastFury.
+
 A full-screen browser arcade built with LittleJS. Grow a luminous vine, **close loops around bugs to capture them**, reclaim water, and wake every flower across three wild gardens. The game has a title screen, in-world HUD, pause menu, results, stage progression, score and a local best score—no website-style sidebar or framed board.
 
 Startup shows **LittleJS's native animated engine splash** with a “Built with LittleJS” credit. A tiny inline first-paint style keeps the background dark and raw markup hidden until the application CSS and engine canvas are ready, including on refresh. The main menu stays hidden until the splash finishes and local artwork is decoded; slower loads retain the loading screen instead of exposing unfinished menus.
@@ -120,7 +122,7 @@ Hunter flies use a warm amber body instead of the original grey. The palette rem
 
 ## Validation
 
-- **77 unit tests:** existing gameplay/art/render coverage plus first-garden-only starting water, capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
+- **78 unit tests:** existing gameplay/art/render coverage plus studio-logo provenance, first-garden-only starting water, capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
 - **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).

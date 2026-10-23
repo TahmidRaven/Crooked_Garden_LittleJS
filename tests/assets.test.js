@@ -4,6 +4,15 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve,sep} from 'node:path';
 
+test('studio branding retains the original FeastFury raven mark and separate ownership',async()=>{
+  const root=resolve('public/assets'),{branding}=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
+  assert.equal(branding.owner,'TahmidRaven / After Hours Arcade');
+  assert.match(branding.source,/TahmidRaven\/FeastFury\/blob\/[a-f0-9]{40}\/assets\/FeastFury\/UI\/raven\.png$/);
+  const bytes=await readFile(resolve(root,branding.path));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'),branding.sha256);
+  assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+});
+
 test('bundled external assets have sources, CC0 license evidence, and matching hashes',async()=>{
   const root=resolve('public/assets'),manifest=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
   assert.ok(manifest.packs.length>=3,'Music and both art packs should be documented');

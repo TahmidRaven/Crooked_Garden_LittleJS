@@ -1,5 +1,13 @@
 {
   "verifiedOn": "2026-10-23",
+  "branding": {
+    "name": "After Hours Arcade raven mark",
+    "owner": "TahmidRaven / After Hours Arcade",
+    "source": "https://github.com/TahmidRaven/FeastFury/blob/5994a9565971c66801405bfe3eb5004e64c4f2ca/assets/FeastFury/UI/raven.png",
+    "permission": "Studio-owned branding, reused at the owner's request; not part of the CC0 asset packs.",
+    "path": "art/after-hours-arcade.png",
+    "sha256": "2867077663c9b049100ab15a6e5ae9b90aceaa370c673fbe60eb5a772f98f0e8"
+  },
   "packs": [
     {
       "name": "calm theme",

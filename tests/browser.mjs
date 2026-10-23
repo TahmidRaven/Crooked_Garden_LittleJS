@@ -64,6 +64,8 @@ try{
     await page.mouse.move(r.x+(v.x+x*v.scale)/v.width*r.width,r.y+(v.y+y*v.scale)/v.height*r.height);
   };
   assert.equal((await state()).phase,'title');
+  assert.equal(await page.locator('#title-screen .studio-brand').innerText(),'AFTER HOURS ARCADE');
+  assert.ok(await page.locator('#title-screen .studio-brand img').evaluate(img=>img.complete&&img.naturalWidth>0),'Original studio logo loads');
   assert.equal(await page.locator('#hud').isVisible(),false);
   assert.equal(await page.locator('aside,footer,header').count(),0,'No website-style sidebar/header/footer');
   await mkdir('artifacts',{recursive:true});
@@ -74,6 +76,7 @@ try{
   const beforeCredits=await state();
   await page.locator('#asset-credits').click();assert.equal((await state()).phase,'credits');
   assert.equal(await page.locator('#asset-credits-title').textContent(),'CREDITS');
+  assert.equal(await page.locator('#asset-credits-screen .studio-brand').innerText(),'AFTER HOURS ARCADE');
   assert.match(await page.locator('#asset-credits-screen').textContent(),/Kenney/);
   assert.match(await page.locator('#asset-credits-screen').textContent(),/pebonius/);
   assert.match(await page.locator('#asset-credits-screen').textContent(),/CC0/);

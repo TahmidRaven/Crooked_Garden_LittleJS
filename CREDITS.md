@@ -1,6 +1,7 @@
 # Credits and asset provenance
 
 - **Game design/development:** [TahmidRaven](https://tahmidraven.com), assisted by OpenAI Codex and OpenCode (GPT-6.1 Sol).
+- **Studio:** After Hours Arcade. Orange raven mark reused unchanged from the owner's [FeastFury branding](https://github.com/TahmidRaven/FeastFury/blob/5994a9565971c66801405bfe3eb5004e64c4f2ca/assets/FeastFury/UI/raven.png), at their request. Bundled as `public/assets/art/after-hours-arcade.png`. Studio branding is not licensed as part of the third-party CC0 packs; source and SHA-256 are recorded separately in the asset manifest.
 - **Engine:** LittleJS, Frank Force / KilledByAPixel, MIT. Installed package includes its license. https://github.com/KilledByAPixel/LittleJS
 - **Build tooling:** Vite (MIT); see installed package license.
 - **Initial visuals:** original procedural Canvas2D drawings made for this project.
