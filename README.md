@@ -44,7 +44,7 @@ Tight successful loops nearly pay for themselves; oversized loops remain expensi
 
 ### In-game How to Play
 
-Choose **How to Play** from the main menu or pause menu for a short illustrated guide: hold ahead of the vine to steer, get the flowers, catch bugs, use Burst, and pause/rewind. Reward formulas and long explanations are left out; keyboard shortcuts sit in a collapsed section. The guide scrolls on small screens while Back and Start/Resume stay visible.
+Choose **How to Play** from the main menu or pause menu for a short illustrated guide: hold ahead of the vine to steer, get the flowers, catch bugs, use Burst, and pause/rewind. Cropped real gameplay shows the starting vine, flowers/water, a before/after catch, stunned bugs and the actual controls. Reward formulas and long explanations are left out; keyboard shortcuts sit in a collapsed section. The guide scrolls on small screens while Back and Start/Resume stay visible. Regenerate the small PNGs with `python3 scripts/crop-help-images.py` after refreshing showcase screenshots (Pillow required); crop coordinates and a source/hash manifest are retained.
 
 Opening the guide never resets or advances a run. Back or Esc returns to the menu you came from; from Pause, **Resume Game** continues the same run. Keyboard focus stays inside the guide until it closes.
 
@@ -122,7 +122,7 @@ Hunter flies use a warm amber body instead of the original grey. The palette rem
 
 ## Validation
 
-- **78 unit tests:** existing gameplay/art/render coverage plus studio-logo provenance, first-garden-only starting water, capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
+- **79 unit tests:** existing gameplay/art/render coverage plus guide-crop provenance, studio-logo provenance, first-garden-only starting water, capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
 - **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).

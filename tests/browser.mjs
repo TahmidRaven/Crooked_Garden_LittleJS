@@ -95,6 +95,9 @@ try{
   assert.equal((await state()).phase,'help');
   assert.equal(await page.locator('#help-title').textContent(),'HOW TO PLAY');
   assert.match(await page.locator('#help-screen').textContent(),/Press and hold ahead of the vine/);
+  assert.equal(await page.locator('#help-screen img').count(),6);
+  await page.waitForFunction(()=>[...document.querySelectorAll('#help-screen img')].every(img=>img.complete&&img.naturalWidth>0));
+  assert.ok(await page.locator('#help-screen img').evaluateAll(images=>images.every(img=>img.alt.length>10)),'Guide crops have descriptive alternatives');
   assert.doesNotMatch(await page.locator('#help-screen').textContent(),/75%|240|300 points/,'Keep balance maths out of the basic guide');
   assert.equal(await page.locator('#help-screen details').getAttribute('open'),null);
   assert.ok((await page.locator('#help-screen .help-scroll').innerText()).split(/\s+/).length<200,'Basic instructions should stay short');

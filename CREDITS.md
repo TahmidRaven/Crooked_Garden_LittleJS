@@ -5,6 +5,7 @@
 - **Engine:** LittleJS, Frank Force / KilledByAPixel, MIT. Installed package includes its license. https://github.com/KilledByAPixel/LittleJS
 - **Build tooling:** Vite (MIT); see installed package license.
 - **Initial visuals:** original procedural Canvas2D drawings made for this project.
+- **How to Play illustrations:** cropped from this game's real showcase screenshots (including the credited Kenney art below); no external tutorial images. Pause/Rewind illustration combines two actual button crops. Reproduction: `scripts/crop-help-images.py`; source screenshots, sizes and SHA-256 hashes: `public/assets/help/manifest.json`.
 - **Initial sound effects:** synthesized tones made for this project.
 - **Concept images:** OpenAI image generation; used for discussion only, not bundled.
 

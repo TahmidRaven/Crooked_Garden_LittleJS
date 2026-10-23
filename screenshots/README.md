@@ -16,3 +16,5 @@ Captured from the current game through browser pointer/keyboard controls, using 
 The two mockups are composites, not photographs or screenshots of a native app/device emulator. All other PNGs are unframed game screenshots. No external device-frame assets are used.
 
 Regenerate after `npm run build` with `env NODE_OPTIONS='' node scripts/capture-showcase.mjs`, then `python3 scripts/frame-screenshots.py` (Pillow required for the optional mockups).
+
+How to Play uses small crops of these originals. After refreshing the screenshots, also run `python3 scripts/crop-help-images.py` to refresh the bundled guide images and their source hashes, then rebuild the game.

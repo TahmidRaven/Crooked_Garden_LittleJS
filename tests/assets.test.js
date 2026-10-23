@@ -13,6 +13,22 @@ test('studio branding retains the original FeastFury raven mark and separate own
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
 });
 
+test('guide illustrations retain their showcase sources, PNG dimensions and hashes',async()=>{
+  const root=resolve('public/assets/help'),manifest=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
+  assert.equal(manifest.files.length,6);
+  for(const source of manifest.sources){
+    assert.match(source.path,/^screenshots\/[\w-]+\.png$/);
+    assert.equal(createHash('sha256').update(await readFile(source.path)).digest('hex'),source.sha256);
+  }
+  for(const file of manifest.files){
+    assert.match(file.path,/^[\w-]+\.png$/);
+    const bytes=await readFile(resolve(root,file.path));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
+    assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+    assert.deepEqual([bytes.readUInt32BE(16),bytes.readUInt32BE(20)],file.size);
+  }
+});
+
 test('bundled external assets have sources, CC0 license evidence, and matching hashes',async()=>{
   const root=resolve('public/assets'),manifest=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
   assert.ok(manifest.packs.length>=3,'Music and both art packs should be documented');
