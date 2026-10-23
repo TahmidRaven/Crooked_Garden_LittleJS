@@ -69,7 +69,7 @@ try{
   assert.match(await page.locator('#asset-credits-screen').textContent(),/pebonius/);
   assert.match(await page.locator('#asset-credits-screen').textContent(),/CC0/);
   await page.clock.runFor(1000);assert.equal((await state()).clock,beforeCredits.clock);assert.equal((await state()).seed,beforeCredits.seed);
-  for(const file of ['kenney-platformer.txt','kenney-foliage.txt','pebonius-music.txt']){
+  for(const file of ['kenney-platformer.txt','kenney-foliage.txt','pebonius-music.txt','kenney-furniture.txt']){
     const response=await page.request.get(`${url}/assets/licenses/${file}`);assert.equal(response.status(),200);assert.match(await response.text(),/CC0/);
   }
   assert.equal((await page.request.get(`${url}/assets/manifest.json`)).status(),200);
@@ -95,6 +95,8 @@ try{
   await page.locator('#how-to-play').click();await page.locator('#help-play').click();
   assert.equal((await state()).phase,'playing');
   assert.equal(await page.locator('#hud').isVisible(),true);
+  assert.equal((await state()).art.flowerPot,true,'The real planter image must be decoded before play');
+  await page.screenshot({path:'artifacts/start-pot.png',fullPage:true});
   assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,2);
   const idle=await state(),insect=idle.bugs[0],iv=idle.view;
   const wingClip={x:Math.floor(iv.x+(insect.x-30)*iv.scale),y:Math.floor(iv.y+(insect.y-27)*iv.scale),width:Math.ceil(60*iv.scale),height:Math.ceil(54*iv.scale)};

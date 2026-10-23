@@ -3,6 +3,7 @@ import { bugsAt } from './arcade.js';
 import { bloomCount } from './game.js';
 import { renderVine, renderVineTip, renderCaptureFlow } from './vine.js';
 import { bugFlightPose } from './bug-flight.js';
+import { potPlacement } from './pot.js';
 
 function oval(c,x,y,rx,ry,color,angle=0){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();}
 function leaf(c,x,y,size,angle,color){
@@ -50,6 +51,11 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
     const y=d.y+Math.sin(t*2+i)*3;glow(c,d.x,y,30,'#6fd6e62b');
     c.save();c.translate(d.x,y);c.fillStyle='#69d5e4';c.beginPath();c.moveTo(0,-15);c.bezierCurveTo(-3,-8,-13,2,-9,10);c.bezierCurveTo(-4,19,13,15,10,5);c.bezierCurveTo(7,-3,2,-10,0,-15);c.fill();oval(c,-3,4,2,5,'#d5ffff');c.restore();
   });
+  // Draw the planter behind the stem so growth remains visible above the soil.
+  const root=g.level.start,pot=potPlacement(root);
+  glow(c,root.x,root.y+15,60,'#69b66420');oval(c,root.x,pot.y+pot.height-1,37,7,'#03171499');
+  if(art.flowerPot)c.drawImage(art.flowerPot,pot.x,pot.y,pot.width,pot.height);
+  else{oval(c,root.x,root.y+28,47,14,'#132e26');for(let i=0;i<5;i++)leaf(c,root.x+(i-2)*9,root.y+27,34,-2.8+i*.5,'#396b3d');}
   const path=g.path;
   if(g.lastCapture&&g.clock-g.lastCapture.clock<1.35){
     const capture=g.lastCapture,fade=1-(g.clock-capture.clock)/1.35;
@@ -96,9 +102,6 @@ export function renderScene(c,{garden:g,light,view:v,ticks,phase,reducedMotion,p
     c.fillStyle=bug.stunned?'#f9d580':color;c.font='bold 17px Arial';c.textAlign='center';c.fillText(bug.stunned?'✧':bug.warning?'!':bug.kind==='hunter'?'⌁':bug.kind==='charger'?'↯':'·',0,-29);
     c.restore();
   }
-  const root=g.level.start;
-  glow(c,root.x,root.y+20,65,'#69b66425');oval(c,root.x,root.y+28,47,14,'#132e26');
-  for(let i=0;i<5;i++)leaf(c,root.x+(i-2)*9,root.y+27,34,-2.8+i*.5,'#396b3d');
   const tip=path.at(-1);
   if(g.loopHint&&phase==='playing'){
     const join=g.loopHint.join;c.strokeStyle='#e9e8a8';c.lineWidth=2;c.setLineDash([3,5]);c.beginPath();c.moveTo(tip.x,tip.y);c.lineTo(join.x,join.y);c.stroke();c.setLineDash([]);

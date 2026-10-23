@@ -1,5 +1,5 @@
 {
-  "verifiedOn": "2026-10-22",
+  "verifiedOn": "2026-10-23",
   "packs": [
     {
       "name": "calm theme",
@@ -37,6 +37,23 @@
         {"path": "art/fly-flight-2.png", "original": "Extra animations and enemies/Enemy sprites/fly_fly.png", "sha256": "478f33e03d6873e557f6759a0509da3d336e9b03d4b429f99eab675ffc871d0a"},
         {"path": "art/bee-flight-1.png", "original": "Extra animations and enemies/Enemy sprites/bee.png", "sha256": "b85144ba48ddf71eea8c8864b2d5791d3a1e43b06586d2a52b75cb6cfad019a8"},
         {"path": "art/bee-flight-2.png", "original": "Extra animations and enemies/Enemy sprites/bee_fly.png", "sha256": "31ad43b14581e6cd756f39e0bcad2c2878c421d6241a5eb40155779da248d9e4"}
+      ]
+    },
+    {
+      "name": "Furniture Kit planter",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/furniture-kit",
+      "itch": "https://kenney.itch.io/kenney-game-assets",
+      "download": "https://kenney.nl/media/pages/assets/furniture-kit/440e0608a4-1677580847/kenney_furniture-kit.zip",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/kenney-furniture.txt",
+      "modifications": "Container-only orthographic 2D render of the wood material from plantSmall1, with a dark soil surface added. Original source geometry/material files are retained unchanged.",
+      "sourceFiles": [
+        {"path": "source-assets/flower-pot/plantSmall1.obj", "sha256": "04aa1237b63f0221678a89bc4a819902074bed20d9badee6b0a034c116f52c8c"},
+        {"path": "source-assets/flower-pot/plantSmall1.mtl", "sha256": "1483fed2c81a2a77a66f4c293844b11de5b2f81e6fc17bfd495360356cdb43ce"}
+      ],
+      "files": [
+        {"path": "art/flower-pot.png", "original": "Models/OBJ format/plantSmall1.obj (wood material only)", "sha256": "e2cd2bafb7e44319232517fe7183ad04ff0a951fa214d6fb754f0515b81e6e1a"}
       ]
     }
   ]

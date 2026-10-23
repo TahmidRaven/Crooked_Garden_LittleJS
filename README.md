@@ -82,6 +82,12 @@ If Node has `NODE_OPTIONS=--no-experimental-fetch`, clear it for Playwright: `en
 
 The full-window Canvas2D scene scales the world without stretching it, maps pointer coordinates through a tested camera transform, and supports high-DPI displays. HUD and touch controls stay in screen space across portrait/landscape sizes. Reduced-motion settings suppress particles/ambient movement and sprite animation.
 
+### Starting planter
+
+The vine grows from the user-selected **compact Kenney planter (option A)** at 54 world units wide, 25% smaller than the first preview. It is based on **Kenney's CC0 Furniture Kit**. `flower-pot.png` is a high-resolution 2D render of the `plantSmall1` container, with the original plant omitted and dark soil added. It replaces the loose leafy start marker. The soil anchor maps to the existing growth root in every garden; no movement, collision or capture rules change.
+
+Original mesh/material files are retained in `source-assets/flower-pot/`. `env NODE_OPTIONS='' npm run art:pot` regenerates the image and prints its dimensions, soil anchor and hash. No 3D engine or model loading is included at runtime.
+
 ### Procedural vine visuals
 
 `src/vine.js` draws the plant directly in Canvas2D: a smoothly tapered, shaded stem; deterministic alternating/paired leaves with gradients and veins; leaves that unfurl over 0.45 seconds; and a growing bud at the live tip. Captured loops get a circulating light accent. No extra image assets or rendering library are required.
@@ -100,7 +106,7 @@ Hunter flies use a warm amber body instead of the original grey. The palette rem
 
 ## Validation
 
-- **62 unit tests:** growth/collisions/water, all three garden routes, seeded variation and replay, reactive hunters, charge telegraphs, enemy bounds, burst rules, loop geometry/containment, capture rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visual safety, flight animation/alignment/state handling, and amber recolouring that preserves wings, alpha and source pixels.
+- **66 unit tests:** growth/collisions/water, all garden routes, seeded/reactive enemy behaviour, bursts, loop captures/rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visuals, flight states/colours, and planter image dimensions/source provenance/soil-anchor alignment across layouts.
 - **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
@@ -111,6 +117,6 @@ The main menu credits the creator with a direct link to **[tahmidraven.com](http
 
 Production files are in `dist/`. `npm run package` creates `artifacts/crooked-garden.zip` with `index.html` at its root, asset notices and `CREDITS.md`. It requires `zip` (included on macOS). Packaging does not upload or submit anything.
 
-Kenney's **Platformer Art Deluxe** bug frames and **Foliage Sprites** branch, plus pebonius's **calm theme**, are CC0. Only selected files are bundled; no paid bundle was purchased. Exact sources, changes, licenses and SHA-256 hashes are in [CREDITS.md](CREDITS.md), `public/assets/manifest.json` and `public/assets/licenses/`. Assets load locally with procedural image fallbacks; tests require all bundled art to decode successfully.
+Kenney's **Platformer Art Deluxe** bug frames, **Foliage Sprites** branch and **Furniture Kit** planter, plus pebonius's **calm theme**, are CC0. Only selected files are bundled; no paid bundle was purchased. Exact sources, changes, licenses and SHA-256 hashes are in [CREDITS.md](CREDITS.md), `public/assets/manifest.json` and `public/assets/licenses/`. Assets load locally with procedural image fallbacks; tests require all bundled art to decode successfully.
 
 Stack: LittleJS 1.28.0, JavaScript ES modules, Canvas2D and Vite. Development assistance: OpenAI Codex and OpenCode (GPT-6.1 Sol). Earlier generated concept images are not bundled. See [plan.md](plan.md) for decisions and the handoff.

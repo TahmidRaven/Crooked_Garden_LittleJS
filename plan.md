@@ -18,6 +18,10 @@ Colour follow-up: the user disliked darkened bees and suggested glow/non-glow st
 
 Hunter colour follow-up: the user also disliked the naturally grey hunter fly. Its neutral dark body pixels are now remapped to warm amber once at load time; light wings, coloured pixels, alpha and source PNG bytes remain unchanged. Eyes stay darker for contrast. The hunter keeps its species shape, coral ring and chasing behaviour. Three palette regression tests cover body/eye contrast, wing/colour preservation and immutable source pixels.
 
+Starting-pot follow-up: user requested a flower-pot asset instead of the loose leafy start marker. Selected Kenney's CC0 Furniture Kit `plantSmall1` container. The source OBJ/MTL are retained unchanged in `source-assets/flower-pot/`; an offline renderer creates a high-resolution transparent 2D PNG of the container only, with dark soil added. This is derived from Kenney's existing model, not AI-generated concept art. `src/pot.js` aligns the soil anchor to the unchanged root in all gardens. The pot is rendered behind the vine, so the stem emerges from its soil. No new collider or 3D runtime is added. Guide text/diagram and in-game Credits include the pot.
+
+Pot selection: the user found the first 72-unit preview too big, saw a comparison, and explicitly chose **A — compact Kenney planter**. Its final width is **54 world units** (25% smaller). Option B, the Techspired Minds CC BY-SA pot, was only an ignored preview and is not part of the game/source asset bundle. Keep the selected Kenney pot; do not substitute the other preview.
+
 Onboarding follow-up: the user could not tell how to play and requested a How to Play button/page. Both the main menu and pause menu now open an in-game full-screen guide with an original SVG sunlight/steering diagram, first-move example, flower/water/Burst/bug rules, and keyboard/touch controls. The run stays frozen; Back/Esc returns to the originating menu without resetting progress, and the guide can explicitly start/resume play. Header/footer navigation stays visible while instructions scroll, and keyboard focus is trapped/restored correctly.
 
 Credits follow-up: creator credit now links directly to **https://tahmidraven.com**, not the project GitHub page. A separate in-game page is visibly labeled **Credits** (the user explicitly shortened “Asset Credits” to “Credits”). It lists the game creator, Kenney bug/foliage sources and modifications, pebonius music, CC0 notices, engine/tools/jam and development assistance. Local notice/manifest links work in production. Back/Esc returns to the main menu with restored keyboard focus; reading credits does not advance/reset the game.
@@ -56,17 +60,20 @@ Refresh/first-paint follow-up: the user saw raw HTML briefly before CSS loaded. 
 - `src/view.js`: viewport/high-DPI fitting and screen-to-world input transform. The full canvas fills the screen; the 600×720 gameplay region scales proportionally within HUD-safe space.
 - `src/art.js`: local CC0 images, runtime tints and procedural fallbacks.
 - `src/bug-flight.js`: pure flight-frame/body-anchor/banking/glow selection and the four insect art file mappings.
+- `src/pot.js`: planter image dimensions, soil anchor and world placement. `scripts/render-flower-pot.mjs` regenerates the image from the retained Kenney source via `npm run art:pot` (Playwright dev dependency only).
 - `index.html` / `src/style.css`: game HUD and menu overlays. No sidebar, website header/footer or framed courtyard panel.
 
 ## Assets and licenses
 
 Kenney CC0: four full-colour fly/bee flight PNGs from Platformer Art Deluxe and one branch silhouette from Foliage Sprites. pebonius CC0: calm theme music. Individual packs were downloaded free from the creator's official pages after checking itch.io/official license evidence. Original PNG bytes are unchanged; body alignment is runtime metadata. Old walking ladybugs and dark stunned silhouettes are no longer bundled. The paid bundle was not used. No logo or unrelated archive contents are bundled.
 
+The planter is a separate CC0 Furniture Kit derivative, documented in `CREDITS.md` and the manifest with source OBJ/MTL hashes and rendered PNG hash. Only the PNG and license notice ship in the HTML game ZIP; the two source files and renderer stay in the repository for reproducibility.
+
 Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/assets/manifest.json`, and bundled notices under `public/assets/licenses/`. Source PNG bytes are unchanged. All runtime assets are local. No new external assets were needed for the full-screen rework.
 
 ## Validation and useful commands
 
-- `npm test`: **62 tests** — growth/water/terrain, all garden routes, seeded variation/replay, retry seeds, hunter reactions, charge telegraph/rest, enemy bounds, Burst/stun/score rules, source license/hash checks, viewport/DPI input mapping, loop geometry/rewards/anti-farming, nine visual-vine safety tests, seven flight/state tests and three palette-preservation tests.
+- `npm test`: **66 tests** — existing growth/AI/capture/art/vine/flight/palette coverage plus four planter tests for root/soil alignment, PNG dimensions, original source integrity and portrait/landscape/high-DPI placement.
 - `npm run build`: production build.
 - `env NODE_OPTIONS='' npm run test:browser`: native LittleJS splash/branding (desktop + short landscape), deliberately delayed images proving the menu waits for readiness, real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.

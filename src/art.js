@@ -1,6 +1,6 @@
 // Optional local art with procedural fallbacks. No runtime CDN or third-party requests.
 import { BUG_ART_FILES, warmHunterPixels } from './bug-flight.js';
-const files={...BUG_ART_FILES,foliage:'foliage.png'};
+const files={...BUG_ART_FILES,foliage:'foliage.png',flowerPot:'flower-pot.png'};
 export const art={};
 export const artReady=Promise.all(Object.entries(files).map(async([key,file])=>{
   const image=new Image();

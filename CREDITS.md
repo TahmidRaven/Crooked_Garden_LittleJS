@@ -40,6 +40,16 @@
 - **Bundled license:** `public/assets/licenses/kenney-foliage.txt` (archive notice, whitespace normalized).
 - **SHA-256:** `8e701f5e6582de9e453b5b50a143bf8677721540eb37469820993583aa411264`.
 
+## Starting planter — Kenney
+
+- **Pack:** [Furniture Kit](https://kenney.nl/assets/furniture-kit), by [Kenney](https://kenney.itch.io/).
+- **License:** [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/), verified on the official page and archive's `License.txt`, October 23, 2026. The archive notice identifies Furniture Kit 2.0.
+- **Download:** https://kenney.nl/media/pages/assets/furniture-kit/440e0608a4-1677580847/kenney_furniture-kit.zip
+- **Original asset:** `Models/OBJ format/plantSmall1.obj` and `plantSmall1.mtl`; retained unchanged in `source-assets/flower-pot/`.
+- **Bundled derivative:** `public/assets/art/flower-pot.png`, a transparent orthographic 2D render of the container only. The original plant is omitted, and a dark soil surface is added. Placement aligns that soil with the unchanged vine root. No 3D runtime is shipped.
+- **Reproducibility:** `scripts/render-flower-pot.mjs` / `npm run art:pot`. Original mesh/material hashes and rendered PNG hash are in `public/assets/manifest.json` and checked by tests.
+- **Bundled license:** `public/assets/licenses/kenney-furniture.txt` (archive notice, whitespace normalized).
+
 ## Discovery and license notes
 
 [Kenney's itch.io page](https://kenney.itch.io/kenney-game-assets) lists the All-in-1 bundle as CC0 and explains it is a collection of freely available packs. The bundle is paid; individual packs can be downloaded free from the creator's official asset pages. No bundle purchase or paid content was used. [Kenney's support page](https://kenney.nl/support) confirms commercial use is permitted; Kenney's logo is reserved and is **not** bundled.
