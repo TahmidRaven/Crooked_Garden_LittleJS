@@ -51,35 +51,32 @@ for _ in range(38):
     r=random.choice([.7,1,1.4])*S
     draw.ellipse((x*S-r,y*S-r,x*S+r,y*S+r), fill=(111,137,78,150))
 
-# Trace one continuous vine: up to the flower, around both bugs, then back
-# onto the older horizontal stem at (235, 400), as an actual capture closes.
-points=[(105,441),(171,400),(514,400),(514,275),(420,270),(330,280),(270,310),(235,355),(235,400)]
-def rounded_path(points, radius=18):
-    result=[points[0]]
-    for i in range(1,len(points)-1):
-        a,b,c=points[i-1:i+2]
-        ab=math.dist(a,b);bc=math.dist(b,c)
-        r=min(radius,ab/3,bc/3)
-        p=(b[0]+(a[0]-b[0])*r/ab,b[1]+(a[1]-b[1])*r/ab)
-        q=(b[0]+(c[0]-b[0])*r/bc,b[1]+(c[1]-b[1])*r/bc)
-        result.append(p)
-        for j in range(1,17):
-            t=j/16
-            result.append(((1-t)**2*p[0]+2*(1-t)*t*b[0]+t*t*q[0],(1-t)**2*p[1]+2*(1-t)*t*b[1]+t*t*q[1]))
-    result.append(points[-1])
-    return [(round(x*S),round(y*S)) for x,y in result]
-path=rounded_path(points)
-enclosure=rounded_path([(235,400),(514,400),(514,275),(420,270),(330,280),(270,310),(235,355),(235,400)])
-capture=Image.new('RGBA',image.size)
-cd=ImageDraw.Draw(capture)
-cd.polygon(enclosure,fill=(160,219,107,24))
-cd.line(enclosure,fill=(186,238,136,130),width=9*S,joint='curve')
-image.alpha_composite(capture.filter(ImageFilter.GaussianBlur(7*S)))
-image.alpha_composite(capture)
+# A new, flowing lasso illustration. The tip naturally meets an earlier part
+# of the stem; there is no rectangular cage, badge or artificial capture glow.
+points=[(105,441),(175,405),(225,395),(265,405),(335,425),(420,420),(490,375),(514,315),(514,275),(440,265),(350,278),(280,310),(245,355),(248,385),(265,405)]
+path=[]
+for i in range(len(points)-1):
+    p0=points[max(0,i-1)];p1=points[i];p2=points[i+1];p3=points[min(len(points)-1,i+2)]
+    for step in range(24):
+        t=step/24
+        xy=[]
+        for axis in range(2):
+            a,b,c,d=p0[axis],p1[axis],p2[axis],p3[axis]
+            xy.append(round(.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t)*S))
+        path.append(tuple(xy))
+path.append((265*S,405*S))
 draw=ImageDraw.Draw(image)
 for color,width,offset in [('#041d1e',15,(0,4)),('#416537',10,(0,0)),('#84b754',6,(0,0)),('#c4df86',2,(-1,-1))]:
     draw.line([(x+offset[0]*S,y+offset[1]*S) for x,y in path], fill=color, width=width*S, joint='curve')
-for x,y,angle in [(158,405,25),(211,400,-20),(235,368,40),(266,315,-30),(310,290,20),(393,273,-25),(465,275,15),(310,400,25),(465,400,-25),(514,355,30),(514,309,-20)]:
+leaves=[]
+travel=0
+for a,b in zip(path,path[1:]):
+    travel+=math.dist(a,b)/S
+    if travel>57:
+        travel=0
+        angle=-math.degrees(math.atan2(b[1]-a[1],b[0]-a[0]))+(-30 if len(leaves)%2 else 30)
+        leaves.append((b[0]/S,b[1]/S,angle))
+for x,y,angle in leaves:
     leaf=Image.new('RGBA',(30*S,18*S))
     ld=ImageDraw.Draw(leaf)
     ld.ellipse((2*S,3*S,27*S,15*S),fill='#80ad55',outline='#bed88b',width=S)
@@ -96,24 +93,12 @@ for angle in range(0,360,72):
     flower.alpha_composite(petal.rotate(angle,Image.Resampling.BICUBIC,center=(60*S,60*S)))
 fd=ImageDraw.Draw(flower);fd.ellipse((46*S,46*S,74*S,74*S),fill='#ffe5a1')
 image.alpha_composite(flower,(454*S,215*S))
-sprite('bee-flight-2.png',(287,338),66,-12)
-sprite('fly-flight-1.png',(366,360),65,10)
-
-# Bright join cue and conversion particles make the closure read at thumbnail size.
-glow=Image.new('RGBA',image.size);gd=ImageDraw.Draw(glow)
-gd.ellipse((214*S,379*S,256*S,421*S),fill=(206,251,155,130))
-image.alpha_composite(glow.filter(ImageFilter.GaussianBlur(8*S)))
-draw=ImageDraw.Draw(image)
-draw.ellipse((219*S,384*S,251*S,416*S),outline='#e4fbc7',width=3*S)
-draw.ellipse((231*S,396*S,239*S,404*S),fill='#fff1bd')
-for x,y,r in [(268,376,2),(282,361,2),(312,349,3),(342,386,2),(391,342,2),(401,366,3),(315,323,2)]:
-    draw.ellipse(((x-r)*S,(y-r)*S,(x+r)*S,(y+r)*S),fill='#e7f3a5')
+sprite('bee-flight-2.png',(321,329),67,-18)
+sprite('fly-flight-1.png',(407,367),65,16)
 
 font_path=Path('/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf')
 if not font_path.exists():
     font_path=Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
-capture_font=ImageFont.truetype(str(font_path),13*S)
-draw.text((374*S,305*S),'DOUBLE CATCH!',anchor='mm',font=capture_font,fill='#f6e4a3',stroke_width=2*S,stroke_fill='#16352b')
 def text_center(text,y,size,color,stroke=0):
     font=ImageFont.truetype(str(font_path),size*S)
     box=font.getbbox(text);x=(W*S-(box[2]-box[0]))/2
@@ -128,5 +113,5 @@ sprite('after-hours-arcade.png',(227,26),19)
 font=ImageFont.truetype(str(font_path),10*S)
 ImageDraw.Draw(image).text((243*S,20*S),'AFTER HOURS ARCADE',font=font,fill='#eadfbb')
 OUT.mkdir(exist_ok=True)
-image.convert('RGB').resize((1260,1000),Image.Resampling.LANCZOS).save(OUT/'cover-1260x1000.png',optimize=True)
-image.convert('RGB').resize((630,500),Image.Resampling.LANCZOS).save(OUT/'cover-630x500.png',optimize=True)
+image.convert('RGB').resize((1260,1000),Image.Resampling.LANCZOS).save(OUT/'cover-v2-1260x1000.png',optimize=True)
+image.convert('RGB').resize((630,500),Image.Resampling.LANCZOS).save(OUT/'cover-v2-630x500.png',optimize=True)

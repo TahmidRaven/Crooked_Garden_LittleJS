@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Cover v2: user disliked the angular loop and requested another cover. Added separate `screenshots/cover-v2-630x500.png` and 1260×1000 master, retaining previous exports. New spline-drawn organic lasso reconnects to older stem around both bugs; no capture label, particles or join glow. Opened the new export in Review. Promotional art only; no game/build changes.
+
 Cover correction: user noted the initial cover did not clearly depict a proper loop capture. Revised both cover exports to trace one continuous vine from the pot to the flower, around both bugs and back onto older stem. Added a visible join ring, enclosed-area glow, conversion particles and DOUBLE CATCH feedback. Promotional artwork only; game/build unchanged.
 
 Cover/animated-guide follow-up: created `screenshots/cover-630x500.png` for itch plus a 1260×1000 master, with large game title, studio logo, original forest/vine/flower shapes and credited real bug/planter art. Composition is promotional artwork, not a screenshot. `scripts/make-cover.py` reproduces it. How to Play now uses three small real-play GIFs (grow/capture/Burst, under 1 MB combined) with readable loop holds; Pause clips switches to stills, reduced motion starts static, leaving the guide unloads animation. Raw captured frames stay ignored; recorder/encoder and GIF/hash manifests are retained. No gameplay rules changed. Validation: 80 unit tests, full browser suite including animation toggle/reduced-motion fallback and 11 layouts, plus cover/GIF frame visual review. Local preview reopened on How to Play.

@@ -2,6 +2,11 @@
 
 ## Itch cover
 
+- `cover-v2-630x500.png` — new alternative: a flowing, organic lasso around both bugs, without capture text or heavy glow.
+- `cover-v2-1260x1000.png` — 2× master of the new alternative.
+
+The generator now produces the v2 alternative. The earlier covers below are retained for comparison.
+
 - `cover-630x500.png` — recommended itch cover upload.
 - `cover-1260x1000.png` — 2× master of the same cover.
 
