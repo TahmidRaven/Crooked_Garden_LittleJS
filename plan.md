@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Showcase screenshots: `screenshots/` now contains title, a real double catch with one flower restored, two-flower progression/water pickup, mobile progression, and first-garden completion. Captured through actual pointer/keyboard controls with seeded swarm 44, not injected gameplay state. Optional generic phone-emulator and desktop-window mockups use these same screenshots; clearly identified as composites in `screenshots/README.md`. Original unframed captures remain available for itch.io. No gameplay changes in this pass.
+
 Build a LittleJS Jam 3 game, theme ZIGZAG. Keep this handoff current, credit licensed assets, and push progress to https://github.com/TahmidRaven/Crooked_Garden_LittleJS. No automatic itch.io/jam submission is authorized.
 
 Latest feedback: the game looked like a website and bugs repeated the same pattern every time. Current rework is a **full-screen forest arcade**, not an editorial page: in-world HUD, title/play/pause/results flow, three gardens, score and local best, floating feedback, and a changing swarm. Direct hold-to-grow steering remains. Do not bring back the rejected three-light planning mechanic.
