@@ -91,7 +91,14 @@ try{
   await page.locator('#how-to-play').click();
   assert.equal((await state()).phase,'help');
   assert.equal(await page.locator('#help-title').textContent(),'HOW TO PLAY');
-  assert.match(await page.locator('#help-screen').textContent(),/You do not drag the seed itself/i);
+  assert.match(await page.locator('#help-screen').textContent(),/Press and hold ahead of the vine/);
+  assert.doesNotMatch(await page.locator('#help-screen').textContent(),/75%|240|300 points/,'Keep balance maths out of the basic guide');
+  assert.equal(await page.locator('#help-screen details').getAttribute('open'),null);
+  assert.ok((await page.locator('#help-screen .help-scroll').innerText()).split(/\s+/).length<200,'Basic instructions should stay short');
+  await page.locator('#help-screen summary').click();assert.notEqual(await page.locator('#help-screen details').getAttribute('open'),null);
+  await page.locator('#help-screen summary').click();
+  await page.locator('#help-screen .help-scroll').evaluate(el=>el.scrollTop=0);
+  await page.locator('#help-back').focus();
   await page.clock.runFor(1000);
   assert.equal((await state()).clock,beforeHelp.clock);assert.equal((await state()).seed,beforeHelp.seed);
   await page.keyboard.press('Shift+Tab');

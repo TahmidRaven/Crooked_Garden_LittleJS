@@ -105,6 +105,8 @@ button:active:not(:disabled){translate:0 2px}
 .help-symbol{position:absolute;top:15px;left:17px;font-size:27px;font-weight:bold}.flower-symbol{color:#e5b36c}.water-symbol{color:#7ad7e2}.burst-symbol{color:#f0d28a}.bug-symbol{color:#ec9d8c}
 .help-page kbd{display:inline-block;padding:1px 5px;border:1px solid #84a68a55;border-radius:4px;background:#1c3e33;color:#dde9c8;font:11px/1.5 Arial,sans-serif}
 .help-keys{margin-top:24px;padding:0 2px}.help-keys dl{margin:12px 0 0}.help-keys dl>div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid #71966322;font-size:12px;line-height:1.5}.help-keys dt{color:#d2dfb8}.help-keys dd{margin:0;color:#9ebbab}
+.help-keys summary{cursor:pointer;min-height:44px;padding:12px 0;color:#d5e7b7;font-size:14px;font-weight:700;touch-action:manipulation}
+.help-keys summary:focus-visible{outline:2px solid #e8d599;outline-offset:2px}
 .help-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid #81ad9133;padding-top:16px}.help-bottom>span{font-size:11px;color:#8cad99}.help-bottom .primary-button{margin:0;min-width:220px;min-height:50px}
 @media(hover:hover){.secondary-button:hover{background:#214a39}}
 @media(max-width:600px){

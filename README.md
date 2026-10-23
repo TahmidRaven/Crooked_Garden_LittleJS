@@ -42,7 +42,7 @@ Tight successful loops nearly pay for themselves; oversized loops remain expensi
 
 ### In-game How to Play
 
-Choose **How to Play** from the main menu or pause menu to open the full-screen guide. It includes a sunlight/steering diagram, a first-move example, the flower objective, water and Burst rules, enemy warnings, and mouse/touch/keyboard controls. The guide scrolls on small screens while Back and Play/Resume stay visible.
+Choose **How to Play** from the main menu or pause menu for a short illustrated guide: hold ahead of the vine to steer, get the flowers, catch bugs, use Burst, and pause/rewind. Reward formulas and long explanations are left out; keyboard shortcuts sit in a collapsed section. The guide scrolls on small screens while Back and Start/Resume stay visible.
 
 Opening the guide never resets or advances a run. Back or Esc returns to the menu you came from; from Pause, **Resume Game** continues the same run. Keyboard focus stays inside the guide until it closes.
 

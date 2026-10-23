@@ -88,7 +88,7 @@ function updateUI(){
   $('help-screen').hidden=phase!=='help';
   $('asset-credits-screen').hidden=phase!=='credits';
   $('help-back').textContent=helpReturn==='title'?'← Back to menu':'← Back to pause';
-  $('help-play').textContent=helpReturn==='title'?'LET IT GROW ▶':'RESUME GAME ▶';
+  $('help-play').textContent=helpReturn==='title'?'START GAME ▶':'RESUME GAME ▶';
   $('hud').hidden=phase==='title'||phase==='credits'||(phase==='help'&&helpReturn==='title');$('play-controls').hidden=phase!=='playing';
   $('game-root').inert=phase!=='playing';
   $('game').dataset.phase=phase;
@@ -143,7 +143,7 @@ async function init(){
     if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(phase==='credits')closeCredits();else if(phase==='help')closeHelp();else if(phase==='playing')pause();else if(phase==='paused')resume();}
     if(e.code==='Tab'&&phase!=='playing'){
       const panel=$(phase==='title'?'title-screen':phase==='paused'?'pause-screen':phase==='help'?'help-screen':phase==='credits'?'asset-credits-screen':'result-screen');
-      const items=[...panel.querySelectorAll('button,a[href],[tabindex="0"]')].filter(el=>!el.disabled&&!el.hidden);
+      const items=[...panel.querySelectorAll('button,a[href],summary,[tabindex="0"]')].filter(el=>!el.disabled&&!el.hidden);
       const first=items[0],last=items.at(-1);
       if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
