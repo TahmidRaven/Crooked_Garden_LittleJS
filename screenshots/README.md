@@ -7,6 +7,8 @@
 
 The cover is composed promotional artwork, not a gameplay screenshot: original vine/flower/forest shapes, the game's credited Kenney sprites, and After Hours Arcade's raven mark. Hunter colours match the game. Regenerate with `python3 scripts/make-cover.py` (Pillow; uses local Arial Rounded Bold on macOS, DejaVu Sans Bold fallback on Linux).
 
+The vine reconnects to its older horizontal stem at the bright join ring, enclosing both bugs. The glow and DOUBLE CATCH label depict the capture moment.
+
 ## Gameplay captures
 
 Captured from the current game through browser pointer/keyboard controls, using reproducible swarm seeds (44 for the capture run, 99 for the two-flower/live-bug run). Gameplay state was not injected, and no bugs were pasted into the originals. Originals are captured at 2× resolution.

@@ -51,8 +51,9 @@ for _ in range(38):
     r=random.choice([.7,1,1.4])*S
     draw.ellipse((x*S-r,y*S-r,x*S+r,y*S+r), fill=(111,137,78,150))
 
-# Rounded, deliberately crooked stem with a visible loop.
-points=[(105,441),(171,400),(229,400),(229,294),(423,294),(423,400),(229,400),(514,400),(514,275)]
+# Trace one continuous vine: up to the flower, around both bugs, then back
+# onto the older horizontal stem at (235, 400), as an actual capture closes.
+points=[(105,441),(171,400),(514,400),(514,275),(420,270),(330,280),(270,310),(235,355),(235,400)]
 def rounded_path(points, radius=18):
     result=[points[0]]
     for i in range(1,len(points)-1):
@@ -68,9 +69,17 @@ def rounded_path(points, radius=18):
     result.append(points[-1])
     return [(round(x*S),round(y*S)) for x,y in result]
 path=rounded_path(points)
+enclosure=rounded_path([(235,400),(514,400),(514,275),(420,270),(330,280),(270,310),(235,355),(235,400)])
+capture=Image.new('RGBA',image.size)
+cd=ImageDraw.Draw(capture)
+cd.polygon(enclosure,fill=(160,219,107,24))
+cd.line(enclosure,fill=(186,238,136,130),width=9*S,joint='curve')
+image.alpha_composite(capture.filter(ImageFilter.GaussianBlur(7*S)))
+image.alpha_composite(capture)
+draw=ImageDraw.Draw(image)
 for color,width,offset in [('#041d1e',15,(0,4)),('#416537',10,(0,0)),('#84b754',6,(0,0)),('#c4df86',2,(-1,-1))]:
     draw.line([(x+offset[0]*S,y+offset[1]*S) for x,y in path], fill=color, width=width*S, joint='curve')
-for x,y,angle in [(158,405,25),(211,400,-20),(229,357,40),(239,305,-30),(280,294,20),(369,294,-25),(423,336,35),(423,382,-30),(310,400,25),(465,400,-25),(514,355,30),(514,309,-20)]:
+for x,y,angle in [(158,405,25),(211,400,-20),(235,368,40),(266,315,-30),(310,290,20),(393,273,-25),(465,275,15),(310,400,25),(465,400,-25),(514,355,30),(514,309,-20)]:
     leaf=Image.new('RGBA',(30*S,18*S))
     ld=ImageDraw.Draw(leaf)
     ld.ellipse((2*S,3*S,27*S,15*S),fill='#80ad55',outline='#bed88b',width=S)
@@ -90,9 +99,21 @@ image.alpha_composite(flower,(454*S,215*S))
 sprite('bee-flight-2.png',(287,338),66,-12)
 sprite('fly-flight-1.png',(366,360),65,10)
 
+# Bright join cue and conversion particles make the closure read at thumbnail size.
+glow=Image.new('RGBA',image.size);gd=ImageDraw.Draw(glow)
+gd.ellipse((214*S,379*S,256*S,421*S),fill=(206,251,155,130))
+image.alpha_composite(glow.filter(ImageFilter.GaussianBlur(8*S)))
+draw=ImageDraw.Draw(image)
+draw.ellipse((219*S,384*S,251*S,416*S),outline='#e4fbc7',width=3*S)
+draw.ellipse((231*S,396*S,239*S,404*S),fill='#fff1bd')
+for x,y,r in [(268,376,2),(282,361,2),(312,349,3),(342,386,2),(391,342,2),(401,366,3),(315,323,2)]:
+    draw.ellipse(((x-r)*S,(y-r)*S,(x+r)*S,(y+r)*S),fill='#e7f3a5')
+
 font_path=Path('/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf')
 if not font_path.exists():
     font_path=Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
+capture_font=ImageFont.truetype(str(font_path),13*S)
+draw.text((374*S,305*S),'DOUBLE CATCH!',anchor='mm',font=capture_font,fill='#f6e4a3',stroke_width=2*S,stroke_fill='#16352b')
 def text_center(text,y,size,color,stroke=0):
     font=ImageFont.truetype(str(font_path),size*S)
     box=font.getbbox(text);x=(W*S-(box[2]-box[0]))/2

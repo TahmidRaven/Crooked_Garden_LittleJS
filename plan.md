@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Cover correction: user noted the initial cover did not clearly depict a proper loop capture. Revised both cover exports to trace one continuous vine from the pot to the flower, around both bugs and back onto older stem. Added a visible join ring, enclosed-area glow, conversion particles and DOUBLE CATCH feedback. Promotional artwork only; game/build unchanged.
+
 Cover/animated-guide follow-up: created `screenshots/cover-630x500.png` for itch plus a 1260×1000 master, with large game title, studio logo, original forest/vine/flower shapes and credited real bug/planter art. Composition is promotional artwork, not a screenshot. `scripts/make-cover.py` reproduces it. How to Play now uses three small real-play GIFs (grow/capture/Burst, under 1 MB combined) with readable loop holds; Pause clips switches to stills, reduced motion starts static, leaving the guide unloads animation. Raw captured frames stay ignored; recorder/encoder and GIF/hash manifests are retained. No gameplay rules changed. Validation: 80 unit tests, full browser suite including animation toggle/reduced-motion fallback and 11 layouts, plus cover/GIF frame visual review. Local preview reopened on How to Play.
 
 Guide-layout correction: user found the first crop/card treatment poor. Reworked How to Play into four numbered, full-width walkthrough sections with text beside generously sized imagery, isolated/labeled flower-water details, larger contextual before/after loop panels and mobile stacking. Removed the old button collage in favour of readable Pause/Rewind labels. Five derived PNGs now ship; no forced image heights/letterboxed uniform cards. Instructions stay brief and gameplay/navigation behaviour is unchanged.
