@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from '@playwright/test';
 import {preview} from 'vite';
+import {captureWaterReward} from '../src/arcade.js';
 
 const server=await preview({preview:{host:'127.0.0.1',port:0,open:false}});
 let browser;
@@ -26,6 +27,14 @@ try{
   // Seed the source of randomness, not game state. Retries still receive new seeds.
   const seedSource=()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(97);return array;}});
   watch(page);await page.addInitScript(seedSource);
+  await page.addInitScript(()=>{
+    window.__sfxStarts=[];
+    const original=AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start=function(...args){
+      window.__sfxStarts.push({duration:this.buffer?.duration||0,hasEnergy:Boolean(this.buffer?.getChannelData(0).some(v=>Math.abs(v)>1e-5))});
+      return original.apply(this,args);
+    };
+  });
   let releaseArt;
   const artGate=new Promise(resolve=>releaseArt=resolve);
   await page.route('**/assets/art/**',async route=>{await artGate;await route.continue();});
@@ -127,6 +136,7 @@ try{
   assert.equal((await state()).phase,'playing');assert.equal((await state()).seed,pausedState.seed);assert.equal((await state()).points,pausedState.points);
   await page.keyboard.down('g');await page.clock.runFor(4000);await page.keyboard.up('g');
   assert.equal((await state()).phase,'result');assert.equal((await state()).status,'blocked');
+  assert.equal(await page.evaluate(()=>window.__sfxStarts.length),0,'Muted losses produce no synthesized sound');
   await page.locator('#result-undo').click();assert.equal((await state()).phase,'playing');
   const old=await state();await page.locator('#restart').click();
   assert.notEqual((await state()).seed,old.seed);assert.notDeepEqual((await state()).bugs,old.bugs,'Retry changes the swarm');
@@ -170,6 +180,30 @@ try{
   assert.equal((await state()).stage,0);assert.equal((await state()).score,0);assert.ok((await state()).best>0);
   await page.locator('#music').click();
   await page.waitForFunction(()=>document.querySelector('#music').getAttribute('aria-pressed')==='true');
+  const audioBefore=await page.evaluate(()=>window.__sfxStarts.length);
+  await point(300,300);await page.mouse.down();await page.clock.runFor(1300);await page.mouse.up();
+  assert.equal((await state()).phase,'result');
+  const lossAudio=await page.evaluate(n=>window.__sfxStarts.slice(n),audioBefore);
+  assert.equal(lossAudio.length,2,'An audible impact and defeat sting start on an unmuted hit');
+  assert.ok(lossAudio.every(voice=>voice.hasEnergy&&voice.duration>0));
+  assert.ok(lossAudio[1].duration>lossAudio[0].duration,'Defeat has a longer tail than the hit');
+  await page.clock.runFor(500);assert.equal(await page.evaluate(()=>window.__sfxStarts.length),audioBefore+2,'The result screen does not repeat death sounds');
+  await page.locator('#next').click();
+  const beforeDryAudio=await page.evaluate(()=>window.__sfxStarts.length);
+  for(const [x,y] of [[540,635],[540,610],[60,610]]){
+    if((await state()).phase==='result')break;
+    await point(x,y);await page.mouse.down();
+    for(let i=0;i<200;i++){
+      await page.clock.runFor(50);const s=await state();
+      if(s.phase==='result'||Math.hypot(s.tip.x-x,s.tip.y-y)<10)break;
+    }
+    await page.mouse.up();
+  }
+  assert.equal((await state()).endedBy,'water');assert.equal((await state()).phase,'result');
+  const dryAudio=await page.evaluate(n=>window.__sfxStarts.slice(n),beforeDryAudio);
+  assert.equal(dryAudio.length,2);assert.ok(dryAudio.every(voice=>voice.hasEnergy));
+  assert.ok(dryAudio[0].duration>lossAudio[0].duration,'Water loss uses its own dry-out cue instead of the impact');
+  await page.locator('#next').click();
   await page.locator('#music').click();
   assert.equal(await page.locator('#music').getAttribute('aria-pressed'),'false');
 
@@ -274,7 +308,8 @@ try{
   }
   const caught=await captureState();
   assert.equal(caught.captures,2);assert.equal(caught.maxCombo,2);assert.equal(caught.captureScore,800);
-  assert.equal(caught.lastCapture.water,440);assert.ok(caught.captured.every(Boolean));assert.ok(caught.score>=1150);
+  assert.equal(caught.lastCapture.water,captureWaterReward(2,caught.lastCapture.loopLength).total);
+  assert.ok(caught.lastCapture.refund<=240);assert.ok(caught.captured.every(Boolean));assert.ok(caught.score>=1150);
   assert.match(await capturePage.locator('#state-label').textContent(),/COMBO CATCH/);
   await capturePage.screenshot({path:'artifacts/double-catch.png',fullPage:true});
   await capturePage.locator('#undo').click();
@@ -306,7 +341,7 @@ try{
   await reducedPage.locator('#pause').click();const pausedPlant=await reducedPage.evaluate(()=>window.crookedGarden.getState());
   await reducedPage.clock.runFor(500);assert.deepEqual(await reducedPage.evaluate(()=>window.crookedGarden.getState()),pausedPlant,'Repeated paused renders cannot mutate simulation state');
   assert.deepEqual(errors,[],'No runtime errors or missing assets');
-  console.log('Browser checks passed: visible idle wing cycles/stable bug positions, vine/reduced motion/pause safety, double capture, startup, credits/guide, three gardens, touch and 11 layouts.');
+  console.log('Browser checks passed: hit/defeat/dry-out audio and mute, capped loop refunds, double capture, startup, credits/guide, three gardens, touch and 11 layouts.');
 }finally{
   await browser?.close();await new Promise((resolve,reject)=>server.httpServer.close(error=>error?reject(error):resolve()));
 }

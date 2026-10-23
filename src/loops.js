@@ -35,14 +35,15 @@ export function findClosedLoop(path,fromIndex=0,radius=LOOP_CLOSE_RADIUS){
   let length=0;
   for(let i=last-2;i>=Math.max(0,fromIndex);i--){
     length+=distance(path[i+1],path[i+2]);
-    if(length<MIN_LOOP_LENGTH)continue;
     const c=path[i],d=path[i+1];
+    if(length+distance(c,d)<MIN_LOOP_LENGTH)continue;
     if(Math.max(a.x,tip.x)+radius<Math.min(c.x,d.x)||Math.min(a.x,tip.x)-radius>Math.max(c.x,d.x)||Math.max(a.y,tip.y)+radius<Math.min(c.y,d.y)||Math.min(a.y,tip.y)-radius>Math.max(c.y,d.y))continue;
     const intersection=segmentIntersection(a,tip,c,d),join=intersection||closestOnSegment(tip,c,d);
     if(!intersection&&distance(tip,join)>radius)continue;
     const polygon=[join,...path.slice(i+1,intersection?last:last+1)];
     const area=polygonArea(polygon);
-    if(area>=MIN_LOOP_AREA)return {join,polygon,area,length};
+    const loopLength=length+distance(join,d)-(intersection?distance(join,tip):0);
+    if(area>=MIN_LOOP_AREA&&loopLength>=MIN_LOOP_LENGTH)return {join,polygon,area,length:loopLength};
   }
   return null;
 }

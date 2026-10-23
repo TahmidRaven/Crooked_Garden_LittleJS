@@ -6,7 +6,9 @@ Build a LittleJS Jam 3 game, theme ZIGZAG. Keep this handoff current, credit lic
 
 Latest feedback: the game looked like a website and bugs repeated the same pattern every time. Current rework is a **full-screen forest arcade**, not an editorial page: in-world HUD, title/play/pause/results flow, three gardens, score and local best, floating feedback, and a changing swarm. Direct hold-to-grow steering remains. Do not bring back the rejected three-light planning mechanic.
 
-Latest gameplay hook (user approved): **loop-catching**, keeping the same direct controls. Grow around bugs and reconnect to older stem to capture them. Each bug gives 180 water + 300 score; each additional bug in the same closure adds an extra 80 water + 200 points, so a double catch pays 440 water + 800 score. Captures remove bugs permanently for the attempt, refresh Burst and grant .45s recovery protection. A join hint, glowing enclosure, conversion particles, distinct capture/combo chimes and popup/HUD rewards make the action visible. The first garden's two enemy roaming regions now overlap in the open root gap to support a realistically sized multi-catch. Existing later layouts are unchanged; the shared capture rule also works there. First-garden playtesting comes before expanding the mechanic.
+Latest gameplay hook (user approved): **loop-catching**, keeping the same direct controls. Grow around bugs and reconnect to older stem to capture them. Current water award is **70 per bug + 75% of the loop's growth cost (refund capped at 240), plus 80 per additional bug in the same catch**. Score remains 300 per bug + 200 per additional bug. Captures remove bugs permanently for the attempt, refresh Burst and grant .45s recovery protection. A join hint, glowing enclosure, conversion particles, distinct capture/combo chimes and popup/HUD rewards make the action visible. The first garden's two enemy roaming regions overlap in the open root gap to support a realistically sized multi-catch. Later layouts are unchanged.
+
+Loss-audio/water follow-up: user requested hit/death/loss SFX and found water too restrictive for catching bugs without wanting the game too easy. Added original synthesized impact + descending defeat sounds, and a separate dry-out cue for water loss. They respect mute, play once per failed attempt, and never on victory. Water uses the capped loop-cost refund above rather than increasing starting tanks (still 660/760/800). A 280-water single catch breaks even; a 500-water loop still costs 190 net. Empty loops give nothing and once-per-bug/cap/rewind safeguards stay intact. Catching needs water up front, so low-water HUD/result copy suggests dew and planning catches early. This is a first balance pass to playtest, not a final difficulty claim.
 
 Vine visual follow-up (user approved): `src/vine.js` replaces uniform strokes with a render-only quadratic spline/ribbon, thick near older growth and fine at the tip, layered cylindrical shading, stable alternating/paired veined leaves with palette/size variation, .45s leaf unfurling, and a small shaded growing bud. Capture light travels around closed enclosures. Geometry/Path2D/leaf birth caches live in WeakMaps, never on simulation state. Raw paths, steering, collision, water and capture rules are untouched. Spline endpoints exactly match physics and smoothing stays within a small local hull. Rewind prunes future leaf births; reduced motion opens leaves immediately and suppresses bud breathing/capture circulation. Pause uses the frozen simulation clock for leaf animation.
 
@@ -53,6 +55,7 @@ Refresh/first-paint follow-up: the user saw raw HTML briefly before CSS loaded. 
 
 - `src/game.js`: pure vine simulation, three level layouts, water/flower/dew/collision rules and rewind.
 - `src/loops.js`: segment intersections/near-closure, polygon area/containment, minimum-size/length guards. Closure tolerance is 8 world units; the preview cue uses 32. Tiny curls/retracing do not count.
+- `src/failure-audio.js`: original hit/dry-out/defeat ZzFX designs, reason-to-cue selection and muted/optional-output-safe playback.
 - `src/arcade.js`: seeded randomness, enemy state/steering, Burst, stuns and simulation ticking.
 - `src/main.js`: loading/title/playing/paused/help/credits/result flow, native engine splash and async asset readiness, context-aware guide/credits navigation, input, score/storage, UI and effects.
 - `src/scene.js`: full-window forest rendering, terrain/vine/flowers, telegraphs, sprites, particles and feedback.
@@ -73,7 +76,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 
 ## Validation and useful commands
 
-- `npm test`: **66 tests** — existing growth/AI/capture/art/vine/flight/palette coverage plus four planter tests for root/soil alignment, PNG dimensions, original source integrity and portrait/landscape/high-DPI placement.
+- `npm test`: **76 tests** — gameplay/art/render coverage plus six water-balance tests and four failure-audio tests. Refund tests verify tight-loop economics, the fixed cap, a single refund per multi-catch, true-crossing length independent of point density and a first-garden single-catch detour ending with under 80 spare water (seed 20).
 - `npm run build`: production build.
 - `env NODE_OPTIONS='' npm run test:browser`: native LittleJS splash/branding (desktop + short landscape), deliberately delayed images proving the menu waits for readiness, real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.
@@ -82,7 +85,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 
 Vine browser checks also grow a plant in reduced-motion mode, verify the flower is collected, and compare complete simulation snapshots across paused renders. Visual examples: `artifacts/vine-mobile.png`, `artifacts/vine-reduced-motion.png`, `artifacts/arcade.png`, `artifacts/double-catch.png`. No new external assets are used by this visual pass.
 
-Capture browser regression uses RNG seed 44 and real pointer/Shift input, not injected game state: (430,550) → (500,550) → (500,435) → (380,435) → (380,360) → (300,360) → (300,435) → (395,435). It captures both moving bugs, awards the combo, tests permanence through rewind, then clears the remaining flowers. Screenshot: `artifacts/double-catch.png`. The main no-capture campaign regression uses a separate seeded sequence because the first-garden swarm layout changed.
+Capture browser regression uses RNG seed 44 and real pointer/Shift input, not injected game state: (430,550) → (500,550) → (500,435) → (380,435) → (380,360) → (300,360) → (300,435) → (395,435). It captures both moving bugs, checks the dynamic capped refund/combo, tests permanence through rewind, then clears the remaining flowers. Screenshot: `artifacts/double-catch.png`. The main no-capture campaign uses a separate seeded sequence. Audio checks observe actual WebAudio buffer starts: muted loss produces no sound, an enabled hit starts two non-silent buffers, and the result screen does not replay them.
 
 ## Prior checkpoints / decisions
 
@@ -97,6 +100,7 @@ Capture browser regression uses RNG seed 44 and real pointer/Shift input, not in
 - `e2e8bf2`: loop captures, combo rewards, capture feedback and anti-farming.
 - `33c8628`: procedural vine taper, shading, veined/unfurling leaves and a living bud.
 - `a082fe6`: real fly/bee wing animations and body-aligned flight poses.
+- `6e3fca3`: selected compact Kenney planter (A), 54 world units wide.
 - The user disliked pure tracing, then explicitly rejected a three-light plan/launch experiment. That experiment was removed, not shipped as the current mode.
 - Earlier generated mockups are not playable levels and are not shipped assets. Do not reuse employer/Two Dots art without verified rights. Leaf maintenance/shading was discussed but is not implemented.
 

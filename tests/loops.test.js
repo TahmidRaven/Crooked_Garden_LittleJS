@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {findClosedLoop,pointInLoop,polygonArea,segmentIntersection} from '../src/loops.js';
-import {createArcade,tickArcade,CAPTURE_WATER,CAPTURE_POINTS,COMBO_WATER,COMBO_POINTS} from '../src/arcade.js';
+import {createArcade,tickArcade,captureWaterReward,CAPTURE_POINTS,COMBO_POINTS} from '../src/arcade.js';
 import {rewind,MAX_WATER} from '../src/game.js';
 
 const nearClosure=[{x:260,y:450},{x:260,y:350},{x:350,y:350},{x:350,y:450},{x:268.2,y:450}];
@@ -33,14 +33,15 @@ test('polygon containment handles winding, outside points and edge points',()=>{
 });
 test('one enclosed bug is removed and grants water and score',()=>{
   const g=fixture();assert.equal(close(g),'capture');assert.deepEqual(g.captured,[true,false]);
-  assert.equal(g.captures,1);assert.equal(g.captureScore,CAPTURE_POINTS);assert.equal(g.captureWaterTotal,CAPTURE_WATER);
-  assert.ok(g.water>570&&g.water<580);assert.equal(g.lastCapture.count,1);assert.equal(g.lastCapture.water,180);
+  const reward=captureWaterReward(1,g.lastCapture.loopLength);
+  assert.equal(g.captures,1);assert.equal(g.captureScore,CAPTURE_POINTS);assert.equal(g.captureWaterTotal,reward.total);
+  assert.ok(g.water>400+reward.total-5&&g.water<400+reward.total);assert.equal(g.lastCapture.count,1);assert.equal(g.lastCapture.refund,reward.refund);
   const bug={x:g.enemies[0].x,y:g.enemies[0].y};g.path=[{...bug}];g.grace=0;
   tickArcade(g,bug);assert.notEqual(g.status,'blocked');assert.deepEqual({x:g.enemies[0].x,y:g.enemies[0].y},bug);
 });
 test('two bugs in the same closure award an explicit combo bonus',()=>{
   const g=fixture(2);close(g);assert.deepEqual(g.captured,[true,true]);assert.equal(g.maxCombo,2);
-  assert.equal(g.captureScore,2*CAPTURE_POINTS+COMBO_POINTS);assert.equal(g.captureWaterTotal,2*CAPTURE_WATER+COMBO_WATER);
+  assert.equal(g.captureScore,2*CAPTURE_POINTS+COMBO_POINTS);assert.equal(g.captureWaterTotal,captureWaterReward(2,g.lastCapture.loopLength).total);
   assert.equal(g.lastCapture.count,2);assert.equal(g.captureSerial,1);
 });
 test('outside bugs and bugs on the boundary are not captured',()=>{

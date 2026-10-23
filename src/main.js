@@ -5,6 +5,7 @@ import { createArcade, tickArcade, queueBurst, bugsAt, BURST_COST } from './arca
 import { artReady, artStatus } from './art.js';
 import { fitViewport, screenToGarden } from './view.js';
 import { renderScene } from './scene.js';
+import { createFailureAudio } from './failure-audio.js';
 
 const $=id=>document.getElementById(id);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -18,6 +19,7 @@ const music=new Audio(`${import.meta.env.BASE_URL}assets/calm-theme.ogg`);music.
 const chime=new L.Sound([.28,0,640,.01,.08,.2,1,1.4,0,0,220,.08]);
 const catchChime=new L.Sound([.18,0,980,.01,.12,.32,1,1.5,0,0,160,.1]);
 const comboChime=new L.Sound([.2,0,1320,.01,.15,.4,1,1.6,0,0,240,.1]);
+const failureAudio=createFailureAudio(L.Sound);
 
 const perfect=()=>bloomCount(garden)===garden.level.flowers.length;
 const stageScore=()=>Math.max(0,bloomCount(garden)*300+garden.swatted*100+garden.captureScore+garden.collected.filter(Boolean).length*50-(garden.rewinds||0)*100+(perfect()?Math.ceil(garden.water):0));
@@ -70,11 +72,12 @@ function captureFeedback(){
 }
 function showResult(){
   held=false;phase='result';const saved=bloomCount(garden),cleared=perfect(),last=garden.index===LEVELS.length-1;
+  if(!cleared)failureAudio.play(garden.endedBy==='water'?'water':garden.endedBy==='bug'?'bug':'terrain',{muted});
   if(cleared){best=Math.max(best,bank+stageScore());try{localStorage.setItem('crooked-garden-best-v2',String(best));}catch{}}
   $('result-tag').textContent=cleared?`GARDEN ${garden.index+1} COMPLETE`:'THE WILD FIGHTS BACK';
   $('result-flowers').textContent='✿'.repeat(saved)+'○'.repeat(3-saved);
   $('result-title').textContent=cleared?(last?'THE GARDEN LIVES.':'KEEP ON GROWING.'):garden.endedBy==='bug'?'THE SWARM GOT YOU.':garden.endedBy==='water'?'OUT OF WATER.':'WATCH THE ROOTS.';
-  $('result-copy').textContent=cleared?`${garden.captures} bug${garden.captures===1?'':'s'} caught${garden.maxCombo>1?` · best catch ×${garden.maxCombo}`:''}. ${last?'Three gardens restored. You outgrew the swarm.':`${garden.level.name} is blooming. A new swarm waits in the next garden.`}`:garden.endedBy==='bug'?'Bait a hunter, stun it with Burst, then grow around it and close a loop against your stem to capture it.':garden.endedBy==='water'?'Dew and loop captures restore water. Catch two bugs in one loop for a bonus, but keep your route lean.':'Mossy roots are solid. Burst protects against bugs, not terrain. Try another bend.';
+  $('result-copy').textContent=cleared?`${garden.captures} bug${garden.captures===1?'':'s'} caught${garden.maxCombo>1?` · best catch ×${garden.maxCombo}`:''}. ${last?'Three gardens restored. You outgrew the swarm.':`${garden.level.name} is blooming. A new swarm waits in the next garden.`}`:garden.endedBy==='bug'?'Bait a hunter, stun it with Burst, then grow around it and close a loop against your stem to capture it.':garden.endedBy==='water'?'Loops cost water up front, then refund most of it on a catch. Plan catches early; find blue dew if you are too low to finish a loop.':'Mossy roots are solid. Burst protects against bugs, not terrain. Try another bend.';
   $('result-score').textContent=bank+stageScore();$('result-time').textContent=`${garden.clock.toFixed(1)}s`;$('best-label').textContent=best;
   $('next').textContent=cleared?(last?'ANOTHER RUN ▶':'NEXT GARDEN ▶'):'TRY A NEW SWARM ▶';
   $('result-undo').hidden=cleared||garden.path.length<2;
@@ -103,7 +106,7 @@ function updateUI(){
   $('burst-detail').textContent=garden.queued?'HOLD TO RELEASE':garden.cooldown>0?'RECHARGING':`${touchControls?'TAP':'SHIFT'} · 30 WATER`;
   $('undo').disabled=!canPlay||garden.path.length<2;
   $('pause').disabled=!canPlay;
-  $('state-label').textContent=garden.lastCapture&&garden.clock-garden.lastCapture.clock<1.4?`${garden.lastCapture.count>1?'COMBO CATCH!':'BUG CAUGHT!'} +${Math.round(garden.lastCapture.water)} WATER`:garden.loopHint?`CLOSE THE LOOP · ${garden.loopHint.count} BUG${garden.loopHint.count===1?'':'S'} INSIDE`:garden.burst>0?'PROTECTED · STUN A BUG, THEN LOOP IT':garden.queued?'BURST ARMED · HOLD TO GROW':garden.water<150?'LOW WATER · CATCH BUGS OR FIND DEW':garden.started?'GROW LOOPS TO CATCH BUGS · BLOOM ALL THREE':'HOLD TO GROW · LOOP BUGS FOR WATER';
+  $('state-label').textContent=garden.lastCapture&&garden.clock-garden.lastCapture.clock<1.4?`${garden.lastCapture.count>1?'COMBO CATCH!':'CAUGHT!'} +${Math.round(garden.lastCapture.water)} WATER · ${garden.lastCapture.refund} REFUND`:garden.loopHint?`CLOSE THE LOOP · ${garden.loopHint.count} BUG${garden.loopHint.count===1?'':'S'} INSIDE`:garden.burst>0?'PROTECTED · STUN A BUG, THEN LOOP IT':garden.queued?'BURST ARMED · HOLD TO GROW':garden.water<150?'LOW WATER · FIND BLUE DEW':garden.started?'GROW LOOPS TO CATCH BUGS · BLOOM ALL THREE':'HOLD TO GROW · LOOP BUGS FOR WATER';
 }
 $('play').onclick=()=>begin();$('resume').onclick=resume;$('pause').onclick=pause;
 $('restart').onclick=retry;$('pause-retry').onclick=retry;$('undo').onclick=doRewind;$('result-undo').onclick=doRewind;
@@ -178,4 +181,4 @@ L.setCanvasFixedSize(L.vec2(Math.round(view.width*view.dpr),Math.round(view.heig
 L.engineInit(init,update,()=>{},()=>renderScene(L.mainContext,{garden,light,view,ticks,phase,reducedMotion,particles,popups}),()=>{},[],$('game-root'));
 // CSS imports have run and the engine owns the canvas; it is now safe to reveal startup UI.
 document.documentElement.classList.add('game-styled');
-window.crookedGarden={getState:()=>({phase,stage:garden.index,seed:garden.seed,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,flowers:[...garden.bloomed],dew:[...garden.collected],points:garden.path.length,bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,captures:garden.captures,captured:[...garden.captured],captureScore:garden.captureScore,maxCombo:garden.maxCombo,lastCapture:garden.lastCapture?{count:garden.lastCapture.count,water:garden.lastCapture.water,points:garden.lastCapture.points}:null,clock:garden.clock,endedBy:garden.endedBy,score:bank+stageScore(),best,view:{...view},art:artStatus()})};
+window.crookedGarden={getState:()=>({phase,stage:garden.index,seed:garden.seed,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,flowers:[...garden.bloomed],dew:[...garden.collected],points:garden.path.length,bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,captures:garden.captures,captured:[...garden.captured],captureScore:garden.captureScore,maxCombo:garden.maxCombo,lastCapture:garden.lastCapture?{count:garden.lastCapture.count,water:garden.lastCapture.water,points:garden.lastCapture.points,loopLength:garden.lastCapture.loopLength,refund:garden.lastCapture.refund}:null,clock:garden.clock,endedBy:garden.endedBy,score:bank+stageScore(),best,view:{...view},art:artStatus()})};

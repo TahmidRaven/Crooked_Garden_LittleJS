@@ -2,7 +2,13 @@ import { advance, createGarden, distance, GROW_SPEED, MAX_WATER } from './game.j
 import { findClosedLoop, pointInLoop } from './loops.js';
 
 export const BURST_COST=30, BURST_DURATION=.45, BURST_COOLDOWN=2, BURST_SPEED=280;
-export const CAPTURE_WATER=180, CAPTURE_POINTS=300, COMBO_WATER=80, COMBO_POINTS=200;
+export const CAPTURE_BASE_WATER=70, LOOP_REFUND_RATE=.75, LOOP_REFUND_CAP=240;
+export const CAPTURE_POINTS=300, COMBO_WATER=80, COMBO_POINTS=200;
+export function captureWaterReward(count,loopLength){
+  if(!Number.isInteger(count)||count<1||!Number.isFinite(loopLength)||loopLength<=0)return {base:0,refund:0,combo:0,total:0};
+  const base=CAPTURE_BASE_WATER*count,refund=Math.min(LOOP_REFUND_CAP,Math.floor(loopLength*LOOP_REFUND_RATE)),combo=COMBO_WATER*(count-1);
+  return {base,refund,combo,total:base+refund+combo};
+}
 const terminal=g=>['won','blocked','dry'].includes(g.status);
 let nonce=0;
 function freshSeed(){
@@ -97,11 +103,11 @@ function captureLoop(g){
   g.loopStart=g.path.length-1;
   const caught=g.enemies.map((bug,i)=>({bug,i})).filter(({bug,i})=>!g.captured[i]&&pointInLoop(bug,loop.polygon));
   if(!caught.length)return null;
-  const count=caught.length,bonus=count-1,reward=CAPTURE_WATER*count+COMBO_WATER*bonus,points=CAPTURE_POINTS*count+COMBO_POINTS*bonus;
-  const credited=Math.min(MAX_WATER-g.water,reward);
+  const count=caught.length,bonus=count-1,reward=captureWaterReward(count,loop.length),points=CAPTURE_POINTS*count+COMBO_POINTS*bonus;
+  const credited=Math.min(MAX_WATER-g.water,reward.total);
   g.water+=credited;g.captureWaterTotal+=credited;g.captureScore+=points;g.captures+=count;g.captureSerial++;g.maxCombo=Math.max(g.maxCombo,count);
   const bugs=caught.map(({bug,i})=>{g.captured[i]=true;g.stunned[i]=0;bug.state='captured';return {x:bug.x,y:bug.y};});
-  g.lastCapture={count,water:credited,points,bugs,polygon:loop.polygon,join:loop.join,clock:g.clock};
+  g.lastCapture={count,water:credited,points,loopLength:loop.length,refund:reward.refund,baseWater:reward.base,comboWater:reward.combo,bugs,polygon:loop.polygon,join:loop.join,clock:g.clock};
   g.cooldown=0;g.grace=Math.max(g.grace,.45);
   if(g.status==='dry'&&g.water>0){g.status='growing';g.endedBy=null;}
   return 'capture';

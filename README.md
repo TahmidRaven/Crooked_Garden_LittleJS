@@ -20,13 +20,25 @@ Running out of water is a failed attempt even if you saved some flowers; there i
 
 Grow around a bug, then return to an older part of your own stem to close the loop. A small glowing join cue appears when you're close to enclosing a bug. Tiny curls, straight retracing and loops with no bugs do not award captures.
 
-- **One bug:** removed for the rest of the attempt, **+180 water and +300 points**.
-- **Two in one loop:** **+440 water and +800 points** total, including the combo bonus. Larger catches add the same extra bonus per additional bug.
+- **One bug:** removed for the attempt, **70 water + a refund of 75% of the loop's growth cost**, and **300 points**. The refund is capped at 240 water.
+- **Two in one loop:** 140 base water + 80 combo water + the same single loop refund, and **800 points**. The loop cost is not refunded separately for each bug.
 - Burst can stun a bug while you wrap around it. Captures also refresh Burst and give a short recovery shield.
 - Capture rewards respect the 1,100-water capacity. An empty completed loop is not a passive trap for bugs entering later.
 - Captures and their actual credited rewards survive rewind. The same bug cannot pay again; a fresh attempt resets eligibility.
 
 The first garden's bugs share the open gap between roots, making a double catch possible without an enormous loop across terrain. This is the initial playtest focus; the existing later gardens remain, and the same capture rule works there without new controls or more levels.
+
+### Water balance
+
+Starting water stays **660 / 760 / 800**. Captures—not a larger free tank—fund extra trapping detours. For a single catch:
+
+| Loop growth cost | Water awarded | Net loop cost |
+| --- | --- | --- |
+| 200 | 220 | Gain 20 |
+| 280 | 280 | Break even |
+| 500 | 310 | Spend 190 |
+
+Tight successful loops nearly pay for themselves; oversized loops remain expensive because the refund stops growing at 240. Burst activation still costs 30 water and is not refunded. Plan catches while you have enough water to finish them: the reward arrives on closure, not before. Empty loops give nothing, captures pay once per bug, and the 1,100-water cap/rewind anti-farming rules still apply. This is a first tuning pass, not a claim that difficulty is settled.
 
 ### In-game How to Play
 
@@ -45,6 +57,8 @@ Opening the guide never resets or advances a run. Back or Esc returns to the men
 | New attempt / fresh swarm | Retry button | **R** |
 
 Rewind restores vine/water/collectible history, grants a 0.9-second recovery shield, and costs 100 score. It does not reset enemy time or cooldowns. Retrying gives a new swarm, not an identical replay. Switching tabs automatically pauses. Sound starts off; the HUD has sound and optional browser-fullscreen controls.
+
+Enable **♫** to hear effects. Bug/terrain hits play a short impact layered with a descending defeat sting; water exhaustion has a separate dry-out cue plus the defeat sting. Sounds trigger once per loss, respect mute, and never play on victory. They are original synthesized effects, with no extra downloads.
 
 ## A changing swarm
 
@@ -106,7 +120,7 @@ Hunter flies use a warm amber body instead of the original grey. The palette rem
 
 ## Validation
 
-- **66 unit tests:** growth/collisions/water, all garden routes, seeded/reactive enemy behaviour, bursts, loop captures/rewards/anti-farming, source licenses/hashes, resized/high-DPI input mapping, vine visuals, flight states/colours, and planter image dimensions/source provenance/soil-anchor alignment across layouts.
+- **76 unit tests:** existing gameplay/art/render coverage plus capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
 - **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
