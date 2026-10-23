@@ -95,7 +95,7 @@ try{
   assert.equal((await state()).phase,'help');
   assert.equal(await page.locator('#help-title').textContent(),'HOW TO PLAY');
   assert.match(await page.locator('#help-screen').textContent(),/Press and hold ahead of the vine/);
-  assert.equal(await page.locator('#help-screen img').count(),6);
+  assert.equal(await page.locator('#help-screen img').count(),5);
   await page.waitForFunction(()=>[...document.querySelectorAll('#help-screen img')].every(img=>img.complete&&img.naturalWidth>0));
   assert.ok(await page.locator('#help-screen img').evaluateAll(images=>images.every(img=>img.alt.length>10)),'Guide crops have descriptive alternatives');
   assert.doesNotMatch(await page.locator('#help-screen').textContent(),/75%|240|300 points/,'Keep balance maths out of the basic guide');
@@ -111,6 +111,9 @@ try{
   assert.equal(await page.evaluate(()=>document.activeElement.id),'help-play','Guide traps keyboard focus');
   await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'help-back');
   await page.screenshot({path:'artifacts/how-to-play.png',fullPage:true});
+  await page.locator('.help-loop-lesson').scrollIntoViewIfNeeded();
+  await page.screenshot({path:'artifacts/how-to-play-catch.png',fullPage:true});
+  await page.locator('#help-screen .help-scroll').evaluate(el=>el.scrollTop=0);
   await page.keyboard.press('Escape');
   assert.equal((await state()).phase,'title');
   assert.equal(await page.evaluate(()=>document.activeElement.id),'how-to-play');

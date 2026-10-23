@@ -2,38 +2,39 @@
 from pathlib import Path
 import hashlib
 import json
-from PIL import Image
+from PIL import Image, ImageDraw
 
 OUT = Path('public/assets/help')
 OUT.mkdir(parents=True, exist_ok=True)
 
 
-def crop(source, box, name):
+def crop(source, box, name=None):
     # Showcase desktop captures use two physical pixels per CSS pixel.
     image = Image.open(Path('screenshots') / source).convert('RGB')
     image = image.crop(tuple(value * 2 for value in box))
-    image.save(OUT / name, optimize=True)
+    if name:
+        image.save(OUT / name, optimize=True)
     return image
 
 
 crop('09-progress-with-bugs.png', (600, 500, 850, 680), 'steering.png')
-crop('08-bugs-before-capture.png', (445, 295, 595, 455), 'flowers-water.png')
-crop('08-bugs-before-capture.png', (570, 345, 755, 495), 'loop-before.png')
-crop('02-double-catch.png', (570, 345, 755, 495), 'loop-after.png')
-crop('09-progress-with-bugs.png', (605, 370, 750, 475), 'stunned-bugs.png')
-pause = crop('09-progress-with-bugs.png', (1208, 9, 1266, 65), 'pause-button.png')
-rewind = crop('09-progress-with-bugs.png', (474, 720, 540, 790), 'rewind-button.png')
-controls = Image.new('RGB', (420, 160), '#0b2528')
-controls.paste(pause, (55, 24))
-controls.paste(rewind, (235, 10))
-controls.save(OUT / 'pause-rewind.png', optimize=True)
-# Only ship the assembled control illustration, not its temporary crop parts.
-(OUT / 'pause-button.png').unlink()
-(OUT / 'rewind-button.png').unlink()
+pickups = Image.new('RGBA', (440, 180))
+mask = Image.new('L', (110, 110))
+ImageDraw.Draw(mask).ellipse((0, 0, 109, 109), fill=255)
+flower = crop('08-bugs-before-capture.png', (532, 395, 587, 450))
+water = crop('08-bugs-before-capture.png', (469, 302, 524, 357))
+pickups.paste(flower, (55, 35), mask)
+pickups.paste(water, (275, 35), mask)
+pickups.save(OUT / 'flowers-water.png', optimize=True)
+crop('08-bugs-before-capture.png', (585, 335, 855, 515), 'loop-before.png')
+crop('02-double-catch.png', (585, 335, 855, 515), 'loop-after.png')
+crop('09-progress-with-bugs.png', (625, 403, 740, 475), 'stunned-bugs.png')
+# This old button collage is no longer used; readable HTML control labels replace it.
+(OUT / 'pause-rewind.png').unlink(missing_ok=True)
 
 manifest = {
     'generator': 'scripts/crop-help-images.py',
-    'description': 'Cropped real gameplay screenshots; controls image combines the actual Pause and Rewind buttons. No new gameplay elements added.',
+    'description': 'Cropped real gameplay screenshots. Flower and water close-ups are arranged side by side with circular masks. No new gameplay elements added.',
     'sources': [
         {'path': f'screenshots/{name}', 'sha256': hashlib.sha256((Path('screenshots') / name).read_bytes()).hexdigest()}
         for name in ['09-progress-with-bugs.png', '08-bugs-before-capture.png', '02-double-catch.png']

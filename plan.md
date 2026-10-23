@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Guide-layout correction: user found the first crop/card treatment poor. Reworked How to Play into four numbered, full-width walkthrough sections with text beside generously sized imagery, isolated/labeled flower-water details, larger contextual before/after loop panels and mobile stacking. Removed the old button collage in favour of readable Pause/Rewind labels. Five derived PNGs now ship; no forced image heights/letterboxed uniform cards. Instructions stay brief and gameplay/navigation behaviour is unchanged.
+
 Visual-guide follow-up: user requested cropped showcase images in How to Play. Replaced the generic SVG with a real pot-to-flower crop and added flower/water, before/after loop, stunned-bug and Pause/Rewind button illustrations. Kept concise instructions, collapsed keys, fixed navigation and paused-run behaviour. Crops ship as six small PNGs under `public/assets/help/`, not full-size screenshots or device mockups; reproducible via `scripts/crop-help-images.py`, with source/hash manifest and regression coverage. No gameplay changes. Validated with 79 unit tests, the full browser suite/11 viewport sizes, desktop/mobile screenshot review and packaging.
 
 Studio-branding follow-up: user requested After Hours Arcade branding reused from their existing work before refreshing showcase images. Verified FeastFury's menu and reused its original orange raven PNG unchanged (source commit and SHA-256 in `public/assets/manifest.json`, separate from CC0 packs). Title and Credits page now show AFTER HOURS ARCADE + logo; TahmidRaven website credit remains. No extra splash delay or in-play obstruction. Add genuinely bug-visible pre-capture gameplay shots rather than compositing living enemies into a cleared arena.

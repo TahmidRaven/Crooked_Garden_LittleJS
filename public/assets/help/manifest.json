@@ -1,6 +1,6 @@
 {
   "generator": "scripts/crop-help-images.py",
-  "description": "Cropped real gameplay screenshots; controls image combines the actual Pause and Rewind buttons. No new gameplay elements added.",
+  "description": "Cropped real gameplay screenshots. Flower and water close-ups are arranged side by side with circular masks. No new gameplay elements added.",
   "sources": [
     {
       "path": "screenshots/09-progress-with-bugs.png",
@@ -18,34 +18,26 @@
   "files": [
     {
       "path": "flowers-water.png",
-      "sha256": "36b7ecfc46d2fa6bf25d464bd92ade157a4506928d13f80533aff1614945e2fe",
+      "sha256": "e8b6fcdd5f7ff555dbd7aac26d86ce7e33134f4d57df12dd36700eb27b0b29f1",
       "size": [
-        300,
-        320
+        440,
+        180
       ]
     },
     {
       "path": "loop-after.png",
-      "sha256": "4c9cb2df5c824aac6ff61b36a8212bf6d34e8bf113f6eae013eb244d231ee28a",
+      "sha256": "9a1e0f45eaa0b01eb6db5bfc6b978f79750c4dd0a3d00b6285ac05b56b989d45",
       "size": [
-        370,
-        300
+        540,
+        360
       ]
     },
     {
       "path": "loop-before.png",
-      "sha256": "baaf1370414ec3726c33064f3d1584fb7cc0767a81fa76e877e91816ccfa851a",
+      "sha256": "3722eb098ce32eb4fe2c029f95e5a0bb2a09e6c3d9281cf261557766e8e3619c",
       "size": [
-        370,
-        300
-      ]
-    },
-    {
-      "path": "pause-rewind.png",
-      "sha256": "2be038255dcf6e5e76eb56f7dbbf04fcd5077dcdf5e6dfa63f1ca4ca64e1c040",
-      "size": [
-        420,
-        160
+        540,
+        360
       ]
     },
     {
@@ -58,10 +50,10 @@
     },
     {
       "path": "stunned-bugs.png",
-      "sha256": "2e6ff519179c10309470959ea2008ece7dd9ce1de7210f1e4b38f838781c0707",
+      "sha256": "f1271dfa84b5b052afe3090789c69b64b71bd464a00549b06a4a519d6ff11afb",
       "size": [
-        290,
-        210
+        230,
+        144
       ]
     }
   ]

@@ -15,7 +15,7 @@ test('studio branding retains the original FeastFury raven mark and separate own
 
 test('guide illustrations retain their showcase sources, PNG dimensions and hashes',async()=>{
   const root=resolve('public/assets/help'),manifest=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
-  assert.equal(manifest.files.length,6);
+  assert.equal(manifest.files.length,5);
   for(const source of manifest.sources){
     assert.match(source.path,/^screenshots\/[\w-]+\.png$/);
     assert.equal(createHash('sha256').update(await readFile(source.path)).digest('hex'),source.sha256);
