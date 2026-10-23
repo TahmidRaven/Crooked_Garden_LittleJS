@@ -69,10 +69,11 @@
       <div class="help-page">
         <div class="help-topbar"><h2 id="help-title">HOW TO PLAY</h2><button id="help-back" class="text-button">← Back to menu</button></div>
         <div class="help-scroll" role="region" tabindex="0" aria-label="Game instructions">
+          <div class="help-tools"><button id="help-motion" class="text-button" aria-pressed="false">Play clips</button></div>
           <div class="help-walkthrough">
             <article class="help-lesson">
               <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">01</span><h3>Hold and move to grow</h3><p><strong>Press and hold ahead of the vine.</strong> Move your mouse or finger to steer. You don't need to grab the plant.</p><p class="help-first-tip">Try it: hold over the orange flower on the lower right.</p></div>
-              <figure class="help-scene"><img src="./assets/help/steering.png" width="500" height="360" alt="The vine grows from its pot toward the orange flower, then bends up around a ledge."></figure>
+              <figure class="help-scene"><img src="./assets/help/steering.png" data-still="./assets/help/steering.png" data-motion="./assets/help/grow.gif" width="480" height="371" alt="The vine grows from its pot toward the orange flower, then bends around the ledge."></figure>
             </article>
             <article class="help-lesson">
               <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">02</span><h3>Flowers are the goal</h3><p>Reach all three to clear a garden. Growing uses water, so pick up blue drops along the way.</p></div>
@@ -80,11 +81,11 @@
             </article>
             <article class="help-lesson help-loop-lesson">
               <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">03</span><h3>Make a loop to catch bugs</h3><p>Grow around a bug, then join back onto your vine. Catches give water back. <strong>Keep loops small.</strong></p></div>
-              <div class="help-catch-pair"><figure><figcaption><span>1</span> Grow around the bugs</figcaption><img src="./assets/help/loop-before.png" width="540" height="360" alt="Both bugs remain visible as the vine grows around them."></figure><figure><figcaption><span>2</span> Join back onto your vine</figcaption><img src="./assets/help/loop-after.png" width="540" height="360" alt="The completed loop catches both bugs and shows the reward."></figure></div>
+              <figure class="help-loop-motion"><img src="./assets/help/loop-after.png" data-still="./assets/help/loop-after.png" data-motion="./assets/help/capture.gif" width="480" height="328" alt="The vine grows around two moving bugs, reconnects to its stem, and catches both."><figcaption>Grow around → join back → catch</figcaption></figure>
             </article>
             <article class="help-lesson">
               <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">04</span><h3>Burst past danger</h3><p>Press <kbd>Shift</kbd> while growing, or tap <strong>Burst</strong> then grow. It protects you from bugs, <strong>not ledges</strong>. Stars mean a bug is stunned.</p></div>
-              <figure class="help-scene help-stun-scene"><img src="./assets/help/stunned-bugs.png" width="230" height="144" alt="Stunned bugs have stars above their heads."></figure>
+              <figure class="help-scene"><img src="./assets/help/stunned-bugs.png" data-still="./assets/help/stunned-bugs.png" data-motion="./assets/help/burst.gif" width="480" height="328" alt="A real Burst protects the growing vine as it approaches the bugs."></figure>
             </article>
           </div>
           <div class="help-safety"><div class="help-control-labels" aria-hidden="true"><span>Ⅱ Pause</span><span>↶ Rewind</span></div><p>Letting go stops the vine, but bugs keep moving. Pause freezes everything. Rewind backs up the vine but costs score.</p></div>

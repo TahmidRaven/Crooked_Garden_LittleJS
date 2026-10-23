@@ -6,6 +6,8 @@
 - **Build tooling:** Vite (MIT); see installed package license.
 - **Initial visuals:** original procedural Canvas2D drawings made for this project.
 - **How to Play illustrations:** cropped from this game's real showcase screenshots (including the credited Kenney art below); no external tutorial images. Flower/water close-ups are arranged side by side with circular masks; wider loop crops preserve gameplay context. Reproduction: `scripts/crop-help-images.py`; source screenshots, sizes and SHA-256 hashes: `public/assets/help/manifest.json`.
+- **How to Play GIFs:** recorded from real pointer/Shift gameplay, encoded with `scripts/capture-help-motion.mjs` and `scripts/encode-help-motion.py`. No injected game state. GIF hashes/dimensions are in `public/assets/help/motion-manifest.json`.
+- **Itch cover:** composed promotional artwork using this game's original garden shapes, credited Kenney sprites below, and the studio raven logo. Hunter sprite colours match runtime. Source: `scripts/make-cover.py`. Not represented as a gameplay screenshot.
 - **Initial sound effects:** synthesized tones made for this project.
 - **Concept images:** OpenAI image generation; used for discussion only, not bundled.
 

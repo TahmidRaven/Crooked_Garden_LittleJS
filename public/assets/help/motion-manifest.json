@@ -1,0 +1,33 @@
+{
+  "recorder": "scripts/capture-help-motion.mjs",
+  "encoder": "scripts/encode-help-motion.py",
+  "files": [
+    {
+      "path": "grow.gif",
+      "size": [
+        480,
+        371
+      ],
+      "frames": 16,
+      "sha256": "18a06a76fcdee791a0c65780f5e3034f306d6b6fad3a075ba7bb2e42e72ca5f6"
+    },
+    {
+      "path": "capture.gif",
+      "size": [
+        480,
+        328
+      ],
+      "frames": 27,
+      "sha256": "cab070afe2b175ebfc05b13a6e3595043f0688c408d86cecc9a7b2bb2f522820"
+    },
+    {
+      "path": "burst.gif",
+      "size": [
+        480,
+        328
+      ],
+      "frames": 12,
+      "sha256": "67a9be027922f76af71f641277e1ea29866bc3e7cf95d700d3233fbfc3678cf6"
+    }
+  ]
+}

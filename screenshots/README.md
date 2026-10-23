@@ -1,5 +1,14 @@
 # Showcase screenshots
 
+## Itch cover
+
+- `cover-630x500.png` — recommended itch cover upload.
+- `cover-1260x1000.png` — 2× master of the same cover.
+
+The cover is composed promotional artwork, not a gameplay screenshot: original vine/flower/forest shapes, the game's credited Kenney sprites, and After Hours Arcade's raven mark. Hunter colours match the game. Regenerate with `python3 scripts/make-cover.py` (Pillow; uses local Arial Rounded Bold on macOS, DejaVu Sans Bold fallback on Linux).
+
+## Gameplay captures
+
 Captured from the current game through browser pointer/keyboard controls, using reproducible swarm seeds (44 for the capture run, 99 for the two-flower/live-bug run). Gameplay state was not injected, and no bugs were pasted into the originals. Originals are captured at 2× resolution.
 
 - `01-title.png` — title screen with the original After Hours Arcade raven logo.

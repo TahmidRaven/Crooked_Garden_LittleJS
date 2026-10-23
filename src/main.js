@@ -32,13 +32,23 @@ function retry(){begin(garden.index,bank);}
 function home(){garden=createArcade();held=false;phase='title';particles=[];popups=[];bank=0;updateUI();$('play').focus({preventScroll:true});}
 function pause(){if(phase==='playing'){phase='paused';held=false;updateUI();$('resume').focus({preventScroll:true});}}
 function resume(){if(phase==='paused'){phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});}}
+let helpMotion=!reducedMotion;
+function updateHelpMotion(){
+  const playing=phase==='help'&&helpMotion;
+  for(const image of $('help-screen').querySelectorAll('[data-motion]')){
+    const source=playing?image.dataset.motion:image.dataset.still;
+    if(image.getAttribute('src')!==source)image.setAttribute('src',source);
+  }
+  $('help-motion').textContent=helpMotion?'Pause clips':'Play clips';
+  $('help-motion').setAttribute('aria-pressed',String(helpMotion));
+}
 function openHelp(){
   if(!['title','paused'].includes(phase))return;
-  helpReturn=phase;phase='help';held=false;updateUI();$('help-screen').querySelector('.help-scroll').scrollTop=0;$('help-back').focus({preventScroll:true});
+  helpReturn=phase;phase='help';held=false;updateUI();updateHelpMotion();$('help-screen').querySelector('.help-scroll').scrollTop=0;$('help-back').focus({preventScroll:true});
 }
 function closeHelp(){
   if(phase!=='help')return;
-  phase=helpReturn;updateUI();$(helpReturn==='title'?'how-to-play':'pause-help').focus({preventScroll:true});
+  phase=helpReturn;updateUI();updateHelpMotion();$(helpReturn==='title'?'how-to-play':'pause-help').focus({preventScroll:true});
 }
 function openCredits(){
   if(phase!=='title')return;
@@ -112,7 +122,8 @@ $('play').onclick=()=>begin();$('resume').onclick=resume;$('pause').onclick=paus
 $('restart').onclick=retry;$('pause-retry').onclick=retry;$('undo').onclick=doRewind;$('result-undo').onclick=doRewind;
 $('home').onclick=home;$('result-home').onclick=home;$('boost').onclick=burst;
 $('how-to-play').onclick=openHelp;$('pause-help').onclick=openHelp;$('help-back').onclick=closeHelp;
-$('help-play').onclick=()=>{if(helpReturn==='title')begin();else{phase='paused';resume();}};
+$('help-motion').onclick=()=>{helpMotion=!helpMotion;updateHelpMotion();};
+$('help-play').onclick=()=>{if(helpReturn==='title')begin();else{phase='paused';resume();}updateHelpMotion();};
 $('asset-credits').onclick=openCredits;$('credits-back').onclick=closeCredits;$('credits-done').onclick=closeCredits;
 $('next').onclick=()=>{if(perfect()){if(garden.index+1<LEVELS.length)begin(garden.index+1,bank+stageScore());else begin();}else retry();};
 $('music').onclick=async()=>{

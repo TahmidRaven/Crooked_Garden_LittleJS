@@ -29,6 +29,19 @@ test('guide illustrations retain their showcase sources, PNG dimensions and hash
   }
 });
 
+test('guide motion clips are small animated GIFs with recorded dimensions and hashes',async()=>{
+  const root=resolve('public/assets/help'),manifest=JSON.parse(await readFile(`${root}/motion-manifest.json`,'utf8'));
+  assert.equal(manifest.files.length,3);
+  for(const file of manifest.files){
+    assert.match(file.path,/^[\w-]+\.gif$/);
+    const bytes=await readFile(resolve(root,file.path));
+    assert.match(bytes.subarray(0,6).toString(),/^GIF8[79]a$/);
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
+    assert.deepEqual([bytes.readUInt16LE(6),bytes.readUInt16LE(8)],file.size);
+    assert.ok(file.frames>5);assert.ok(bytes.length<2_000_000);
+  }
+});
+
 test('bundled external assets have sources, CC0 license evidence, and matching hashes',async()=>{
   const root=resolve('public/assets'),manifest=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
   assert.ok(manifest.packs.length>=3,'Music and both art packs should be documented');
