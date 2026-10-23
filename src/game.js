@@ -11,7 +11,7 @@ export const LEVELS = [{
   name: 'Moonlit clearing',
   hint: 'Wake all three flowers. Outgrow the swarm.',
   start: {x:300,y:635},
-  water: 660,
+  water: 720,
   rocks: [{x:85,y:475,w:280,h:26},{x:280,y:310,w:235,h:26}],
   flowers: [
     {x:430,y:550,name:'Marigold',color:'#e2a347'},

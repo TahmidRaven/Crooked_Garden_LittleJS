@@ -38,7 +38,7 @@ Refresh/first-paint follow-up: the user saw raw HTML briefly before CSS loaded. 
 
 - Grow toward the pointer (or arrow-key light + G), avoid mossy terrain and bugs, collect dew, and restore **all three flowers** to advance. No early finish/partial victory. Water exhaustion is failure even after some flowers bloom.
 - Three levels: Moonlit clearing, Overgrown terraces, Heart of the wild. Different roots, targets and dew. Two enemies in the earlier gardens, three in the final garden.
-- Starting water is 660 / 760 / 800. The first garden was increased from 580 after varied encounters exposed an overly tight defensive-burst budget.
+- Starting water is 720 / 760 / 800. The first garden was previously increased from 580 to 660 after varied encounters exposed an overly tight defensive-burst budget; the latest user-requested first-garden-only increase adds another 60 (about 9%). Later gardens, bugs, Burst costs and capture rewards are unchanged.
 - Burst: 30 water, .45s protection, 280 units/s, 2s cooldown. It stuns contacted bugs for 1.5s, but never crosses terrain. Flowers stun the swarm for .8s and refresh cooldown. Stun credit is once per distinct bug per attempt.
 - Rewind restores vine history, grants .9s recovery protection and costs 100 score. Enemy time/cooldowns do not rewind. Retry creates a new swarm. Pause/hidden-tab freezes the simulation.
 - Score carries between cleared gardens; best is local browser storage only (`crooked-garden-best-v2`). No account sync or online leaderboard.
@@ -78,7 +78,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 
 ## Validation and useful commands
 
-- `npm test`: **76 tests** — gameplay/art/render coverage plus six water-balance tests and four failure-audio tests. Refund tests verify tight-loop economics, the fixed cap, a single refund per multi-catch, true-crossing length independent of point density and a first-garden single-catch detour ending with under 80 spare water (seed 20).
+- `npm test`: **77 tests** — gameplay/art/render coverage plus seven water-balance tests and four failure-audio tests. Water tests verify 720/760/800 starting tanks, tight-loop economics, the fixed cap, a single refund per multi-catch, true-crossing length independent of point density and a first-garden single-catch detour ending with 60–140 spare water (seed 20).
 - `npm run build`: production build.
 - `env NODE_OPTIONS='' npm run test:browser`: native LittleJS splash/branding (desktop + short landscape), deliberately delayed images proving the menu waits for readiness, real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.

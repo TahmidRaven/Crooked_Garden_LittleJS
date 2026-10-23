@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import {captureWaterReward,LOOP_REFUND_CAP,LOOP_REFUND_RATE,createArcade,tickArcade,queueBurst,bugsAt} from '../src/arcade.js';
 import {findClosedLoop} from '../src/loops.js';
 
-test('efficient catches nearly pay for their loop without increasing starting water',()=>{
+test('only the first garden gets extra starting water',()=>{
+  assert.deepEqual([0,1,2].map(stage=>createArcade({stage,seed:1}).water),[720,760,800]);
+});
+test('efficient catches nearly pay for their loop',()=>{
   const reward=captureWaterReward(1,280);
-  assert.equal(createArcade({seed:1}).water,660);
   assert.equal(reward.refund,210);assert.equal(reward.total,280);
 });
 test('large wasteful loops remain costly and cannot grow an unlimited refund',()=>{
@@ -33,12 +35,12 @@ test('reported loop cost includes the joined stem segment regardless of point de
   assert.equal(a.length,400);assert.equal(b.length,400);
 });
 test('a single-catch detour can clear the first garden with a small water margin',()=>{
-  const g=createArcade({seed:20});assert.equal(g.water,660);
+  const g=createArcade({seed:20});assert.equal(g.water,720);
   const route=[[430,550],[500,550],[500,435],[380,435],[380,360],[300,360],[300,435],[395,435],[205,390],[130,390],[130,280],[345,170]];
   for(const [x,y] of route)for(let f=0;f<800&&Math.hypot(g.path.at(-1).x-x,g.path.at(-1).y-y)>8&&!['won','blocked','dry'].includes(g.status);f++){
     if(g.cooldown<=0&&g.burst<=0&&bugsAt(g).some(b=>!b.captured&&!b.stunned&&Math.hypot(g.path.at(-1).x-b.x,g.path.at(-1).y-b.y)<65))queueBurst(g);
     tickArcade(g,{x,y},{growing:true});
   }
   assert.equal(g.status,'won');assert.equal(g.captures,1);assert.ok(g.bloomed.every(Boolean));
-  assert.ok(g.water>0&&g.water<80,'The detour should be possible without leaving an excessive spare tank');
+  assert.ok(g.water>60&&g.water<140,'The detour should leave a little extra breathing room, not a full tank');
 });

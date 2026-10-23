@@ -30,7 +30,7 @@ The first garden's bugs share the open gap between roots, making a double catch 
 
 ### Water balance
 
-Starting water stays **660 / 760 / 800**. Captures—not a larger free tank—fund extra trapping detours. For a single catch:
+Starting water is **720 / 760 / 800**. The first garden gets 60 extra water to give new players a little more room; later gardens are unchanged. Captures still fund extra trapping detours. For a single catch:
 
 | Loop growth cost | Water awarded | Net loop cost |
 | --- | --- | --- |
@@ -120,7 +120,7 @@ Hunter flies use a warm amber body instead of the original grey. The palette rem
 
 ## Validation
 
-- **76 unit tests:** existing gameplay/art/render coverage plus capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
+- **77 unit tests:** existing gameplay/art/render coverage plus first-garden-only starting water, capped loop-cost refunds, efficient versus oversized loop economics, a single-catch detour clearing with a small water margin, point-density-independent true closure cost, failure cue selection, mute/victory guards and safe audio fallback.
 - **Browser checks:** changing wing images while idle enemy positions stay fixed; an actual moving-bug double capture, combo rewards/rewind and first-garden clear; native splash/slow loading, title/play/pause/results, guide/credits, all three gardens through real input, scoring, retry variation, touch, decoded sprites, reduced motion, audio, and 11 viewport sizes from 320×568 portrait / 568×320 landscape through desktop.
 - Browser tests seed the randomness source for reproducibility, while verifying that retries still get different seeds. They do not mutate game state or unlock levels through shortcuts.
 - Screenshots are in ignored `artifacts/` (`vine-mobile.png`, `vine-reduced-motion.png`, `double-catch.png`, `title.png`, `how-to-play*.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`).
