@@ -10,13 +10,20 @@ OUT = ROOT / 'screenshots'
 S = 3
 W, H = 630, 500
 random.seed(14)
-image = Image.new('RGBA', (W*S, H*S))
-draw = ImageDraw.Draw(image)
-for y in range(H*S):
-    t = y/(H*S)
-    draw.line((0, y, W*S, y), fill=(int(7+7*t), int(26+23*t), int(30+12*t)))
-for x in range(-30, 680, 49):
-    draw.polygon([(x*S, 0), ((x+24)*S, 0), ((x+12)*S, H*S), ((x-13)*S, H*S)], fill=(14, 45, 43, 255))
+backdrop = Image.new('RGB',(W,H))
+pixels = backdrop.load()
+for y in range(H):
+    for x in range(W):
+        light=math.exp(-((x-450)**2/(260**2)+(y-345)**2/(200**2)))
+        pixels[x,y]=(int(5+17*light),int(22+45*light),int(27+28*light))
+image=backdrop.resize((W*S,H*S),Image.Resampling.BICUBIC).convert('RGBA')
+draw=ImageDraw.Draw(image)
+for x,width,lean in [(-15,70,12),(90,32,-15),(158,22,16),(225,45,-9),(317,24,18),(389,34,-12),(482,18,20),(561,37,28),(622,47,-15)]:
+    draw.polygon([(x*S,0),((x+width)*S,0),((x+width+lean)*S,H*S),((x+lean)*S,H*S)],fill=(5,26,29,150))
+shafts=Image.new('RGBA',image.size);sd=ImageDraw.Draw(shafts)
+sd.polygon([(520*S,0),(565*S,0),(345*S,500*S),(290*S,500*S)],fill=(168,204,136,12))
+sd.polygon([(590*S,0),(605*S,0),(465*S,500*S),(425*S,500*S)],fill=(184,214,148,14))
+image.alpha_composite(shafts.filter(ImageFilter.GaussianBlur(7*S)))
 
 
 def sprite(name, center, width, angle=0):
@@ -40,9 +47,11 @@ def sprite(name, center, width, angle=0):
     image.alpha_composite(source, (round(center[0]*S-source.width/2), round(center[1]*S-source.height/2)))
 
 
-for center, width, angle in [((-15, 370), 200, -25), ((645, 360), 190, 155)]:
+for center, width, angle in [((-10, 380), 275, -25), ((650, 400), 275, 155)]:
     source = Image.open(ART/'foliage.png').convert('RGBA')
-    source.putalpha(source.getchannel('A').point(lambda a: round(a*.15)))
+    alpha=source.getchannel('A').point(lambda a: round(a*.75))
+    source=Image.new('RGBA',source.size,'#305341')
+    source.putalpha(alpha)
     source = source.resize((width*S, width*S)).rotate(angle, expand=True)
     image.alpha_composite(source, (round(center[0]*S-source.width/2), round(center[1]*S-source.height/2)))
 draw = ImageDraw.Draw(image)
@@ -51,9 +60,14 @@ for _ in range(38):
     r=random.choice([.7,1,1.4])*S
     draw.ellipse((x*S-r,y*S-r,x*S+r,y*S+r), fill=(111,137,78,150))
 
-# A new, flowing lasso illustration. The tip naturally meets an earlier part
-# of the stem; there is no rectangular cage, badge or artificial capture glow.
-points=[(105,441),(175,405),(225,395),(265,405),(335,425),(420,420),(490,375),(514,315),(514,275),(440,265),(350,278),(280,310),(245,355),(248,385),(265,405)]
+# Key art, not a diagram: a growing vine zigzags between mossy shelves toward
+# the large bloom. No loop, enclosure, capture text or UI.
+draw=ImageDraw.Draw(image)
+draw.rounded_rectangle((175*S,360*S,327*S,382*S),radius=8*S,fill='#112e2d')
+draw.rounded_rectangle((174*S,357*S,328*S,365*S),radius=4*S,fill='#53754b')
+for x in [187,211,242,270,306]:
+    draw.ellipse((x*S,349*S,(x+7)*S,360*S),fill='#718f50')
+points=[(105,441),(159,410),(250,422),(318,407),(352,375),(356,340),(414,338),(467,328),(490,305)]
 path=[]
 for i in range(len(points)-1):
     p0=points[max(0,i-1)];p1=points[i];p2=points[i+1];p3=points[min(len(points)-1,i+2)]
@@ -64,7 +78,7 @@ for i in range(len(points)-1):
             a,b,c,d=p0[axis],p1[axis],p2[axis],p3[axis]
             xy.append(round(.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t)*S))
         path.append(tuple(xy))
-path.append((265*S,405*S))
+path.append((490*S,305*S))
 draw=ImageDraw.Draw(image)
 for color,width,offset in [('#041d1e',15,(0,4)),('#416537',10,(0,0)),('#84b754',6,(0,0)),('#c4df86',2,(-1,-1))]:
     draw.line([(x+offset[0]*S,y+offset[1]*S) for x,y in path], fill=color, width=width*S, joint='curve')
@@ -84,7 +98,7 @@ for x,y,angle in leaves:
     leaf=leaf.rotate(angle,Image.Resampling.BICUBIC,expand=True)
     image.alpha_composite(leaf,(round(x*S-leaf.width/2),round(y*S-leaf.height/2-5*S)))
 
-sprite('flower-pot.png',(105,452),61)
+sprite('flower-pot.png',(105,456),82)
 # Same petal shapes and palette as the in-game marigold.
 flower=Image.new('RGBA',(120*S,120*S));fd=ImageDraw.Draw(flower)
 for angle in range(0,360,72):
@@ -92,26 +106,41 @@ for angle in range(0,360,72):
     pd.ellipse((48*S,14*S,72*S,68*S),fill='#e6ad50')
     flower.alpha_composite(petal.rotate(angle,Image.Resampling.BICUBIC,center=(60*S,60*S)))
 fd=ImageDraw.Draw(flower);fd.ellipse((46*S,46*S,74*S,74*S),fill='#ffe5a1')
-image.alpha_composite(flower,(454*S,215*S))
-sprite('bee-flight-2.png',(321,329),67,-18)
-sprite('fly-flight-1.png',(407,367),65,16)
+flower=flower.resize((174*S,174*S),Image.Resampling.LANCZOS)
+warmth=Image.new('RGBA',image.size);wd=ImageDraw.Draw(warmth)
+wd.ellipse((415*S,230*S,565*S,380*S),fill=(238,193,85,50))
+image.alpha_composite(warmth.filter(ImageFilter.GaussianBlur(26*S)))
+image.alpha_composite(flower,(403*S,218*S))
+# Flight strokes are decorative motion cues rather than a closing stem.
+draw=ImageDraw.Draw(image)
+draw.arc((170*S,273*S,281*S,345*S),200,255,fill='#91b17b',width=2*S)
+draw.arc((184*S,278*S,285*S,344*S),203,243,fill='#4e7961',width=2*S)
+sprite('bee-flight-2.png',(272,301),90,-23)
+sprite('fly-flight-1.png',(445,423),76,22)
+for x,y in [(380,282),(420,367),(530,401),(150,322)]:
+    draw=ImageDraw.Draw(image)
+    draw.line((x*S,(y-4)*S,x*S,(y+4)*S),fill='#dddfa3',width=S)
+    draw.line(((x-4)*S,y*S,(x+4)*S,y*S),fill='#dddfa3',width=S)
 
 font_path=Path('/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf')
 if not font_path.exists():
     font_path=Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
 def text_center(text,y,size,color,stroke=0):
     font=ImageFont.truetype(str(font_path),size*S)
-    box=font.getbbox(text);x=(W*S-(box[2]-box[0]))/2
-    draw=ImageDraw.Draw(image)
+    box=font.getbbox(text);x=((W-34)*S-(box[2]-box[0]))/2
+    lettering=Image.new('RGBA',image.size)
+    draw=ImageDraw.Draw(lettering)
     draw.text((x,y*S+5*S),text,font=font,fill='#031a1d',stroke_width=stroke*S,stroke_fill='#031a1d')
     draw.text((x,y*S),text,font=font,fill=color,stroke_width=stroke*S,stroke_fill='#031a1d')
+    image.alpha_composite(lettering.rotate(3,Image.Resampling.BICUBIC,center=(290*S,150*S)))
 
-text_center('CROOKED',47,77,'#f6f3d1',2)
-text_center('GARDEN',122,91,'#c3e68f',2)
-text_center('GROW. LOOP. BLOOM.',226,14,'#e4d38e')
-sprite('after-hours-arcade.png',(227,26),19)
+text_center('CROOKED',53,77,'#f6f3d1',2)
+text_center('GARDEN',132,91,'#c3e68f',2)
+font=ImageFont.truetype(str(font_path),12*S)
+ImageDraw.Draw(image).text((70*S,235*S),'GROW. LOOP. BLOOM.',font=font,fill='#e4d38e')
+sprite('after-hours-arcade.png',(81,27),19)
 font=ImageFont.truetype(str(font_path),10*S)
-ImageDraw.Draw(image).text((243*S,20*S),'AFTER HOURS ARCADE',font=font,fill='#eadfbb')
+ImageDraw.Draw(image).text((97*S,21*S),'AFTER HOURS ARCADE',font=font,fill='#eadfbb')
 OUT.mkdir(exist_ok=True)
-image.convert('RGB').resize((1260,1000),Image.Resampling.LANCZOS).save(OUT/'cover-v2-1260x1000.png',optimize=True)
-image.convert('RGB').resize((630,500),Image.Resampling.LANCZOS).save(OUT/'cover-v2-630x500.png',optimize=True)
+image.convert('RGB').resize((1260,1000),Image.Resampling.LANCZOS).save(OUT/'cover-v3-1260x1000.png',optimize=True)
+image.convert('RGB').resize((630,500),Image.Resampling.LANCZOS).save(OUT/'cover-v3-630x500.png',optimize=True)

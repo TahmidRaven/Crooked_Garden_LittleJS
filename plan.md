@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Cover v3: user still disliked the loop presentation and requested a more game-like cover. Created separate no-loop key art at `screenshots/cover-v3-630x500.png` plus a 2× master. Uses a tilted oversized title, larger marigold and flying bugs, a winding upward vine/mossy ledge, forest lighting and tinted foreground foliage. Kept the studio mark and prior covers. Promotional assets only; no game/build changes.
+
 Cover v2: user disliked the angular loop and requested another cover. Added separate `screenshots/cover-v2-630x500.png` and 1260×1000 master, retaining previous exports. New spline-drawn organic lasso reconnects to older stem around both bugs; no capture label, particles or join glow. Opened the new export in Review. Promotional art only; no game/build changes.
 
 Cover correction: user noted the initial cover did not clearly depict a proper loop capture. Revised both cover exports to trace one continuous vine from the pot to the flower, around both bugs and back onto older stem. Added a visible join ring, enclosed-area glow, conversion particles and DOUBLE CATCH feedback. Promotional artwork only; game/build unchanged.
