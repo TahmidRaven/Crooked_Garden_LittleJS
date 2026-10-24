@@ -1,5 +1,9 @@
 # Crooked Garden — Outgrow the swarm
 
+## [Play Crooked Garden on itch.io](https://ravendeath.itch.io/crooked-garden)
+
+Play free in your browser—no download needed.
+
 An **After Hours Arcade** game by [TahmidRaven](https://tahmidraven.com). The title and Credits page use the studio's original orange raven mark from FeastFury.
 
 A full-screen browser arcade built with LittleJS. Grow a luminous vine, **close loops around bugs to capture them**, reclaim water, and wake every flower across three wild gardens. The game has a title screen, in-world HUD, pause menu, results, stage progression, score and a local best score—no website-style sidebar or framed board.

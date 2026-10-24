@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Game page: user supplied the itch.io URL, https://ravendeath.itch.io/crooked-garden. Added a prominent Play link near the top of README. Uploading a game page is separate from submitting to the jam; no jam-submission status inferred.
+
 Build output location: user requested the upload ZIP under the repo's `buildDirectories/` folder. Packaging now writes `buildDirectories/crooked-garden.zip`; this supersedes the old ignored `artifacts/` ZIP path. No gameplay changes.
 
 Browser-icon follow-up: added an original orange marigold on a dark green rounded background as `public/favicon.svg`, with 32px PNG/16–48px ICO fallbacks and a 180px Apple touch icon. Relative head links support itch's nested embed paths. PNG/ICO variants are reproducible with `python3 scripts/make-icons.py` (Pillow). No gameplay changes.
