@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Browser-icon follow-up: added an original orange marigold on a dark green rounded background as `public/favicon.svg`, with 32px PNG/16–48px ICO fallbacks and a 180px Apple touch icon. Relative head links support itch's nested embed paths. PNG/ICO variants are reproducible with `python3 scripts/make-icons.py` (Pillow). No gameplay changes.
+
 Cover v3: user still disliked the loop presentation and requested a more game-like cover. Created separate no-loop key art at `screenshots/cover-v3-630x500.png` plus a 2× master. Uses a tilted oversized title, larger marigold and flying bugs, a winding upward vine/mossy ledge, forest lighting and tinted foreground foliage. Kept the studio mark and prior covers. Promotional assets only; no game/build changes.
 
 Cover v2: user disliked the angular loop and requested another cover. Added separate `screenshots/cover-v2-630x500.png` and 1260×1000 master, retaining previous exports. New spline-drawn organic lasso reconnects to older stem around both bugs; no capture label, particles or join glow. Opened the new export in Review. Promotional art only; no game/build changes.
@@ -94,7 +96,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 
 ## Validation and useful commands
 
-- `npm test`: **80 tests** — gameplay/art/render, GIF integrity/size, guide-crop and studio-logo provenance coverage plus seven water-balance tests and four failure-audio tests. Water tests verify 720/760/800 starting tanks, tight-loop economics, the fixed cap, a single refund per multi-catch, true-crossing length independent of point density and a first-garden single-catch detour ending with 60–140 spare water (seed 20).
+- `npm test`: **81 tests** — gameplay/art/render, favicon/touch-icon packaging, GIF integrity/size, guide-crop and studio-logo provenance coverage plus seven water-balance tests and four failure-audio tests. Water tests verify 720/760/800 starting tanks, tight-loop economics, the fixed cap, a single refund per multi-catch, true-crossing length independent of point density and a first-garden single-catch detour ending with 60–140 spare water (seed 20).
 - `npm run build`: production build.
 - `env NODE_OPTIONS='' npm run test:browser`: native LittleJS splash/branding (desktop + short landscape), deliberately delayed images proving the menu waits for readiness, real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.

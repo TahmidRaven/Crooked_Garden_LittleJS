@@ -4,6 +4,22 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve,sep} from 'node:path';
 
+test('browser and home-screen icons are bundled and use relative links for embedded builds',async()=>{
+  const html=await readFile('index.html','utf8');
+  for(const name of ['favicon.svg','favicon-32.png','favicon.ico','apple-touch-icon.png']){
+    assert.ok(html.includes(`href="./${name}"`));
+    assert.ok((await readFile(`public/${name}`)).length>0);
+  }
+  const svg=await readFile('public/favicon.svg','utf8');
+  assert.match(svg,/viewBox="0 0 64 64"/);assert.match(svg,/#e6ad50/);
+  for(const [name,size] of [['favicon-32.png',32],['apple-touch-icon.png',180]]){
+    const bytes=await readFile(`public/${name}`);
+    assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+    assert.deepEqual([bytes.readUInt32BE(16),bytes.readUInt32BE(20)],[size,size]);
+  }
+  assert.equal((await readFile('public/favicon.ico')).subarray(0,4).toString('hex'),'00000100');
+});
+
 test('studio branding retains the original FeastFury raven mark and separate ownership',async()=>{
   const root=resolve('public/assets'),{branding}=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
   assert.equal(branding.owner,'TahmidRaven / After Hours Arcade');
