@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="58" viewBox="0 0 250 58" role="img" aria-label="Play on itch.io">
+  <defs>
+    <linearGradient id="gold" x2="0" y2="1">
+      <stop stop-color="#f6db94"/>
+      <stop offset="1" stop-color="#d5b266"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="5" width="248" height="52" rx="14" fill="#756039"/>
+  <rect x="1" y="1" width="248" height="50" rx="14" fill="url(#gold)"/>
+  <path d="M27 17v19l16-9.5Z" fill="#2a3925"/>
+  <text x="142" y="32" text-anchor="middle" fill="#2a3925" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="1">PLAY ON ITCH.IO</text>
+</svg>
