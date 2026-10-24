@@ -95,3 +95,35 @@ ImageDraw.Draw(flower).ellipse((57,57,93,93),fill='#ffe5a1')
 banner.alpha_composite(flower,(1080,74))
 sprite(banner,'bee-flight-2.png',(1086,250),77,-17)
 banner.convert('RGB').save(OUT/'banner-1260x300.png',optimize=True)
+
+# Keep the original composition, but fit itch's narrower page column without cropping.
+compact=forest(960,240,12)
+compact.alpha_composite(banner.resize((960,229),Image.Resampling.LANCZOS),(0,5))
+compact.convert('RGB').save(OUT/'banner-960x240.png',optimize=True)
+
+# Click-to-play artwork: leave the centre clear for itch's own launch button.
+embed=forest(1280,720,45,quiet=True)
+draw=ImageDraw.Draw(embed)
+font=ImageFont.truetype(str(FONT),67)
+words=[('CROOKED ','#f6f3d1'),('GARDEN','#c3e68f')]
+x=(embed.width-sum(draw.textlength(text,font=font) for text,_ in words))/2
+for text,color in words:
+    draw.text((x,115),text,font=font,fill=color,stroke_width=2,stroke_fill='#031a1d')
+    x+=draw.textlength(text,font=font)
+font=ImageFont.truetype(str(FONT),20)
+draw.text((640,213),'GROW. LOOP. BLOOM.',anchor='mt',font=font,fill='#e4d38e')
+for points in [[(170,650),(190,548),(150,472),(205,400),(175,310)],
+               [(1110,650),(1070,560),(1120,480),(1065,400),(1100,310)]]:
+    for color,width in [('#173c2e',14),('#84b754',7),('#c4df86',2)]:
+        draw.line(points,fill=color,width=width,joint='curve')
+    for x,y in points[1:-1]:
+        draw.ellipse((x-23,y-13,x+2,y),fill='#87af59')
+    sprite(embed,'flower-pot.png',points[0],85)
+    embed.alpha_composite(flower,(points[-1][0]-75,points[-1][1]-75))
+sprite(embed,'bee-flight-2.png',(1010,290),82,-17)
+sprite(embed,'bee-flight-2.png',(255,440),57,15)
+sprite(embed,'after-hours-arcade.png',(520,662),28)
+draw=ImageDraw.Draw(embed)
+font=ImageFont.truetype(str(FONT),16)
+draw.text((545,654),'AFTER HOURS ARCADE',font=font,fill='#e5dbb7')
+embed.convert('RGB').save(OUT/'embed-background-1280x720.png',optimize=True)
