@@ -54,6 +54,14 @@
 - **Reproducibility:** `scripts/render-flower-pot.mjs` / `npm run art:pot`. Original mesh/material hashes and rendered PNG hash are in `public/assets/manifest.json` and checked by tests.
 - **Bundled license:** `public/assets/licenses/kenney-furniture.txt` (archive notice, whitespace normalized).
 
+## On-screen joystick — Kenney
+
+- **Pack:** [Mobile Controls](https://kenney.nl/assets/mobile-controls), by Kenney.
+- **License:** CC0 1.0 Universal, verified on the official page and archive's `License.txt`, October 24, 2026. Notice included as `public/assets/licenses/kenney-mobile-controls.txt`.
+- **Download:** https://kenney.nl/media/pages/assets/mobile-controls/0d047b3be4-1754738457/mobile-controls-1.zip
+- **Files:** `Sprites/Style C/Large (2×)/joystick_circle_pad_a.png` and `Sprites/Style B/Large (2×)/joystick_circle_nub_a.png` → `public/assets/art/joystick-pad.png` and `joystick-nub.png`.
+- **Changes:** original PNGs unchanged; scaled, partially transparent and subtly sepia-tinted with CSS. Hashes and exact source paths are recorded in the asset manifest.
+
 ## Discovery and license notes
 
 [Kenney's itch.io page](https://kenney.itch.io/kenney-game-assets) lists the All-in-1 bundle as CC0 and explains it is a collection of freely available packs. The bundle is paid; individual packs can be downloaded free from the creator's official asset pages. No bundle purchase or paid content was used. [Kenney's support page](https://kenney.nl/support) confirms commercial use is permitted; Kenney's logo is reserved and is **not** bundled.

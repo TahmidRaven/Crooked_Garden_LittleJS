@@ -25,11 +25,14 @@ try{
     frames[kind].push({path,burst:s.burst,captures:s.captures});
   }
   async function grow(x,y,kind){
-    const {view:v}=await state();
-    await page.mouse.move(v.x+x*v.scale,v.y+y*v.scale);
+    // Keep the joystick outside the cropped illustration; drive it with real input.
+    const anchor={x:350,y:650};
+    await page.mouse.move(anchor.x,anchor.y);
     await page.mouse.down();
     for(let i=0;i<200;i++){
       const before=await state();
+      const dx=x-before.tip.x,dy=y-before.tip.y,length=Math.hypot(dx,dy)||1;
+      await page.mouse.move(anchor.x+40*dx/length,anchor.y+40*dy/length);
       if(before.cooldown<=0&&before.burst<=0&&before.bugs.some(b=>!b.captured&&!b.stunned&&Math.hypot(before.tip.x-b.x,before.tip.y-b.y)<65))await page.keyboard.press('Shift');
       await page.clock.runFor(100);
       const s=await state();assert.equal(s.phase,'playing');
@@ -43,7 +46,7 @@ try{
   for(const [x,y]of [[430,550],[500,550]])await grow(x,y,'grow');
   await grow(500,435);
   await frame('loop');
-  for(const [x,y]of [[380,435],[380,360],[300,360],[300,435],[395,435]]){
+  for(const [x,y]of [[380,435],[380,380],[360,360],[300,360],[300,435],[395,435]]){
     await grow(x,y,'loop');
     if((await state()).captures)break;
   }

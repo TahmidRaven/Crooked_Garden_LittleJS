@@ -10,6 +10,20 @@
   },
   "packs": [
     {
+      "name": "Mobile Controls",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/mobile-controls",
+      "itch": "https://kenney.itch.io/kenney-game-assets",
+      "download": "https://kenney.nl/media/pages/assets/mobile-controls/0d047b3be4-1754738457/mobile-controls-1.zip",
+      "verifiedOn": "2026-10-24",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/kenney-mobile-controls.txt",
+      "files": [
+        {"path": "art/joystick-pad.png", "original": "Sprites/Style C/Large (2×)/joystick_circle_pad_a.png", "sha256": "91f0fd64138f780cfd8a260b5fe76ef0c1a07edcfd96015e6056b27c910d7ff0"},
+        {"path": "art/joystick-nub.png", "original": "Sprites/Style B/Large (2×)/joystick_circle_nub_a.png", "sha256": "c8e07205fb92da4213bc75b35b33934a61ceb636e506e287afe0ef057c8fc07a"}
+      ]
+    },
+    {
       "name": "calm theme",
       "author": "pebonius",
       "source": "https://opengameart.org/content/calm-music-0",

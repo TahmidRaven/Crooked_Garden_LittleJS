@@ -19,7 +19,7 @@
 </head>
 <body>
   <main id="game" aria-label="Crooked Garden game" aria-busy="true">
-    <div id="game-root" role="application" tabindex="0" inert aria-label="Hold pointer or G to grow. Move pointer or arrows to steer. Close loops around bugs to capture them. Shift bursts, Space pauses, Z rewinds."></div>
+    <div id="game-root" role="application" tabindex="0" inert aria-label="Touch or click anywhere and drag to steer and grow with a floating joystick; release to stop. Keyboard: arrows aim, G grows. Close loops around bugs to capture them. Shift bursts, Space pauses, Z rewinds."></div>
     <div id="startup-credit" class="startup-credit" role="status"><span>BUILT WITH <strong>LittleJS</strong></span><small>Loading Crooked Garden…</small></div>
 
     <div id="hud" class="hud" hidden>
@@ -36,6 +36,12 @@
       </nav>
     </div>
 
+    <div id="joystick-controls" class="joystick-controls" hidden>
+      <div id="joystick" class="joystick" aria-hidden="true">
+        <img class="joystick-pad" src="./assets/art/joystick-pad.png" alt="" draggable="false">
+        <img class="joystick-nub" src="./assets/art/joystick-nub.png" alt="" draggable="false">
+      </div>
+    </div>
     <div id="play-controls" class="play-controls" hidden>
       <p id="state-label" class="play-hint" aria-live="polite">HOLD TO GROW · WAKE ALL 3 FLOWERS</p>
       <div class="action-dock">
@@ -76,7 +82,7 @@
           <div class="help-tools"><button id="help-motion" class="text-button" aria-pressed="false">Play clips</button></div>
           <div class="help-walkthrough">
             <article class="help-lesson">
-              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">01</span><h3>Hold and move to grow</h3><p><strong>Press and hold ahead of the vine.</strong> Move your mouse or finger to steer. You don't need to grab the plant.</p><p class="help-first-tip">Try it: hold over the orange flower on the lower right.</p></div>
+              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">01</span><h3>Touch, drag and grow</h3><p><strong>Touch or click anywhere in the garden.</strong> A translucent joystick appears there. Drag in the direction you want to grow. Release or centre it to stop.</p><p class="help-first-tip">Tap Burst with your other thumb while steering.</p></div>
               <figure class="help-scene"><img src="./assets/help/steering.png" data-still="./assets/help/steering.png" data-motion="./assets/help/grow.gif" width="480" height="371" alt="The vine grows from its pot toward the orange flower, then bends around the ledge."></figure>
             </article>
             <article class="help-lesson">
@@ -106,6 +112,7 @@
           <div class="studio-brand"><img src="./assets/art/after-hours-arcade.png" width="40" height="40" alt="" decoding="async"><span>AFTER HOURS ARCADE</span></div>
           <div class="credits-owner"><p class="overline">GAME DESIGN & DEVELOPMENT</p><h3><a href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a></h3><p>The game, original vine and flower drawings, forest scene and effects were made for Crooked Garden. How to Play uses cropped gameplay screenshots. The external art and music used alongside them are credited below.</p></div>
           <div class="help-grid">
+            <article class="help-card credit-card"><h3>Joystick · Kenney</h3><p>From <a href="https://kenney.nl/assets/mobile-controls" target="_blank" rel="noopener">Mobile Controls</a> by Kenney. Circular pad and thumb grip, scaled for the screen; original PNGs unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-mobile-controls.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
             <article class="help-card credit-card"><h3>Flying insects · Kenney</h3><p>From <a href="https://kenney.nl/assets/platformer-art-deluxe" target="_blank" rel="noopener">Platformer Art Deluxe</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney Vleugels</a>.</p><p>Fly and bee wing-animation pairs with stable body anchors, mirroring and a slight flight bank. Hunter bodies are recoloured warm amber at load time, preserving white wings. Active bugs glow; stunned bugs keep their colours and show stars. Original PNG files are unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-platformer.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
             <article class="help-card credit-card"><h3>Starting planter · Kenney</h3><p>From <a href="https://kenney.nl/assets/furniture-kit" target="_blank" rel="noopener">Furniture Kit</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney</a>.</p><p>A 2D render of the container from the plantSmall1 model, with the original plant removed and a dark soil surface added. The vine starts at the soil opening. Original mesh/material sources are retained unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-furniture.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
             <article class="help-card credit-card"><h3>Foliage · Kenney</h3><p>From <a href="https://kenney.nl/assets/foliage-sprites" target="_blank" rel="noopener">Foliage Sprites</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney</a>.</p><p>One branch silhouette is tinted sage green, mirrored and drawn translucently around the forest edges. Decorative only; the original PNG is unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-foliage.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>

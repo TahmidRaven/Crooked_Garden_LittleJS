@@ -17,7 +17,7 @@ Built for [LittleJS Jam 3](https://itch.io/jam/littlejs-jam), theme **ZIGZAG**. 
 ## Play
 
 1. Press **Let it grow**.
-2. Hold the mouse button or touch to grow toward your pointer. Release to stop growing.
+2. Touch or click anywhere in the garden to place a floating joystick. Drag away from its centre to steer and grow. Release or centre the stick to stop growing; release also hides it.
 3. Reach **all three flowers** to clear a garden. Blue dew adds **260 water**. Every stretch of vine uses water.
 4. Use **Burst** to pass through bugs: it costs **30 water**, lasts **0.45 seconds**, and has a **2-second cooldown**. It does not protect against solid roots.
 5. A flower briefly stuns the whole swarm and refreshes Burst. Clear all three gardens to finish a run.
@@ -52,7 +52,7 @@ Tight successful loops nearly pay for themselves; oversized loops remain expensi
 
 Steering, catching and Burst use short GIFs recorded through actual game controls, with pauses between loops. **Pause clips** switches to stills; reduced-motion users start with stills. Clips stop when leaving the guide. To regenerate: build, run `env NODE_OPTIONS='' node scripts/capture-help-motion.mjs`, then `python3 scripts/encode-help-motion.py`, then rebuild. Raw frames stay in ignored `artifacts/`; the three optimized GIFs and hash/size metadata ship in `public/assets/help/`.
 
-Choose **How to Play** from the main menu or pause menu for a short visual walkthrough: hold ahead of the vine to steer, get the flowers, catch bugs, use Burst, and pause/rewind. Four numbered sections pair text with gameplay clips, isolated flower/water close-ups and a full-width animated catch. Sections stack on mobile instead of shrinking into thumbnails. Pause/Rewind use readable control labels rather than a screenshot collage. Reward formulas and long explanations are left out; keyboard shortcuts sit in a collapsed section. The guide scrolls on small screens while Back and Start/Resume stay visible. Regenerate still-image fallbacks with `python3 scripts/crop-help-images.py` after refreshing showcase screenshots (Pillow required); crop coordinates and a source/hash manifest are retained.
+Choose **How to Play** from the main menu or pause menu for a short visual walkthrough: place the floating joystick anywhere and drag to steer, get the flowers, catch bugs, use Burst, and pause/rewind. Four numbered sections pair text with gameplay clips, isolated flower/water close-ups and a full-width animated catch. Sections stack on mobile instead of shrinking into thumbnails. Pause/Rewind use readable control labels rather than a screenshot collage. Reward formulas and long explanations are left out; keyboard shortcuts sit in a collapsed section. The guide scrolls on small screens while Back and Start/Resume stay visible. Regenerate still-image fallbacks with `python3 scripts/crop-help-images.py` after refreshing showcase screenshots (Pillow required); crop coordinates and a source/hash manifest are retained.
 
 Opening the guide never resets or advances a run. Back or Esc returns to the menu you came from; from Pause, **Resume Game** continues the same run. Keyboard focus stays inside the guide until it closes.
 
@@ -60,13 +60,15 @@ Opening the guide never resets or advances a run. Back or Esc returns to the men
 
 | Action | Pointer/touch | Keyboard |
 | --- | --- | --- |
-| Steer / grow | Move and hold on the world | Arrows aim, hold **G** |
+| Steer / grow | Touch/click anywhere, then drag the floating stick; release or centre to stop | Arrows aim, hold **G** |
 | Protected burst | Tap **Burst** to arm, then grow; tap again to cancel | **Shift** while growing |
 | Pause / resume | Pause icon, then Keep growing | **Space** pauses; **Esc** toggles pause |
 | Rewind | Rewind button | **Z** |
 | New attempt / fresh swarm | Retry button | **R** |
 
 Rewind restores vine/water/collectible history, grants a 0.9-second recovery shield, and costs 100 score. It does not reset enemy time or cooldowns. Retrying gives a new swarm, not an identical replay. Switching tabs automatically pauses. Sound starts off; the HUD has sound and optional browser-fullscreen controls.
+
+The Kenney joystick is rendered at 45% opacity over the garden. Its origin stays at the initial touch/click; the knob has circular clamped travel and a neutral dead zone. Growth direction is relative to the vine tip, not an absolute target under the cursor. Desktop uses a small cream dot cursor until a drag begins; the old glowing aim target is removed. A second touch can activate Burst while steering. Release, cancellation, pause, retry and resize clear the joystick input.
 
 Enable **♫** to hear effects. Bug/terrain hits play a short impact layered with a descending defeat sting; water exhaustion has a separate dry-out cue plus the defeat sting. Sounds trigger once per loss, respect mute, and never play on victory. They are original synthesized effects, with no extra downloads.
 
@@ -98,13 +100,14 @@ npm test
 npm run build
 npx playwright install chromium --only-shell
 npm run test:browser
+npm run test:joystick
 npm run preview
 npm run package
 ```
 
 If Node has `NODE_OPTIONS=--no-experimental-fetch`, clear it for Playwright: `env NODE_OPTIONS='' npm run test:browser`.
 
-The full-window Canvas2D scene scales the world without stretching it, maps pointer coordinates through a tested camera transform, and supports high-DPI displays. HUD and touch controls stay in screen space across portrait/landscape sizes. Reduced-motion settings suppress particles/ambient movement and sprite animation.
+The full-window Canvas2D scene scales the world without stretching it and supports high-DPI displays. The floating joystick uses screen-space drag offsets, independent of the garden camera. HUD and touch controls stay in screen space across portrait/landscape sizes. Reduced-motion settings suppress particles/ambient movement and sprite animation.
 
 ### Starting planter
 

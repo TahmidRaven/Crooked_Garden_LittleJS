@@ -3,14 +3,15 @@ import * as L from 'littlejsengine';
 import { LEVELS, MAX_WATER, rewind, bloomCount } from './game.js';
 import { createArcade, tickArcade, queueBurst, bugsAt, BURST_COST } from './arcade.js';
 import { artReady, artStatus } from './art.js';
-import { fitViewport, screenToGarden } from './view.js';
+import { fitViewport } from './view.js';
 import { renderScene } from './scene.js';
 import { createFailureAudio } from './failure-audio.js';
+import { createJoystick } from './joystick.js';
 
 const $=id=>document.getElementById(id);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touchControls=matchMedia('(pointer:coarse)').matches;
-let garden=createArcade(),light={x:400,y:450},phase='loading',held=false,ticks=0,muted=true;
+let garden=createArcade(),light={x:400,y:450},phase='loading',ticks=0,muted=true;
 let particles=[],popups=[],bank=0,best=0;
 let helpReturn='title';
 let view=fitViewport(innerWidth,innerHeight,devicePixelRatio||1);
@@ -24,13 +25,14 @@ const failureAudio=createFailureAudio(L.Sound);
 const perfect=()=>bloomCount(garden)===garden.level.flowers.length;
 const stageScore=()=>Math.max(0,bloomCount(garden)*300+garden.swatted*100+garden.captureScore+garden.collected.filter(Boolean).length*50-(garden.rewinds||0)*100+(perfect()?Math.ceil(garden.water):0));
 function focusGame(){$('game-root').focus({preventScroll:true});}
+const joystick=createJoystick($('joystick'),{surface:$('game-root'),enabled:()=>phase==='playing',onStart:focusGame});
 function begin(stage=0,score=0){
   garden=createArcade({stage});garden.rewinds=0;bank=score;light={x:400,y:450};
-  held=false;particles=[];popups=[];phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});
+  joystick.reset();particles=[];popups=[];phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});
 }
 function retry(){begin(garden.index,bank);}
-function home(){garden=createArcade();held=false;phase='title';particles=[];popups=[];bank=0;updateUI();$('play').focus({preventScroll:true});}
-function pause(){if(phase==='playing'){phase='paused';held=false;updateUI();$('resume').focus({preventScroll:true});}}
+function home(){garden=createArcade();phase='title';particles=[];popups=[];bank=0;updateUI();$('play').focus({preventScroll:true});}
+function pause(){if(phase==='playing'){phase='paused';updateUI();$('resume').focus({preventScroll:true});}}
 function resume(){if(phase==='paused'){phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});}}
 let helpMotion=!reducedMotion;
 function updateHelpMotion(){
@@ -44,7 +46,7 @@ function updateHelpMotion(){
 }
 function openHelp(){
   if(!['title','paused'].includes(phase))return;
-  helpReturn=phase;phase='help';held=false;updateUI();updateHelpMotion();$('help-screen').querySelector('.help-scroll').scrollTop=0;$('help-back').focus({preventScroll:true});
+  helpReturn=phase;phase='help';updateUI();updateHelpMotion();$('help-screen').querySelector('.help-scroll').scrollTop=0;$('help-back').focus({preventScroll:true});
 }
 function closeHelp(){
   if(phase!=='help')return;
@@ -52,7 +54,7 @@ function closeHelp(){
 }
 function openCredits(){
   if(phase!=='title')return;
-  phase='credits';held=false;updateUI();$('asset-credits-screen').querySelector('.help-scroll').scrollTop=0;$('credits-back').focus({preventScroll:true});
+  phase='credits';updateUI();$('asset-credits-screen').querySelector('.help-scroll').scrollTop=0;$('credits-back').focus({preventScroll:true});
 }
 function closeCredits(){
   if(phase!=='credits')return;
@@ -61,7 +63,7 @@ function closeCredits(){
 function doRewind(){
   if(phase==='title'||perfect()||garden.path.length<2)return;
   rewind(garden,140);garden.grace=.9;garden.burst=0;garden.queued=false;garden.rewinds=(garden.rewinds||0)+1;
-  held=false;phase='playing';popup('SECOND CHANCE','#d9f6cf');updateUI();focusGame();
+  joystick.reset();phase='playing';popup('SECOND CHANCE','#d9f6cf');updateUI();focusGame();
 }
 function burst(){if(phase==='playing'){queueBurst(garden);updateUI();}}
 function popup(text,color){const tip=garden.path.at(-1);popups.push({x:tip.x,y:tip.y-25,text,color,life:1.1});}
@@ -81,7 +83,7 @@ function captureFeedback(){
   for(const bug of capture.bugs)for(let i=0;i<(reducedMotion?0:28);i++)particles.push({x:bug.x,y:bug.y,vx:(tip.x-bug.x)*.025+(Math.random()-.5)*3,vy:(tip.y-bug.y)*.025-Math.random()*2,life:1,color:i%2?'#d3f49b':'#ffe09a',size:2+Math.random()*2});
 }
 function showResult(){
-  held=false;phase='result';const saved=bloomCount(garden),cleared=perfect(),last=garden.index===LEVELS.length-1;
+  phase='result';const saved=bloomCount(garden),cleared=perfect(),last=garden.index===LEVELS.length-1;
   if(!cleared)failureAudio.play(garden.endedBy==='water'?'water':garden.endedBy==='bug'?'bug':'terrain',{muted});
   if(cleared){best=Math.max(best,bank+stageScore());try{localStorage.setItem('crooked-garden-best-v2',String(best));}catch{}}
   $('result-tag').textContent=cleared?`GARDEN ${garden.index+1} COMPLETE`:'THE WILD FIGHTS BACK';
@@ -94,6 +96,7 @@ function showResult(){
   updateUI();$('next').focus({preventScroll:true});
 }
 function updateUI(){
+  if(phase!=='playing')joystick.reset();
   $('title-screen').hidden=phase!=='title';$('pause-screen').hidden=phase!=='paused';$('result-screen').hidden=phase!=='result';
   $('help-screen').hidden=phase!=='help';
   $('asset-credits-screen').hidden=phase!=='credits';
@@ -116,11 +119,14 @@ function updateUI(){
   $('burst-detail').textContent=garden.queued?'HOLD TO RELEASE':garden.cooldown>0?'RECHARGING':`${touchControls?'TAP':'SHIFT'} · 30 WATER`;
   $('undo').disabled=!canPlay||garden.path.length<2;
   $('pause').disabled=!canPlay;
-  $('state-label').textContent=garden.lastCapture&&garden.clock-garden.lastCapture.clock<1.4?`${garden.lastCapture.count>1?'COMBO CATCH!':'CAUGHT!'} +${Math.round(garden.lastCapture.water)} WATER · ${garden.lastCapture.refund} REFUND`:garden.loopHint?`CLOSE THE LOOP · ${garden.loopHint.count} BUG${garden.loopHint.count===1?'':'S'} INSIDE`:garden.burst>0?'PROTECTED · STUN A BUG, THEN LOOP IT':garden.queued?'BURST ARMED · HOLD TO GROW':garden.water<150?'LOW WATER · FIND BLUE DEW':garden.started?'GROW LOOPS TO CATCH BUGS · BLOOM ALL THREE':'HOLD TO GROW · LOOP BUGS FOR WATER';
+  $('state-label').textContent=garden.lastCapture&&garden.clock-garden.lastCapture.clock<1.4?`${garden.lastCapture.count>1?'COMBO CATCH!':'CAUGHT!'} +${Math.round(garden.lastCapture.water)} WATER · ${garden.lastCapture.refund} REFUND`:garden.loopHint?`CLOSE THE LOOP · ${garden.loopHint.count} BUG${garden.loopHint.count===1?'':'S'} INSIDE`:garden.burst>0?'PROTECTED · STUN A BUG, THEN LOOP IT':garden.queued?'BURST ARMED · DRAG TO GROW':garden.water<150?'LOW WATER · FIND BLUE DEW':garden.started?'GROW LOOPS TO CATCH BUGS · BLOOM ALL THREE':'TOUCH OR CLICK ANYWHERE · DRAG TO GROW';
 }
 $('play').onclick=()=>begin();$('resume').onclick=resume;$('pause').onclick=pause;
 $('restart').onclick=retry;$('pause-retry').onclick=retry;$('undo').onclick=doRewind;$('result-undo').onclick=doRewind;
-$('home').onclick=home;$('result-home').onclick=home;$('boost').onclick=burst;
+$('home').onclick=home;$('result-home').onclick=home;
+// A secondary touch does not generate a click while the steering thumb is down.
+$('boost').addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!$('boost').disabled){e.preventDefault();burst();}});
+$('boost').onclick=e=>{if(e.pointerType!=='touch')burst();};
 $('how-to-play').onclick=openHelp;$('pause-help').onclick=openHelp;$('help-back').onclick=closeHelp;
 $('help-motion').onclick=()=>{helpMotion=!helpMotion;updateHelpMotion();};
 $('help-play').onclick=()=>{if(helpReturn==='title')begin();else{phase='paused';resume();}updateHelpMotion();};
@@ -137,16 +143,10 @@ function resize(){
   const r=$('game-root').getBoundingClientRect();view=fitViewport(r.width,r.height,devicePixelRatio||1);
   L.setCanvasFixedSize(L.vec2(Math.round(view.width*view.dpr),Math.round(view.height*view.dpr)));
 }
-function point(e){
-  const r=L.mainCanvas.getBoundingClientRect();light=screenToGarden(view,(e.clientX-r.left)/r.width*view.width,(e.clientY-r.top)/r.height*view.height);
-}
 async function init(){
   // The native LittleJS splash runs before init; keep loading visible until local art is decoded.
   await artReady;
   const canvas=L.mainCanvas;canvas.style.touchAction='none';canvas.style.transform='none';
-  canvas.addEventListener('pointerdown',e=>{if(e.button!==0||phase!=='playing'||!e.isPrimary)return;point(e);held=true;canvas.setPointerCapture(e.pointerId);focusGame();e.preventDefault();});
-  canvas.addEventListener('pointermove',e=>{if(phase==='playing')point(e);});
-  for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,()=>held=false);
   window.addEventListener('blur',pause);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();music.pause();}else if(!muted&&phase==='playing')music.play().catch(()=>{});});
   $('game-root').addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
@@ -175,8 +175,10 @@ function update(){
     if(L.keyIsDown('ArrowUp'))light.y=Math.max(35,light.y-6);if(L.keyIsDown('ArrowDown'))light.y=Math.min(660,light.y+6);
   }
   if(phase==='playing'){
+    const stick=joystick.vector;
+    if(stick.growing){const tip=garden.path.at(-1);light={x:tip.x+stick.x*100,y:tip.y+stick.y*100};}
     const captureSerial=garden.captureSerial;
-    const event=tickArcade(garden,light,{growing:held||keyboardGrowing()});
+    const event=tickArcade(garden,light,{growing:joystick.active?stick.growing:keyboardGrowing()});
     if(garden.captureSerial!==captureSerial){captureFeedback();updateUI();}
     if(['dew','flower','won','swat'].includes(event))feedback(event);
     if(['blocked','dry','won'].includes(event))showResult();

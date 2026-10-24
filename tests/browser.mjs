@@ -4,6 +4,15 @@ import {chromium} from '@playwright/test';
 import {preview} from 'vite';
 import {captureWaterReward} from '../src/arcade.js';
 
+// Use real floating-joystick gestures, not the retired absolute-pointer aiming.
+async function steer(page,x,y,start=true){
+  const {tip}=await page.evaluate(()=>window.crookedGarden.getState());
+  const r=await page.locator('#game-root').boundingBox(),anchor={x:r.x+r.width*.5,y:r.y+r.height*.6};
+  if(start){await page.mouse.move(anchor.x,anchor.y);await page.mouse.down();}
+  const dx=x-tip.x,dy=y-tip.y,length=Math.hypot(dx,dy)||1;
+  await page.mouse.move(anchor.x+40*dx/length,anchor.y+40*dy/length);
+}
+
 const server=await preview({preview:{host:'127.0.0.1',port:0,open:false}});
 let browser;
 try{
@@ -59,10 +68,7 @@ try{
   assert.equal(await page.locator('#startup-credit').isVisible(),false);
   assert.equal(await page.locator('#game').getAttribute('aria-busy'),'false');
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
-  const point=async(x,y)=>{
-    const {view:v}=await state(),r=await page.locator('#game-root canvas').boundingBox();
-    await page.mouse.move(r.x+(v.x+x*v.scale)/v.width*r.width,r.y+(v.y+y*v.scale)/v.height*r.height);
-  };
+  const point=(x,y,start=true)=>steer(page,x,y,start);
   assert.equal((await state()).phase,'title');
   assert.equal(await page.locator('#title-screen .studio-brand').innerText(),'AFTER HOURS ARCADE');
   assert.ok(await page.locator('#title-screen .studio-brand img').evaluate(img=>img.complete&&img.naturalWidth>0),'Original studio logo loads');
@@ -94,7 +100,7 @@ try{
   await page.locator('#how-to-play').click();
   assert.equal((await state()).phase,'help');
   assert.equal(await page.locator('#help-title').textContent(),'HOW TO PLAY');
-  assert.match(await page.locator('#help-screen').textContent(),/Press and hold ahead of the vine/);
+  assert.match(await page.locator('#help-screen').textContent(),/Touch or click anywhere in the garden/);
   assert.equal(await page.locator('#help-screen img').count(),4);
   await page.waitForFunction(()=>[...document.querySelectorAll('#help-screen img')].every(img=>img.complete&&img.naturalWidth>0));
   assert.ok(await page.locator('#help-screen img').evaluateAll(images=>images.every(img=>img.alt.length>10)),'Guide crops have descriptive alternatives');
@@ -142,7 +148,7 @@ try{
   assert.equal((await state()).queued,false,'Menu Shift+Tab must not leak into a gameplay Burst');
   await page.locator('#boost').click();assert.equal((await state()).queued,true);
   await page.locator('#boost').click();assert.equal((await state()).queued,false);
-  await point(300,300);await page.mouse.down();await page.clock.runFor(100);
+  await point(300,300);await page.clock.runFor(100);
   assert.ok(635-(await state()).tip.y>=12,'Input moves the vine within 100ms');
   await page.mouse.up();const count=(await state()).points;
   await page.clock.runFor(200);assert.equal((await state()).points,count,'Release stops the vine');
@@ -156,7 +162,7 @@ try{
   assert.equal(await page.evaluate(()=>document.activeElement.id),'pause-help');
   await page.locator('#pause-help').click();await page.locator('#help-play').click();
   assert.equal((await state()).phase,'playing');assert.equal((await state()).seed,pausedState.seed);assert.equal((await state()).points,pausedState.points);
-  await page.keyboard.down('g');await page.clock.runFor(4000);await page.keyboard.up('g');
+  await point(300,300);await page.clock.runFor(4000);await page.mouse.up();
   assert.equal((await state()).phase,'result');assert.equal((await state()).status,'blocked');
   assert.equal(await page.evaluate(()=>window.__sfxStarts.length),0,'Muted losses produce no synthesized sound');
   await page.locator('#result-undo').click();assert.equal((await state()).phase,'playing');
@@ -166,9 +172,10 @@ try{
   async function follow(route){
     for(const [x,y] of route){
       if((await state()).phase==='result')break;
-      await point(x,y);await page.mouse.down();
+      await point(x,y);
       for(let i=0;i<200;i++){
         const before=await state();
+        await point(x,y,false);
         if(before.cooldown<=0&&before.burst<=0&&before.water>30&&before.bugs.some(b=>!b.captured&&!b.stunned&&Math.hypot(before.tip.x-b.x,before.tip.y-b.y)<70))await page.keyboard.press('Shift');
         await page.clock.runFor(50);const s=await state();
         if(s.phase==='result'){assert.ok(s.flowers.every(Boolean),`Garden ${s.stage+1}, seed ${s.seed} failed: ${s.endedBy}, flowers ${s.flowers}, water ${s.water}`);break;}
@@ -203,7 +210,7 @@ try{
   await page.locator('#music').click();
   await page.waitForFunction(()=>document.querySelector('#music').getAttribute('aria-pressed')==='true');
   const audioBefore=await page.evaluate(()=>window.__sfxStarts.length);
-  await point(300,300);await page.mouse.down();await page.clock.runFor(1300);await page.mouse.up();
+  await point(300,300);await page.clock.runFor(1300);await page.mouse.up();
   assert.equal((await state()).phase,'result');
   const lossAudio=await page.evaluate(n=>window.__sfxStarts.slice(n),audioBefore);
   assert.equal(lossAudio.length,2,'An audible impact and defeat sting start on an unmuted hit');
@@ -214,8 +221,9 @@ try{
   const beforeDryAudio=await page.evaluate(()=>window.__sfxStarts.length);
   for(const [x,y] of [[540,635],[540,610],[60,610]]){
     if((await state()).phase==='result')break;
-    await point(x,y);await page.mouse.down();
+    await point(x,y);
     for(let i=0;i<200;i++){
+      await point(x,y,false);
       await page.clock.runFor(50);const s=await state();
       if(s.phase==='result'||Math.hypot(s.tip.x-x,s.tip.y-y)<10)break;
     }
@@ -283,10 +291,11 @@ try{
   await mobile.locator('#how-to-play').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'help');
   await mobile.locator('#help-play').tap();
   await mobile.locator('#boost').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().queued),true);
-  const s=await mobile.evaluate(()=>window.crookedGarden.getState()),r=await mobile.locator('#game-root canvas').boundingBox();
-  const x=r.x+(s.view.x+430*s.view.scale)/s.view.width*r.width,y=r.y+(s.view.y+550*s.view.scale)/s.view.height*r.height;
+  const s=await mobile.evaluate(()=>window.crookedGarden.getState());
+  const x=150,y=620,dx=430-s.tip.x,dy=550-s.tip.y,length=Math.hypot(dx,dy);
   const touch=await mobile.context().newCDPSession(mobile);
   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+  await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+40*dx/length,y:y+40*dy/length}]});
   await mobile.waitForFunction(()=>window.crookedGarden.getState().flowers[0]);
   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'playing');
@@ -312,17 +321,16 @@ try{
   await capturePage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
   await capturePage.locator('#play').click();
   const captureState=()=>capturePage.evaluate(()=>window.crookedGarden.getState());
-  const captureRoute=[[430,550],[500,550],[500,435],[380,435],[380,360],[300,360],[300,435],[395,435]];
+  const captureRoute=[[430,550],[500,550],[500,435],[380,435],[380,380],[360,360],[300,360],[300,435],[395,435]];
   for(const [x,y] of captureRoute){
     if((await captureState()).captures)break;
-    const {view:v}=await captureState(),r=await capturePage.locator('#game-root canvas').boundingBox();
-    await capturePage.mouse.move(r.x+(v.x+x*v.scale)/v.width*r.width,r.y+(v.y+y*v.scale)/v.height*r.height);
-    await capturePage.mouse.down();
+    await steer(capturePage,x,y);
     for(let i=0;i<200;i++){
       const before=await captureState();
+      await steer(capturePage,x,y,false);
       if(before.cooldown<=0&&before.burst<=0&&before.bugs.some(b=>!b.captured&&!b.stunned&&Math.hypot(before.tip.x-b.x,before.tip.y-b.y)<65))await capturePage.keyboard.press('Shift');
       await capturePage.clock.runFor(50);const after=await captureState();
-      assert.equal(after.phase,'playing','The capture route remains playable');
+      assert.equal(after.phase,'playing',`Capture waypoint ${x},${y}: ${after.endedBy}, tip ${JSON.stringify(after.tip)}, water ${after.water}`);
       if(after.captures||Math.hypot(after.tip.x-x,after.tip.y-y)<8)break;
       assert.ok(i<199,'Capture waypoint is reachable');
     }
@@ -337,10 +345,9 @@ try{
   await capturePage.locator('#undo').click();
   assert.equal((await captureState()).captureScore,800);assert.ok((await captureState()).captured.every(Boolean),'Rewind cannot respawn paid captures');
   for(const [x,y] of [[205,390],[130,390],[130,280],[345,170]]){
-    const {view:v}=await captureState(),r=await capturePage.locator('#game-root canvas').boundingBox();
-    await capturePage.mouse.move(r.x+(v.x+x*v.scale)/v.width*r.width,r.y+(v.y+y*v.scale)/v.height*r.height);
-    await capturePage.mouse.down();
+    await steer(capturePage,x,y);
     for(let i=0;i<200;i++){
+      await steer(capturePage,x,y,false);
       await capturePage.clock.runFor(50);const after=await captureState();
       if(after.phase==='result'||Math.hypot(after.tip.x-x,after.tip.y-y)<10)break;
       assert.ok(i<199,'A captured arena still has a route to the remaining flowers');
@@ -359,9 +366,7 @@ try{
   assert.equal(await reducedPage.locator('#help-screen img[src$=".gif"]').count(),0,'Reduced motion defaults to static guide illustrations');
   assert.equal(await reducedPage.locator('#help-motion').getAttribute('aria-pressed'),'false');
   await reducedPage.locator('#help-play').click();
-  const reducedState=await reducedPage.evaluate(()=>window.crookedGarden.getState()),rr=await reducedPage.locator('#game-root canvas').boundingBox(),rv=reducedState.view;
-  await reducedPage.mouse.move(rr.x+(rv.x+430*rv.scale)/rv.width*rr.width,rr.y+(rv.y+550*rv.scale)/rv.height*rr.height);
-  await reducedPage.mouse.down();await reducedPage.clock.runFor(1300);await reducedPage.mouse.up();
+  await steer(reducedPage,430,550);await reducedPage.clock.runFor(1300);await reducedPage.mouse.up();
   assert.equal(await reducedPage.evaluate(()=>window.crookedGarden.getState().flowers[0]),true,'Detailed vine rendering also works with reduced motion');
   await reducedPage.screenshot({path:'artifacts/vine-reduced-motion.png',fullPage:true});
   await reducedPage.locator('#pause').click();const pausedPlant=await reducedPage.evaluate(()=>window.crookedGarden.getState());
