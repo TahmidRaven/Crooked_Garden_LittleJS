@@ -1,5 +1,9 @@
 # Showcase screenshots
 
+## Itch page banner and background
+
+See [`itch-page/`](itch-page/) for the 1260×300 banner, 1920×1080 page background, and matching Embed BG/theme colours. Reproduce with `python3 scripts/make-itch-page.py`.
+
 ## Itch cover
 
 - `cover-v3-630x500.png` — new no-loop key-art cover: tilted title, larger bloom and flying bugs, winding vine, mossy shelf, forest light and foreground foliage.
