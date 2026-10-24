@@ -2,6 +2,8 @@
 
 ## User intent and current direction
 
+Build output location: user requested the upload ZIP under the repo's `buildDirectories/` folder. Packaging now writes `buildDirectories/crooked-garden.zip`; this supersedes the old ignored `artifacts/` ZIP path. No gameplay changes.
+
 Browser-icon follow-up: added an original orange marigold on a dark green rounded background as `public/favicon.svg`, with 32px PNG/16–48px ICO fallbacks and a 180px Apple touch icon. Relative head links support itch's nested embed paths. PNG/ICO variants are reproducible with `python3 scripts/make-icons.py` (Pillow). No gameplay changes.
 
 Cover v3: user still disliked the loop presentation and requested a more game-like cover. Created separate no-loop key art at `screenshots/cover-v3-630x500.png` plus a 2× master. Uses a tilted oversized title, larger marigold and flying bugs, a winding upward vine/mossy ledge, forest lighting and tinted foreground foliage. Kept the studio mark and prior covers. Promotional assets only; no game/build changes.
@@ -101,7 +103,7 @@ Sources, original paths, modifications and hashes are in `CREDITS.md`, `public/a
 - `env NODE_OPTIONS='' npm run test:browser`: native LittleJS splash/branding (desktop + short landscape), deliberately delayed images proving the menu waits for readiness, real-input title/play/pause/results, main/pause How to Play (focus trap/restoration, Back/Esc, frozen run, start/resume, touch and 11 layouts), creator website URL, separate Credits page (sources/local notice availability, focus, Back/Esc, frozen state and 11 layouts), all three gardens, score/best, randomized retries, touch/keyboard bursts, audio and asset decode checks. Tests seed the randomness source for repeatability, not the game state.
 - 11 viewport checks: 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1280×720, 1440×900, 568×320, 667×375, 844×390. No page scrolling; full-window canvas and HUD controls fit.
 - Screenshots in ignored `artifacts/`: `title.png`, `how-to-play.png`, `how-to-play-mobile.png`, `asset-credits.png`, `asset-credits-mobile.png`, `arcade.png`, `clear-*.png`, `game-*.png`, `mobile.png`.
-- `npm run package`: builds `artifacts/crooked-garden.zip` with credits/notices and index.html at archive root. Does not publish the game.
+- `npm run package`: builds `buildDirectories/crooked-garden.zip` with credits/notices and index.html at archive root. Does not publish the game.
 
 Vine browser checks also grow a plant in reduced-motion mode, verify the flower is collected, and compare complete simulation snapshots across paused renders. Visual examples: `artifacts/vine-mobile.png`, `artifacts/vine-reduced-motion.png`, `artifacts/arcade.png`, `artifacts/double-catch.png`. No new external assets are used by this visual pass.
 

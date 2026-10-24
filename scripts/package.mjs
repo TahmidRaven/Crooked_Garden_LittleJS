@@ -4,8 +4,8 @@ import { resolve } from 'node:path';
 
 // index.html must be at the archive root for itch.io's HTML game loader.
 await copyFile('CREDITS.md','dist/CREDITS.md');
-await mkdir('artifacts',{recursive:true});
-const archive=resolve('artifacts/crooked-garden.zip');
+await mkdir('buildDirectories',{recursive:true});
+const archive=resolve('buildDirectories/crooked-garden.zip');
 // Synchronize an existing ZIP too, so removed assets cannot linger.
 const result=spawnSync('zip',['-r','-FS',archive,'.'],{cwd:'dist',stdio:'inherit'});
 if(result.error)throw result.error;
