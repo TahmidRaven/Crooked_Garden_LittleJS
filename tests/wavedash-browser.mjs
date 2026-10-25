@@ -9,14 +9,18 @@ try{
   browser=await chromium.launch({headless:true});
   const url=`http://127.0.0.1:${server.httpServer.address().port}`;
   const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
-  const globalCalls=[];let failGlobalUpload=true;
+  const globalCalls=[],savedRuns=new Map();let failGlobalUpload=true,failGlobalRead=false;
   await page.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',async route=>{
     const request=route.request();
     if(request.method()==='OPTIONS'){await route.fulfill({status:204,headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*'}});return;}
     globalCalls.push({url:request.url(),body:request.postDataJSON(),headers:request.headers()});
     const auth=request.url().includes('/auth/'),submit=request.url().includes('/functions/');
-    const data=auth?{access_token:'test-player-token',refresh_token:'test-refresh',expires_at:9999999999}:submit?{ok:!failGlobalUpload}:[{rank:1,name:'Global Gardener',score:8000}];
-    await route.fulfill({status:submit&&failGlobalUpload?503:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(data)});
+    const payload=request.postDataJSON();
+    const duplicate=submit&&savedRuns.has(payload.runId);
+    if(submit&&!failGlobalUpload&&!duplicate)savedRuns.set(payload.runId,payload.score);
+    const personalBest=Math.max(0,...savedRuns.values());
+    const data=auth?{access_token:'test-player-token',refresh_token:'test-refresh',expires_at:9999999999}:submit?{ok:!failGlobalUpload,duplicate,personalBest}:[{rank:1,name:'Global Gardener',score:8000}];
+    await route.fulfill({status:submit&&failGlobalUpload||!auth&&!submit&&failGlobalRead?503:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(data)});
   });
   page.on('pageerror',e=>errors.push(e.message));
   page.on('response',r=>{if(r.status()>=400&&!r.url().includes('supabase.co'))errors.push(`${r.status()} ${r.url()}`);});
@@ -113,6 +117,9 @@ try{
   await page.clock.runFor(2100);
   await page.waitForFunction(()=>!document.getElementById('score-retry').hidden);
   const final=await state(),uploads=(await calls()).filter(c=>c[0]==='upload');
+  await page.waitForFunction(()=>document.getElementById('best-label').textContent==='8000');
+  assert.match(await page.locator('.result-stats').textContent(),/GLOBAL BEST/);
+  assert.notEqual(await page.locator('#best-label').textContent(),'999999','Displayed best comes from Supabase, never browser storage');
   assert.equal(uploads.length,1);assert.deepEqual(uploads[0],['upload','garden-masters-id',final.score,true]);
   assert.ok(final.score<999999,'Do not upload the stored local best');
   for(const id of ['FIRST_BLOOM','BUG_GARDENER','DOUBLE_TROUBLE','THE_GARDEN_LIVES']){
@@ -133,12 +140,35 @@ try{
   await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Could not share'));
   assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,1);
   failGlobalUpload=false;await page.locator('#global-share').click();
-  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Global score shared'));
+  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
   const shared=globalCalls.filter(c=>c.url.includes('/functions/'));
   assert.equal(shared.length,2);assert.equal(shared[0].body.runId,shared[1].body.runId,'Retries keep an idempotent submission ID');
   assert.equal(shared[1].body.score,final.score);assert.equal(shared[1].body.completedGardens,3);
   assert.equal(shared[1].headers.authorization,'Bearer test-player-token');
   assert.equal(await page.locator('#global-share').isDisabled(),true);
+  // Play and share another full run without replacing the player's guest session.
+  await page.locator('#next').click();
+  assert.equal(await page.locator('#global-share-panel').isVisible(),false);
+  const replayRoutes=[
+    [[430,550],[500,550],[500,435],[205,390],[130,390],[130,280],[345,170]],
+    [[425,570],[425,455],[205,420],[205,300],[405,275],[405,160]],
+    [[205,590],[205,475],[410,450],[410,335],[205,310],[205,190]]
+  ];
+  for(let stage=0;stage<3;stage++){
+    await follow(replayRoutes[stage]);assert.equal((await state()).phase,'result');
+    if(stage<2){assert.equal(await page.locator('#global-share-panel').isVisible(),false);await page.locator('#next').click();}
+  }
+  assert.equal(await page.locator('#global-share').isEnabled(),true,'Every completed run gets a fresh share action');
+  await page.locator('#global-share').click();
+  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
+  const submissions=globalCalls.filter(c=>c.url.includes('/functions/'));
+  assert.equal(submissions.length,3);assert.notEqual(submissions[2].body.runId,submissions[1].body.runId);
+  assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,1,'Two full runs share one guest login');
+  assert.equal(savedRuns.size,2,'The backend receives both runs rather than only one best');
+  failGlobalRead=true;await page.locator('#result-leaderboard').click();await page.locator('#leaderboard-global').click();
+  await page.waitForFunction(()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
+  await page.locator('#leaderboard-back').click();
+  assert.equal(await page.locator('#best-label').textContent(),'—','Network failure never falls back to an unrelated local best');
   const offline=await browser.newPage();offline.on('pageerror',e=>errors.push(e.message));
   await offline.goto(url);await offline.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
   await offline.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',route=>route.fulfill({status:503,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'{}'}));
@@ -147,7 +177,7 @@ try{
   await offline.locator('#leaderboard-back').click();await offline.locator('#play').click({force:true});
   assert.equal(await offline.evaluate(()=>window.crookedGarden.getState().phase),'playing');
   assert.deepEqual(errors,[]);
-  console.log('Platform mock checks passed: Wavedash + global tabs, real achievements, complete-run scores, opt-in guest sharing/retry, auth headers, layouts and offline fallback. Live gameplay verification remains required.');
+  console.log('Platform mock checks passed: global best from Supabase, two completed runs with one guest login, run IDs/retries, achievements, layouts and offline fallback.');
 }finally{
   await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));
 }

@@ -73,6 +73,7 @@ h1 em{font-style:normal;color:#bde18a;letter-spacing:-2px;font-size:1.07em}
 .result-flowers{font-size:43px;letter-spacing:10px;color:#e6cc84;margin:0 0 18px;filter:drop-shadow(0 0 10px #eedb8b33)}
 .result-copy{font-size:13px;line-height:1.7;color:#a2bda6;max-width:365px;margin:0 auto 22px}
 .platform-status{font-size:11px;line-height:1.5;color:#c6d792;margin:0 auto 12px;max-width:340px}
+.local-best-note{max-width:340px;margin:-12px auto 18px;color:#8eac96;font-size:10px;line-height:1.5}
 .leaderboard-page{max-width:640px}.leaderboard-entries{list-style:none;padding:0;margin:18px 0}
 .leaderboard-entries li{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 8px;border-bottom:1px solid #81ad9133;color:#d5e7b7;font-size:14px}
 .leaderboard-entries li span:nth-child(2){overflow-wrap:anywhere}.leaderboard-entries li span:last-child{color:#e8d397;font-variant-numeric:tabular-nums}

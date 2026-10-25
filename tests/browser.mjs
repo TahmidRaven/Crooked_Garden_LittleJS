@@ -19,12 +19,13 @@ try{
   const url=`http://127.0.0.1:${server.httpServer.address().port}`;
   browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
-  function watch(p){
+  async function watch(p){
+    await p.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',route=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'[{"rank":1,"name":"Global Gardener","score":8000}]'}));
     p.on('pageerror',error=>errors.push(error.message));
     p.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
   }
   // Simulate the first paint before either application JS or CSS is available.
-  const bare=await browser.newPage({viewport:{width:390,height:844},javaScriptEnabled:false});watch(bare);
+  const bare=await browser.newPage({viewport:{width:390,height:844},javaScriptEnabled:false});await watch(bare);
   await bare.route('**/*.css',route=>route.fulfill({status:200,contentType:'text/css',body:''}));
   for(let refresh=0;refresh<2;refresh++){
     if(refresh)await bare.reload();else await bare.goto(url);
@@ -35,9 +36,12 @@ try{
   await bare.close();
   // Seed the source of randomness, not game state. Retries still receive new seeds.
   const seedSource=()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(97);return array;}});
-  watch(page);await page.addInitScript(seedSource);
+  await watch(page);await page.addInitScript(seedSource);
   await page.addInitScript(()=>{
     window.__sfxStarts=[];
+    window.__musicPlayRequests=[];
+    const originalPlay=HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play=function(...args){window.__musicPlayRequests.push(this.src);return originalPlay.apply(this,args);};
     const original=AudioBufferSourceNode.prototype.start;
     AudioBufferSourceNode.prototype.start=function(...args){
       window.__sfxStarts.push({duration:this.buffer?.duration||0,hasEnergy:Boolean(this.buffer?.getChannelData(0).some(v=>Math.abs(v)>1e-5))});
@@ -129,9 +133,15 @@ try{
   await page.keyboard.press('Escape');
   assert.equal((await state()).phase,'title');
   assert.equal(await page.evaluate(()=>document.activeElement.id),'how-to-play');
+  assert.equal(await page.evaluate(()=>window.__musicPlayRequests.length),0,'The menu does not attempt autoplay before starting');
   await page.locator('#how-to-play').click();await page.locator('#help-play').click();
   assert.equal((await state()).phase,'playing');
   assert.equal(await page.locator('#hud').isVisible(),true);
+  assert.equal(await page.locator('#music').getAttribute('aria-pressed'),'true','Sound defaults to enabled');
+  assert.equal(await page.locator('#music').getAttribute('aria-label'),'Mute sound');
+  assert.ok(await page.evaluate(()=>window.__musicPlayRequests.some(src=>src.endsWith('/assets/calm-theme.ogg'))),'Starting the game starts its music');
+  await page.locator('#music').click();
+  assert.equal(await page.locator('#music').getAttribute('aria-pressed'),'false','Players can still mute; subsequent loss checks run muted');
   assert.equal((await state()).art.flowerPot,true,'The real planter image must be decoded before play');
   await page.screenshot({path:'artifacts/start-pot.png',fullPage:true});
   assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,2);
@@ -192,6 +202,8 @@ try{
   ];
   for(let stage=0;stage<3;stage++){
     assert.equal((await state()).stage,stage);
+    assert.equal((await state()).rewindsLeft,2,'Advancing gardens preserves the run-wide rewind allowance');
+    assert.equal((await state()).rewindPenalty,100,'An earlier garden’s penalty remains charged once');
     if(stage===2)assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,3);
     if(stage===0){
       await follow(routes[0].slice(0,1));
@@ -286,7 +298,7 @@ try{
     await page.locator('#credits-done').click();assert.equal((await state()).phase,'title');
   }
 
-  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});watch(mobile);await mobile.addInitScript(seedSource);
+  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});await watch(mobile);await mobile.addInitScript(seedSource);
   await mobile.goto(url);await mobile.waitForFunction(()=>window.crookedGarden?.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
   await mobile.locator('#how-to-play').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'help');
   await mobile.locator('#help-play').tap();
@@ -304,7 +316,7 @@ try{
   await mobile.locator('#pause').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'paused');
   await mobile.locator('#pause-retry').tap();assert.notEqual(await mobile.evaluate(()=>window.crookedGarden.getState().seed),seed);
   await mobile.screenshot({path:'artifacts/mobile.png',fullPage:true});
-  const shortSplash=await browser.newPage({viewport:{width:568,height:320}});watch(shortSplash);
+  const shortSplash=await browser.newPage({viewport:{width:568,height:320}});await watch(shortSplash);
   await shortSplash.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await shortSplash.clock.pauseAt(new Date('2026-10-22T12:00:01Z'));
   await shortSplash.goto(url,{waitUntil:'domcontentloaded'});await shortSplash.waitForFunction(()=>window.crookedGarden);
@@ -314,7 +326,7 @@ try{
   assert.ok(branding.y>=270&&branding.y+branding.height<=320,'Short-screen branding stays below the native logo and inside the viewport');
   await shortSplash.screenshot({path:'artifacts/littlejs-splash-landscape.png',fullPage:true});
   // A seeded encounter, but real controls: trace a lasso and capture two moving bugs.
-  const capturePage=await browser.newPage({viewport:{width:1280,height:800}});watch(capturePage);
+  const capturePage=await browser.newPage({viewport:{width:1280,height:800}});await watch(capturePage);
   await capturePage.addInitScript(()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(42);return array;}}));
   await capturePage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await capturePage.goto(url);await capturePage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
@@ -359,7 +371,7 @@ try{
   assert.equal((await captureState()).captureScore,800);assert.match(await capturePage.locator('#result-copy').textContent(),/2 bugs caught/);
   await capturePage.locator('#next').click();
   assert.equal((await captureState()).captures,0);assert.ok((await captureState()).captured.every(value=>!value));
-  const reducedPage=await browser.newPage({viewport:{width:960,height:720},reducedMotion:'reduce'});watch(reducedPage);await reducedPage.addInitScript(seedSource);
+  const reducedPage=await browser.newPage({viewport:{width:960,height:720},reducedMotion:'reduce'});await watch(reducedPage);await reducedPage.addInitScript(seedSource);
   await reducedPage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await reducedPage.goto(url);await reducedPage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
   await reducedPage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));

@@ -52,9 +52,17 @@ test('auth rejection, unavailable storage and network errors do not throw',async
   const broken=createGlobalLeaderboard({storage:()=>{throw Error('blocked');},fetcher:async()=>{throw Error('offline');}});
   assert.equal(await broken.getScores(),null);assert.equal((await broken.postScore(run,'Raven')).ok,false);
 });
+test('disabled anonymous provider and CAPTCHA setup failures are not mislabeled as network errors',async()=>{
+  for(const [code,text] of [['anonymous_provider_disabled',/disabled.*Supabase/],['captcha_failed',/CAPTCHA/]]){
+    const {client,calls}=fixture(()=>response({error_code:code,msg:'backend diagnostic'},422));
+    const result=await client.postScore(run,'Raven');
+    assert.equal(result.ok,false);assert.match(result.message,text);assert.doesNotMatch(result.message,/Check your connection/);
+    assert.deepEqual(calls[0].body,{data:{}});assert.equal(calls.length,1,'A failed login never attempts score submission');
+  }
+});
 test('rate limits have a retry message and never save a name as if successful',async()=>{
   const {client}=fixture(url=>url.includes('/auth/')?response({access_token:'token',refresh_token:'refresh',expires_at:4600}):response({error:'rate_limited'},429));
-  const result=await client.postScore(run,'Raven');assert.equal(result.ok,false);assert.match(result.message,/30 seconds/);assert.equal(client.getName(),'Gardener');
+  const result=await client.postScore(run,'Raven');assert.equal(result.ok,false);assert.match(result.message,/5 seconds/);assert.equal(client.getName(),'Gardener');
 });
 test('server rules reject malicious and implausible input, ignoring supplied user IDs',()=>{
   assert.deepEqual(validateSubmission({...run,name:' Raven ',userId:'attacker'}),{name:'Raven',score:5628,runId:run.runId,durationSeconds:34});
@@ -70,11 +78,32 @@ function edgeFixture(handler){
 }
 test('Edge Function verifies player JWT with Auth and uses that identity, not browser claims',async()=>{
   const {handle,request,calls}=edgeFixture();const result=await handle(request({...run,name:'Raven',userId:'attacker'}));
-  assert.equal(result.status,200);assert.deepEqual(result.body,{ok:true});
+  assert.equal(result.status,200);assert.deepEqual(result.body,{ok:true,duplicate:false,improved:false});
   assert.equal(calls[0].headers.Authorization,'Bearer player-jwt');assert.match(calls[0].url,/auth\/v1\/user$/);
   assert.equal(JSON.parse(calls[1].body).p_user,'verified-player');
   assert.equal(calls[1].headers.Authorization,'Bearer server-only-test-secret');
   assert.doesNotMatch(JSON.stringify(result),/server-only-test-secret/);
+});
+test('the same guest session submits distinct runs, including a lower score',async()=>{
+  const {client,calls}=fixture(url=>url.includes('/auth/')?response({access_token:'token',refresh_token:'refresh',expires_at:4600}):response({ok:true,personalBest:run.score,duplicate:false}));
+  const first=await client.postScore(run,'Raven');
+  const second=await client.postScore({...run,runId:'12345678-1234-4234-8234-123456789abd',score:3994},'Raven');
+  assert.equal(first.ok,true);assert.equal(second.ok,true);assert.match(second.message,/Run saved \(3994\)/);assert.match(second.message,/best is 5628/);
+  assert.equal(calls.filter(c=>c.url.includes('/auth/')).length,1);
+  const submissions=calls.filter(c=>c.url.includes('/functions/'));assert.equal(submissions.length,2);
+  assert.notEqual(submissions[0].body.runId,submissions[1].body.runId);assert.equal(submissions[0].headers.Authorization,submissions[1].headers.Authorization);
+});
+test('idempotent resubmissions tell the player that the run is already saved',async()=>{
+  const {client}=fixture(url=>url.includes('/auth/')?response({access_token:'token',refresh_token:'refresh',expires_at:4600}):response({ok:true,personalBest:run.score,duplicate:true}));
+  assert.match((await client.postScore(run,'Raven')).message,/already saved/);
+});
+test('run-history migration preserves bests, protects history and deduplicates any previous run',async()=>{
+  const sql=await readFile('supabase/migrations/202610260001_run_history.sql','utf8');
+  assert.match(sql,/create table public.garden_runs/);assert.match(sql,/primary key \(user_id, run_id\)/);
+  assert.match(sql,/revoke all on public.garden_runs from public, anon, authenticated/);
+  assert.match(sql,/existing_run.score <> p_score/);assert.match(sql,/interval '5 seconds'/);
+  assert.match(sql,/insert into public.garden_runs/);assert.match(sql,/greatest\(garden_scores.score, excluded.score\)/);
+  assert.doesNotMatch(sql,/drop table|delete from|truncate /i);
 });
 test('Edge Function preflight/method/auth/schema checks stop unauthorized database work',async()=>{
   for(const [method,token,body,status] of [['OPTIONS','',{},204],['GET','',{},405],['POST','',{},401],['POST','Bearer token','bad json',400],['POST','Bearer token','x'.repeat(2049),413]]){

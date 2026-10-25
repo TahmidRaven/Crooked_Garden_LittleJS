@@ -30,7 +30,7 @@
       </div>
       <div class="stage-badge"><span id="stage-label">GARDEN 1 / 3</span><div id="flower-icons" aria-label="Flowers restored"></div></div>
       <nav class="hud-buttons" aria-label="Game settings">
-        <button id="music" class="icon-button" aria-label="Enable sound" aria-pressed="false" title="Toggle sound">♫<span class="off-dot"></span></button>
+        <button id="music" class="icon-button" aria-label="Mute sound" aria-pressed="true" title="Toggle sound">♫<span class="off-dot"></span></button>
         <button id="fullscreen" class="icon-button" aria-label="Enter fullscreen" title="Fullscreen">⛶</button>
         <button id="pause" class="icon-button" aria-label="Pause game" title="Pause (Space)">Ⅱ</button>
       </nav>
@@ -45,7 +45,7 @@
     <div id="play-controls" class="play-controls" hidden>
       <p id="state-label" class="play-hint" aria-live="polite">HOLD TO GROW · WAKE ALL 3 FLOWERS</p>
       <div class="action-dock">
-        <button id="undo" class="dock-button" title="Rewind (Z)" aria-label="Rewind vine">↶<small>REWIND</small></button>
+        <button id="undo" class="dock-button" title="Rewind (Z) · −100 points" aria-label="Rewind vine: 3 left this run; costs 100 points">↶<small id="rewind-label">REWIND · 3</small></button>
         <button id="boost" class="burst-button" aria-pressed="false"><span>↯</span><div><strong id="burst-label">BURST</strong><small id="burst-detail">SHIFT · 30 WATER</small></div></button>
         <button id="restart" class="dock-button" title="New attempt (R)" aria-label="Retry garden with a new swarm">↻<small>RETRY</small></button>
       </div>
@@ -101,7 +101,7 @@
               <figure class="help-scene"><img src="./assets/help/stunned-bugs.png" data-still="./assets/help/stunned-bugs.png" data-motion="./assets/help/burst.gif" width="480" height="328" alt="A real Burst protects the growing vine as it approaches the bugs."></figure>
             </article>
           </div>
-          <div class="help-safety"><div class="help-control-labels" aria-hidden="true"><span>Ⅱ Pause</span><span>↶ Rewind</span></div><p>Letting go stops the vine, but bugs keep moving. Pause freezes everything. Rewind backs up the vine but costs score.</p></div>
+          <div class="help-safety"><div class="help-control-labels" aria-hidden="true"><span>Ⅱ Pause</span><span>↶ Rewind · −100 pts</span></div><p>Letting go stops the vine, but bugs keep moving. Pause freezes everything. You get three rewinds for the entire run, costing 100 points each. Retrying a garden does not refill them.</p></div>
           <details class="help-keys"><summary>Keyboard controls</summary><dl><div><dt><kbd>Arrows</kbd> + <kbd>G</kbd></dt><dd>Aim; hold G to grow.</dd></div><div><dt><kbd>Shift</kbd></dt><dd>Burst.</dd></div><div><dt><kbd>Space</kbd> / <kbd>Esc</kbd></dt><dd>Pause. Esc resumes.</dd></div><div><dt><kbd>Z</kbd></dt><dd>Rewind.</dd></div><div><dt><kbd>R</kbd></dt><dd>Retry.</dd></div></dl></details>
         </div>
         <div class="help-bottom"><span>Paused while you read.</span><button id="help-play" class="primary-button">START GAME ▶</button></div>
@@ -146,14 +146,15 @@
         <div id="result-flowers" class="result-flowers" aria-hidden="true"></div>
         <h2 id="result-title"></h2>
         <p id="result-copy" class="result-copy"></p>
-        <div class="result-stats"><div><strong id="result-score">0</strong><span>SCORE</span></div><div><strong id="result-time">0s</strong><span>TIME</span></div><div><strong id="best-label">0</strong><span>BEST</span></div></div>
+        <div class="result-stats"><div><strong id="result-score">0</strong><span>SCORE</span></div><div><strong id="result-time">0s</strong><span>TIME</span></div><div title="Highest submitted score across all players, read from the global leaderboard."><strong id="best-label">…</strong><span>GLOBAL BEST</span></div></div>
+        <p id="global-best-note" class="local-best-note">Global best is the highest submitted score across all players.</p>
         <p id="score-status" class="platform-status" role="status" hidden></p>
         <button id="score-retry" class="text-button" hidden>Retry score upload</button>
         <div id="global-share-panel" class="global-share-panel" hidden>
           <label for="global-player-name">Public leaderboard name</label>
           <input id="global-player-name" type="text" minlength="3" maxlength="24" autocomplete="nickname" value="Gardener" aria-describedby="global-share-note">
           <button id="global-share" class="text-button">Share global score</button>
-          <p id="global-share-note">Optional: your name and best score will be public. A guest identity is saved in this browser for this site.</p>
+          <p id="global-share-note">Optional: save this run. Your name and personal best appear on the leaderboard. A guest identity kept in this browser can submit every new run.</p>
           <p id="global-score-status" class="platform-status" role="status"></p>
         </div>
         <button id="next" class="primary-button">TRY AGAIN ▶</button>

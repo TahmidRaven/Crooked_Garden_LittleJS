@@ -8,13 +8,21 @@ The **Leaderboard** button appears on every host. **All platforms** reads the sh
 
 Only a complete three-garden run offers **Share global score** on the final results. Sharing is optional: choose a public name (3–24 ASCII letters, digits, spaces, `_` or `-`) and click Share. This creates an anonymous Supabase Auth user, saves its session in browser storage, and submits through an Edge Function. Merely playing or viewing scores does **not** create a user. No email, password or Wavedash account is required. Failed submissions can be retried while the results remain open.
 
-One best score is kept per guest identity. Different sites/devices/browser profiles have separate storage, so the same human can have separate entries; this is not cross-platform account linking. Clearing browser data loses access to the guest identity. Tokens stay in this browser, are sent only to your Supabase project, and are not public leaderboard fields. Public data is limited to name, score and rank. Explain this in your published page's privacy notes.
+Every new submitted run is kept in private `garden_runs`, keyed by `(user_id, run_id)`, including lower-scoring runs. The Top 10 reads the separate `garden_scores` personal-best table, so one guest cannot fill the board with repeat entries. A browser session identifies the player; it is not a one-run limit. Different sites/devices/browser profiles have separate storage, so the same human can have separate entries; this is not cross-platform account linking. Clearing browser data loses access to the guest identity. Tokens stay in this browser, are sent only to your Supabase project, and are not public leaderboard fields. Public data is limited to name, score and rank. Explain this in your published page's privacy notes.
+
+Results show **Global Best**, fetched from `garden_top_scores()` when results open, after successful sharing, or when refreshing the global leaderboard. It is not taken from localStorage. An empty board shows 0; an unavailable service shows “—” with an explanation. A saved browser-local record may still be retained for legacy compatibility, but it is neither displayed as the global best nor uploaded as a run.
 
 ## Status and deployment
 
 **Deployed October 25, 2026**, with the owner's authorization, to `jzixrgkpvbypiyfnshjq`. Supabase CLI 2.122.0 was installed, the linked-project dry run reviewed, migration `202610250001_global_leaderboard.sql` applied, and `submit-garden-score` deployed. Anonymous sign-in was enabled by the owner. No billing settings were changed.
 
 Live read/authorization checks passed: public Top 10 returned HTTP 200 with an empty array; the private table and submission RPC denied unauthenticated browser access; the Edge Function returned HTTP 401 for both missing and forged player tokens. These checks created **no test accounts or fake scores**. A real authenticated completed-run submission, authenticated-role access checks, session refresh and cross-platform iframe verification remain to be performed. Unit/browser tests use mocked endpoints separately.
+
+**Live itch.io diagnosis, October 26:** tested from the actual game iframe at `ravendeath.itch.io/crooked-garden`. Public Top 10 returned HTTP 200 (`[]`), but anonymous signup returned HTTP 422 with `anonymous_provider_disabled` / “Anonymous sign-ins are disabled.” Thus reads work across the itch frame, but sharing is blocked by the project's current Auth setting. Recheck and save **Anonymous Sign-Ins** for this exact project before retesting sharing; no diagnostic account or fake score was created. The browser now distinguishes this configuration error from connectivity errors.
+
+**Follow-up after the owner saved the setting, October 26:** signup now returns HTTP 200 from the live itch.io iframe. One diagnostic anonymous Auth user was created (no score submitted). Its token was accepted by `/auth/v1/user`, private table access remained blocked (HTTP 403), and the public Top 10 returned HTTP 200 (`[]`). Guest authentication is now working; a real completed-run score submission is still the remaining end-to-end check.
+
+**Repeat-run update deployed October 26:** migration `202610260001_run_history.sql` adds private run history and replaces the submission routine, preserving all existing bests. Previously overwritten lower scores cannot be reconstructed; historical best rows were not invented as run-history entries. Every future accepted run is logged, with idempotency across *all* previously stored run IDs, even after later runs. A shorter five-second interval avoids rejecting ordinary consecutive complete runs. The updated Edge Function reports a saved run separately from its retained personal best. `supabase/tests/run-history.sql` passed against the actual database, checking two runs under one user, lower-score retention, limits, older-run retries and browser-role restrictions inside a rolled-back transaction. No fake scores or test history persisted.
 
 ### 1. Enable guest sign-in
 
@@ -38,7 +46,7 @@ Inspect the planned changes before applying:
 supabase db push
 ```
 
-`supabase/config.toml` is already included; do not re-run `supabase init` over it. The migration creates new `garden_scores`, `garden_top_scores()` and `submit_garden_score(...)` objects. If these names already exist, stop and reconcile them; do not drop existing project data. Alternatively, review and execute `supabase/migrations/202610250001_global_leaderboard.sql` in the project's SQL Editor (the CLI also records migration history).
+`supabase/config.toml` is already included; do not re-run `supabase init` over it. The initial migration creates `garden_scores`, `garden_top_scores()` and `submit_garden_score(...)`; the next adds `garden_runs` and upgrades the submission function. If these names exist outside recorded migrations, stop and reconcile them; do not drop existing project data. Prefer the CLI migration history over running SQL manually on an already deployed project.
 
 ### 3. Deploy the score endpoint
 
@@ -53,10 +61,10 @@ The project URL/publishable key in `src/global-leaderboard.js` are public browse
 ### 4. Verify before uploading the game
 
 - Open Leaderboard from localhost: Top 10 should load as empty, not error, without creating any Auth user.
-- Confirm the browser/publishable key cannot select or insert into `garden_scores`, or execute `submit_garden_score` directly. Only the fixed `garden_top_scores` projection is public. Test this with both unauthenticated and anonymous authenticated sessions.
+- Confirm the browser/publishable key cannot select or insert into `garden_scores` or `garden_runs`, or execute `submit_garden_score` directly. Only the fixed `garden_top_scores` projection is public. Test this with both unauthenticated and anonymous authenticated sessions.
 - Finish three gardens, choose a name and Share. Confirm one anonymous Auth user and one score row are created. Refresh the leaderboard and check the entry.
-- Submit a lower completed-run score in the same profile after 30 seconds: the old best must remain. A retry using the same run ID must not duplicate the score.
-- Tampered scores above 10,000, malformed names, incomplete runs, missing/expired/forged JWTs and sub-10-second claimed runs must fail. A second different submission within 30 seconds returns HTTP 429.
+- Submit another lower completed-run score in the same profile after five seconds: `garden_runs` must have both runs, while `garden_scores` retains the old best. Retry the first run ID after the second submission: it must not add a record. The final-results Share action must reset for every new full run without creating a new guest account.
+- Tampered scores above 10,000, malformed names, incomplete runs, missing/expired/forged JWTs and sub-10-second claimed runs must fail. A second different submission within five seconds returns HTTP 429 with a retry delay. A retry of an already saved run bypasses the delay safely.
 - Verify two different browser profiles can both submit. Test the itch.io, Newgrounds and Wavedash versions against the same project; cross-origin fetch must work inside their actual game frames.
 - Disconnect the network: gameplay must continue; rankings show a retry message and sharing must not falsely report success. Reload and confirm the guest session refreshes normally.
 
@@ -66,11 +74,11 @@ Then run `npm run package` and upload `buildDirectories/crooked-garden.zip` to y
 
 - RLS is enabled and browser roles have **no direct table grants**. Public reads use a fixed security-definer Top 10 function exposing no user IDs or tokens.
 - Only the Edge Function's server role can execute the submission function. It uses the user ID returned by Auth, ignoring any browser-supplied user ID.
-- Atomic per-player locking, a 30-second interval and last-run idempotency prevent accidental duplicates and simple same-identity spam. The database retains a personal best, not an unbounded run history.
+- Atomic per-player locking, a five-second interval and unique run IDs prevent accidental duplicates and simple same-identity spam. Private run history grows with accepted submissions; monitor storage on the Free plan and agree a retention policy before pruning any history. No automatic deletion is configured.
 - Validation is **plausibility checking, not replay verification or anti-cheat**. A modified client can still claim a plausible score/duration or make new guest identities. The 10,000 ceiling is a conservative bound for current three-garden scoring (current theoretical maximum is 9,900); update it on both client/server/database if scoring changes.
 - Stay on Supabase's Free plan if you want no paid subscription, monitor Auth/database/function quotas and abuse, and do not enable a paid upgrade or overages without reviewing costs. Free service has usage limits and may pause; this does not promise unlimited free availability. No billing settings were changed here.
 - Anonymous Auth users need a retention/cleanup policy; there is no automatic cleanup assumed. Deleting an Auth user cascades to its score. Decide retention and moderation rules before deleting data. Remove abusive names through the dashboard as the project owner.
 
 ## Tests
 
-`npm test` covers browser client requests, lazy guest signup/session refresh, validation, Edge Function authorization and SQL grant declarations. `env -u NODE_OPTIONS npm run test:wavedash` exercises Wavedash/native versus global tabs and an actual completed run's opt-in sharing, failures and idempotent retries with mock endpoints. These automated tests make **no requests or writes to the live Supabase project**. The separate live checks and remaining verification are listed under deployment status above.
+`npm test` covers browser client requests, lazy guest signup/session refresh, validation, Edge Function authorization and SQL grant declarations. `env -u NODE_OPTIONS npm run test:wavedash` completes two full runs under one mock guest, submits each, verifies fresh run IDs, and checks Supabase global-best display against an unrelated local score and offline failure. Browser/Node tests make **no requests or writes to the live Supabase project**. The separate SQL integration test can be run explicitly with `supabase db query --linked --file supabase/tests/run-history.sql`; it requires the diagnostic Auth account and always rolls back its rows. Live iframe verification remains listed above.

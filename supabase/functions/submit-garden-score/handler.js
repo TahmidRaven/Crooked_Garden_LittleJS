@@ -26,9 +26,10 @@ export function createSubmitHandler({url,key,fetcher=(...args)=>fetch(...args),r
       });
       if(!result.ok)return reply(503,{error:'temporarily_unavailable'});
       const data=await result.json();
-      if(data?.rate_limited)return reply(429,{error:'rate_limited'});
+      if(data?.rate_limited)return reply(429,{error:'rate_limited',retryAfterSeconds:Math.max(1,Math.min(5,Number(data.retry_after_seconds)||5))});
       if(data?.ok!==true)return reply(400,{error:'invalid_submission'});
-      return reply(200,{ok:true});
+      return reply(200,{ok:true,duplicate:data.duplicate===true,improved:data.improved===true,
+        ...(Number.isSafeInteger(data.personal_best)?{personalBest:data.personal_best}:{})});
     }catch{return reply(503,{error:'temporarily_unavailable'});}
   };
 }

@@ -8,6 +8,7 @@ let browser;
 try{
   browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];
+  await page.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',route=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'[]'}));
   page.on('pageerror',e=>errors.push(e.message));
   page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
   await page.clock.install();
@@ -71,8 +72,31 @@ try{
   await page.locator('#pause').click();assert.equal(await page.locator('#joystick').isVisible(),false,'UI clicks never open a joystick');
   await page.locator('#resume').click();
   assert.equal(await page.locator('#joystick-controls').evaluate(el=>getComputedStyle(el).opacity),'0.45','The entire joystick is translucent');
+  assert.equal((await state()).rewindsLeft,3);
+  for(let used=1;used<=3;used++){
+    await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(50);await page.mouse.up();
+    await page.locator('#undo').click();
+    assert.equal((await state()).rewindsLeft,3-used);assert.equal((await state()).rewindPenalty,used*100);
+    assert.match(await page.locator('#state-label').textContent(),/−100 PTS/);
+    if(used===1){
+      await page.clock.runFor(20);await page.screenshot({path:'artifacts/rewind-penalty.png'});
+      await page.locator('#restart').click();
+      assert.equal((await state()).rewindsLeft,2,'Retrying garden 1 must not reset the run allowance');
+      assert.equal((await state()).rewindPenalty,100,'Retrying cannot erase the penalty');
+    }
+  }
+  await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(50);await page.mouse.up();
+  assert.equal(await page.locator('#undo').isDisabled(),true);
+  const exhausted=await state();await page.keyboard.press('z');
+  assert.equal((await state()).points,exhausted.points,'Keyboard cannot bypass an exhausted allowance');
+  assert.equal((await state()).rewindPenalty,300);
+  await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(2000);await page.mouse.up();
+  assert.equal((await state()).phase,'result');assert.equal(await page.locator('#result-undo').isVisible(),false,'No result-screen recovery after three uses');
+  await page.locator('#next').click();assert.equal((await state()).rewindsLeft,0,'A failed-garden retry is not a new run');
+  await page.locator('#pause').click();await page.locator('#home').click();await page.locator('#play').tap({force:true});
+  assert.equal((await state()).rewindsLeft,3);assert.equal((await state()).rewindPenalty,0,'Starting a genuinely new run restores the allowance');
   assert.deepEqual(errors,[]);
-  console.log('Floating joystick checks passed: touch/mouse anchors, dot cursor, hover, drag, release, cancel, multitouch Burst, pause and five layouts.');
+  console.log('Floating joystick checks passed: touch/mouse, multitouch Burst, layouts, three run-wide rewinds, penalty feedback, retry persistence and new-run reset.');
 }finally{
   await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));
 }

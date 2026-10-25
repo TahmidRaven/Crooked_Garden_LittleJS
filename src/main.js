@@ -9,17 +9,20 @@ import { createFailureAudio } from './failure-audio.js';
 import { createJoystick } from './joystick.js';
 import { createWavedash, createRunProgress } from './wavedash.js';
 import { createGlobalLeaderboard } from './global-leaderboard.js';
+import { createRunResources,REWIND_PENALTY } from './run-resources.js';
 
 const $=id=>document.getElementById(id);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touchControls=matchMedia('(pointer:coarse)').matches;
-let garden=createArcade(),light={x:400,y:450},phase='loading',ticks=0,muted=true;
+let garden=createArcade(),light={x:400,y:450},phase='loading',ticks=0,muted=false;
 let particles=[],popups=[],bank=0,best=0;
 let helpReturn='title';
 const wavedash=createWavedash();
 const globalLeaderboard=createGlobalLeaderboard();
 let runProgress=createRunProgress(),leaderboardReturn='title',leaderboardRequest=0,scoreRequest=0,pendingScore=null;
 let leaderboardSource='global',runSeconds=0,pendingGlobalRun=null,globalSubmitRequest=0;
+let globalBestRequest=0;
+let runResources=createRunResources(),rewindNotice=0;
 let view=fitViewport(innerWidth,innerHeight,devicePixelRatio||1);
 try{best=Number(localStorage.getItem('crooked-garden-best-v2'))||0;}catch{}
 const music=new Audio(`${import.meta.env.BASE_URL}assets/calm-theme.ogg`);music.loop=true;music.volume=.2;
@@ -29,17 +32,19 @@ const comboChime=new L.Sound([.2,0,1320,.01,.15,.4,1,1.6,0,0,240,.1]);
 const failureAudio=createFailureAudio(L.Sound);
 
 const perfect=()=>bloomCount(garden)===garden.level.flowers.length;
-const stageScore=()=>Math.max(0,bloomCount(garden)*300+garden.swatted*100+garden.captureScore+garden.collected.filter(Boolean).length*50-(garden.rewinds||0)*100+(perfect()?Math.ceil(garden.water):0));
+const stageScore=()=>bloomCount(garden)*300+garden.swatted*100+garden.captureScore+garden.collected.filter(Boolean).length*50+(perfect()?Math.ceil(garden.water):0);
+const totalScore=()=>runResources.score(bank+stageScore());
 function focusGame(){$('game-root').focus({preventScroll:true});}
 const joystick=createJoystick($('joystick'),{surface:$('game-root'),enabled:()=>phase==='playing',onStart:focusGame});
-function begin(stage=0,score=0){
-  if(stage===0){runProgress=createRunProgress();runSeconds=0;}
+function begin(stage=0,score=0,{freshRun=stage===0}={}){
+  if(freshRun){runProgress=createRunProgress();runSeconds=0;runResources=createRunResources();}
+  rewindNotice=0;
   pendingGlobalRun=null;globalSubmitRequest++;$('global-share').disabled=false;$('global-score-status').textContent='';
   scoreRequest++;pendingScore=null;$('score-status').textContent='';$('score-retry').hidden=true;
   garden=createArcade({stage});garden.rewinds=0;bank=score;light={x:400,y:450};
   joystick.reset();particles=[];popups=[];phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});
 }
-function retry(){begin(garden.index,bank);}
+function retry(){begin(garden.index,bank,{freshRun:false});}
 function home(){garden=createArcade();phase='title';particles=[];popups=[];bank=0;updateUI();$('play').focus({preventScroll:true});}
 function pause(){if(phase==='playing'){phase='paused';updateUI();$('resume').focus({preventScroll:true});}}
 function resume(){if(phase==='paused'){phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});}}
@@ -69,6 +74,17 @@ function closeCredits(){
   if(phase!=='credits')return;
   phase='title';updateUI();$('asset-credits').focus({preventScroll:true});
 }
+function displayGlobalBest(entries){
+  $('best-label').textContent=entries===null?'—':String(entries.reduce((highest,e)=>Math.max(highest,e.score),0));
+  $('global-best-note').textContent=entries===null?'Global best unavailable. Open the leaderboard to retry.':'Global best is the highest submitted score across all players.';
+}
+async function refreshGlobalBest(){
+  const request=++globalBestRequest;
+  $('best-label').textContent='…';
+  $('global-best-note').textContent='Loading the global best from Supabase…';
+  const entries=await globalLeaderboard.getScores();
+  if(request===globalBestRequest)displayGlobalBest(entries);
+}
 async function showLeaderboard(){
   if(!['title','result','leaderboard'].includes(phase))return;
   if(phase!=='leaderboard')leaderboardReturn=phase;
@@ -83,6 +99,7 @@ async function showLeaderboard(){
   $('leaderboard-refresh').disabled=true;
   const entries=await (global?globalLeaderboard:wavedash).getScores();
   if(request!==leaderboardRequest||phase!=='leaderboard')return;
+  if(global){globalBestRequest++;displayGlobalBest(entries);}
   $('leaderboard-refresh').disabled=false;
   $('leaderboard-status').textContent=entries===null?'Could not load scores. Please try again.':entries.length?'Completed three-garden runs · highest score wins.':'No scores yet. Clear all three gardens to set the first!';
   for(const entry of entries||[]){
@@ -101,6 +118,7 @@ async function shareGlobalScore(){
   if(request!==globalSubmitRequest)return;
   $('global-score-status').textContent=result.message;
   $('global-share').disabled=result.ok;
+  if(result.ok)void refreshGlobalBest();
 }
 function closeLeaderboard(){
   if(phase!=='leaderboard')return;
@@ -116,9 +134,9 @@ async function uploadRunScore(score){
   $('score-retry').hidden=sent;
 }
 function doRewind(){
-  if(phase==='title'||perfect()||garden.path.length<2)return;
+  if(!['playing','result'].includes(phase)||perfect()||garden.path.length<2||!runResources.useRewind())return;
   rewind(garden,140);garden.grace=.9;garden.burst=0;garden.queued=false;garden.rewinds=(garden.rewinds||0)+1;
-  joystick.reset();phase='playing';popup('SECOND CHANCE','#d9f6cf');updateUI();focusGame();
+  joystick.reset();phase='playing';rewindNotice=120;popup(`REWIND · −${REWIND_PENALTY} PTS`,'#f0b18c');updateUI();focusGame();
 }
 function burst(){if(phase==='playing'){queueBurst(garden);updateUI();}}
 function popup(text,color){const tip=garden.path.at(-1);popups.push({x:tip.x,y:tip.y-25,text,color,life:1.1});}
@@ -140,10 +158,10 @@ function captureFeedback(){
 function showResult(){
   phase='result';const saved=bloomCount(garden),cleared=perfect(),last=garden.index===LEVELS.length-1;
   if(!cleared)failureAudio.play(garden.endedBy==='water'?'water':garden.endedBy==='bug'?'bug':'terrain',{muted});
-  if(cleared){best=Math.max(best,bank+stageScore());try{localStorage.setItem('crooked-garden-best-v2',String(best));}catch{}}
+  if(cleared){best=Math.max(best,totalScore());try{localStorage.setItem('crooked-garden-best-v2',String(best));}catch{}}
   if(cleared){
     runSeconds+=garden.clock;
-    const completedScore=runProgress.clear(garden.index,bank+stageScore());
+    const completedScore=runProgress.clear(garden.index,totalScore());
     if(completedScore!==null){
       wavedash.unlock('THE_GARDEN_LIVES');
       pendingGlobalRun={runId:crypto.randomUUID(),score:completedScore,completedGardens:3,durationSeconds:Math.ceil(runSeconds)};
@@ -154,9 +172,10 @@ function showResult(){
   $('result-flowers').textContent='✿'.repeat(saved)+'○'.repeat(3-saved);
   $('result-title').textContent=cleared?(last?'THE GARDEN LIVES.':'KEEP ON GROWING.'):garden.endedBy==='bug'?'THE SWARM GOT YOU.':garden.endedBy==='water'?'OUT OF WATER.':'WATCH THE ROOTS.';
   $('result-copy').textContent=cleared?`${garden.captures} bug${garden.captures===1?'':'s'} caught${garden.maxCombo>1?` · best catch ×${garden.maxCombo}`:''}. ${last?'Three gardens restored. You outgrew the swarm.':`${garden.level.name} is blooming. A new swarm waits in the next garden.`}`:garden.endedBy==='bug'?'Bait a hunter, stun it with Burst, then grow around it and close a loop against your stem to capture it.':garden.endedBy==='water'?'Loops cost water up front, then refund most of it on a catch. Plan catches early; find blue dew if you are too low to finish a loop.':'Mossy roots are solid. Burst protects against bugs, not terrain. Try another bend.';
-  $('result-score').textContent=bank+stageScore();$('result-time').textContent=`${garden.clock.toFixed(1)}s`;$('best-label').textContent=best;
+  $('result-score').textContent=totalScore();$('result-time').textContent=`${garden.clock.toFixed(1)}s`;
+  void refreshGlobalBest();
   $('next').textContent=cleared?(last?'ANOTHER RUN ▶':'NEXT GARDEN ▶'):'TRY A NEW SWARM ▶';
-  $('result-undo').hidden=cleared||garden.path.length<2;
+  $('result-undo').hidden=cleared||garden.path.length<2||!runResources.remaining;
   updateUI();$('next').focus({preventScroll:true});
 }
 function updateUI(){
@@ -175,7 +194,7 @@ function updateUI(){
   $('game-root').inert=phase!=='playing';
   $('game').dataset.phase=phase;
   $('water').max=MAX_WATER;$('water').value=garden.water;$('water').classList.toggle('low',garden.water<150);$('water-label').textContent=Math.ceil(garden.water);
-  $('score-label').textContent=String(bank+stageScore()).padStart(4,'0');$('stage-label').textContent=`GARDEN ${garden.index+1} / ${LEVELS.length}`;
+  $('score-label').textContent=String(totalScore()).padStart(4,'0');$('stage-label').textContent=`GARDEN ${garden.index+1} / ${LEVELS.length}`;
   for(let i=0;i<3;i++){
     const token=$(`flower-${i}`);token.classList.toggle('saved',garden.bloomed[i]);token.style.setProperty('--flower',garden.level.flowers[i].color);
     token.setAttribute('aria-label',`${garden.level.flowers[i].name}: ${garden.bloomed[i]?'restored':'dormant'}`);
@@ -186,9 +205,13 @@ function updateUI(){
   $('boost').setAttribute('aria-pressed',String(garden.queued||garden.burst>0));
   $('burst-label').textContent=garden.burst>0?'PROTECTED':garden.cooldown>0?`${garden.cooldown.toFixed(1)}s`:garden.queued?'ARMED':'BURST';
   $('burst-detail').textContent=garden.queued?'HOLD TO RELEASE':garden.cooldown>0?'RECHARGING':`${touchControls?'TAP':'SHIFT'} · 30 WATER`;
-  $('undo').disabled=!canPlay||garden.path.length<2;
+  $('undo').disabled=!canPlay||garden.path.length<2||!runResources.remaining;
+  $('rewind-label').textContent=`REWIND · ${runResources.remaining}`;
+  $('undo').setAttribute('aria-label',`Rewind vine: ${runResources.remaining} left this run; costs ${REWIND_PENALTY} points`);
+  $('undo').title=`Rewind (Z) · ${runResources.remaining} left · −${REWIND_PENALTY} points`;
+  $('result-undo').textContent=`↶ Rewind · ${runResources.remaining} left (−${REWIND_PENALTY} pts)`;
   $('pause').disabled=!canPlay;
-  $('state-label').textContent=garden.lastCapture&&garden.clock-garden.lastCapture.clock<1.4?`${garden.lastCapture.count>1?'COMBO CATCH!':'CAUGHT!'} +${Math.round(garden.lastCapture.water)} WATER · ${garden.lastCapture.refund} REFUND`:garden.loopHint?`CLOSE THE LOOP · ${garden.loopHint.count} BUG${garden.loopHint.count===1?'':'S'} INSIDE`:garden.burst>0?'PROTECTED · STUN A BUG, THEN LOOP IT':garden.queued?'BURST ARMED · DRAG TO GROW':garden.water<150?'LOW WATER · FIND BLUE DEW':garden.started?'GROW LOOPS TO CATCH BUGS · BLOOM ALL THREE':'TOUCH OR CLICK ANYWHERE · DRAG TO GROW';
+  $('state-label').textContent=rewindNotice>0?`−${REWIND_PENALTY} PTS · ${runResources.remaining} REWINDS LEFT THIS RUN`:garden.lastCapture&&garden.clock-garden.lastCapture.clock<1.4?`${garden.lastCapture.count>1?'COMBO CATCH!':'CAUGHT!'} +${Math.round(garden.lastCapture.water)} WATER · ${garden.lastCapture.refund} REFUND`:garden.loopHint?`CLOSE THE LOOP · ${garden.loopHint.count} BUG${garden.loopHint.count===1?'':'S'} INSIDE`:garden.burst>0?'PROTECTED · STUN A BUG, THEN LOOP IT':garden.queued?'BURST ARMED · DRAG TO GROW':garden.water<150?'LOW WATER · FIND BLUE DEW':garden.started?'GROW LOOPS TO CATCH BUGS · BLOOM ALL THREE':'TOUCH OR CLICK ANYWHERE · DRAG TO GROW';
 }
 $('play').onclick=()=>begin();$('resume').onclick=resume;$('pause').onclick=pause;
 $('restart').onclick=retry;$('pause-retry').onclick=retry;$('undo').onclick=doRewind;$('result-undo').onclick=doRewind;
@@ -250,6 +273,7 @@ function update(){
     if(L.keyIsDown('ArrowUp'))light.y=Math.max(35,light.y-6);if(L.keyIsDown('ArrowDown'))light.y=Math.min(660,light.y+6);
   }
   if(phase==='playing'){
+    rewindNotice=Math.max(0,rewindNotice-1);
     const stick=joystick.vector;
     if(stick.growing){const tip=garden.path.at(-1);light={x:tip.x+stick.x*100,y:tip.y+stick.y*100};}
     const captureSerial=garden.captureSerial;
@@ -272,4 +296,4 @@ L.setCanvasFixedSize(L.vec2(Math.round(view.width*view.dpr),Math.round(view.heig
 L.engineInit(init,update,()=>{},()=>renderScene(L.mainContext,{garden,light,view,ticks,phase,reducedMotion,particles,popups}),()=>{},[],$('game-root'));
 // CSS imports have run and the engine owns the canvas; it is now safe to reveal startup UI.
 document.documentElement.classList.add('game-styled');
-window.crookedGarden={getState:()=>({phase,stage:garden.index,seed:garden.seed,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,flowers:[...garden.bloomed],dew:[...garden.collected],points:garden.path.length,bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,captures:garden.captures,captured:[...garden.captured],captureScore:garden.captureScore,maxCombo:garden.maxCombo,lastCapture:garden.lastCapture?{count:garden.lastCapture.count,water:garden.lastCapture.water,points:garden.lastCapture.points,loopLength:garden.lastCapture.loopLength,refund:garden.lastCapture.refund}:null,clock:garden.clock,endedBy:garden.endedBy,score:bank+stageScore(),best,view:{...view},art:artStatus()})};
+window.crookedGarden={getState:()=>({phase,stage:garden.index,seed:garden.seed,status:garden.status,tip:{...garden.path.at(-1)},water:garden.water,flowers:[...garden.bloomed],dew:[...garden.collected],points:garden.path.length,bugs:bugsAt(garden),burst:garden.burst,cooldown:garden.cooldown,queued:garden.queued,swatted:garden.swatted,captures:garden.captures,captured:[...garden.captured],captureScore:garden.captureScore,maxCombo:garden.maxCombo,lastCapture:garden.lastCapture?{count:garden.lastCapture.count,water:garden.lastCapture.water,points:garden.lastCapture.points,loopLength:garden.lastCapture.loopLength,refund:garden.lastCapture.refund}:null,clock:garden.clock,endedBy:garden.endedBy,score:totalScore(),rewindsLeft:runResources.remaining,rewindPenalty:runResources.penalty,best,view:{...view},art:artStatus()})};
