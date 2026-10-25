@@ -1,0 +1,6 @@
+project_id = "crooked-garden"
+
+# The handler verifies the player's JWT against Supabase Auth itself.
+# This also supports projects using non-JWT publishable API keys.
+[functions.submit-garden-score]
+verify_jwt = false

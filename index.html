@@ -57,8 +57,11 @@
         <p class="overline">A WILD LITTLE ARCADE</p>
         <h1>CROOKED<br><em>GARDEN</em></h1>
         <p class="tagline">GROW. LOOP. BLOOM.</p>
-        <button id="play" class="primary-button">LET IT GROW <span>▶</span></button>
-        <button id="how-to-play" class="secondary-button" aria-label="How to Play">? HOW TO PLAY</button>
+        <button id="play" class="primary-button">LET IT GROW</button>
+        <div class="menu-shortcuts">
+          <button id="how-to-play" class="secondary-button" aria-label="How to Play">HOW TO PLAY</button>
+          <button id="title-leaderboard" class="secondary-button" aria-label="Leaderboard">LEADERBOARD</button>
+        </div>
         <p class="title-note">Catch bugs in loops. Bloom your way through three gardens.</p>
         <div class="title-credits"><span>Made by</span><a id="creator-link" href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a><span aria-hidden="true">·</span><button id="asset-credits">Credits</button></div>
       </div>
@@ -125,6 +128,18 @@
       </div>
     </section>
 
+    <section id="leaderboard-screen" class="screen help-screen" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" hidden>
+      <div class="help-page leaderboard-page">
+        <div class="help-topbar"><h2 id="leaderboard-title">GARDEN MASTERS</h2><button id="leaderboard-back" class="text-button">← Back</button></div>
+        <div class="help-scroll" role="region" tabindex="0" aria-label="Top ten completed runs">
+          <div class="leaderboard-tabs" role="group" aria-label="Leaderboard source"><button id="leaderboard-global" class="text-button" aria-pressed="true">All platforms</button><button id="leaderboard-wavedash" class="text-button" aria-pressed="false" hidden>Wavedash</button></div>
+          <p id="leaderboard-status" role="status"></p>
+          <ol id="leaderboard-entries" class="leaderboard-entries" aria-label="Top scores"></ol>
+        </div>
+        <div class="help-bottom"><span id="leaderboard-platform">All platforms · Top 10</span><button id="leaderboard-refresh" class="text-button">Refresh scores</button></div>
+      </div>
+    </section>
+
     <section id="result-screen" class="screen" role="dialog" aria-modal="true" aria-label="Garden result" hidden>
       <div class="menu-content">
         <p id="result-tag" class="overline"></p>
@@ -132,9 +147,19 @@
         <h2 id="result-title"></h2>
         <p id="result-copy" class="result-copy"></p>
         <div class="result-stats"><div><strong id="result-score">0</strong><span>SCORE</span></div><div><strong id="result-time">0s</strong><span>TIME</span></div><div><strong id="best-label">0</strong><span>BEST</span></div></div>
+        <p id="score-status" class="platform-status" role="status" hidden></p>
+        <button id="score-retry" class="text-button" hidden>Retry score upload</button>
+        <div id="global-share-panel" class="global-share-panel" hidden>
+          <label for="global-player-name">Public leaderboard name</label>
+          <input id="global-player-name" type="text" minlength="3" maxlength="24" autocomplete="nickname" value="Gardener" aria-describedby="global-share-note">
+          <button id="global-share" class="text-button">Share global score</button>
+          <p id="global-share-note">Optional: your name and best score will be public. A guest identity is saved in this browser for this site.</p>
+          <p id="global-score-status" class="platform-status" role="status"></p>
+        </div>
         <button id="next" class="primary-button">TRY AGAIN ▶</button>
         <button id="result-undo" class="text-button">↶ Rewind and keep going</button>
         <button id="result-home" class="text-button">Main menu</button>
+        <button id="result-leaderboard" class="text-button" hidden>Garden Masters leaderboard</button>
       </div>
     </section>
   </main>

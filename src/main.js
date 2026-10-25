@@ -7,6 +7,8 @@ import { fitViewport } from './view.js';
 import { renderScene } from './scene.js';
 import { createFailureAudio } from './failure-audio.js';
 import { createJoystick } from './joystick.js';
+import { createWavedash, createRunProgress } from './wavedash.js';
+import { createGlobalLeaderboard } from './global-leaderboard.js';
 
 const $=id=>document.getElementById(id);
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -14,6 +16,10 @@ const touchControls=matchMedia('(pointer:coarse)').matches;
 let garden=createArcade(),light={x:400,y:450},phase='loading',ticks=0,muted=true;
 let particles=[],popups=[],bank=0,best=0;
 let helpReturn='title';
+const wavedash=createWavedash();
+const globalLeaderboard=createGlobalLeaderboard();
+let runProgress=createRunProgress(),leaderboardReturn='title',leaderboardRequest=0,scoreRequest=0,pendingScore=null;
+let leaderboardSource='global',runSeconds=0,pendingGlobalRun=null,globalSubmitRequest=0;
 let view=fitViewport(innerWidth,innerHeight,devicePixelRatio||1);
 try{best=Number(localStorage.getItem('crooked-garden-best-v2'))||0;}catch{}
 const music=new Audio(`${import.meta.env.BASE_URL}assets/calm-theme.ogg`);music.loop=true;music.volume=.2;
@@ -27,6 +33,9 @@ const stageScore=()=>Math.max(0,bloomCount(garden)*300+garden.swatted*100+garden
 function focusGame(){$('game-root').focus({preventScroll:true});}
 const joystick=createJoystick($('joystick'),{surface:$('game-root'),enabled:()=>phase==='playing',onStart:focusGame});
 function begin(stage=0,score=0){
+  if(stage===0){runProgress=createRunProgress();runSeconds=0;}
+  pendingGlobalRun=null;globalSubmitRequest++;$('global-share').disabled=false;$('global-score-status').textContent='';
+  scoreRequest++;pendingScore=null;$('score-status').textContent='';$('score-retry').hidden=true;
   garden=createArcade({stage});garden.rewinds=0;bank=score;light={x:400,y:450};
   joystick.reset();particles=[];popups=[];phase='playing';L.inputClear();updateUI();focusGame();if(!muted)music.play().catch(()=>{});
 }
@@ -60,6 +69,52 @@ function closeCredits(){
   if(phase!=='credits')return;
   phase='title';updateUI();$('asset-credits').focus({preventScroll:true});
 }
+async function showLeaderboard(){
+  if(!['title','result','leaderboard'].includes(phase))return;
+  if(phase!=='leaderboard')leaderboardReturn=phase;
+  phase='leaderboard';updateUI();$('leaderboard-back').focus({preventScroll:true});
+  const request=++leaderboardRequest;
+  const global=leaderboardSource==='global';
+  $('leaderboard-title').textContent=global?'GLOBAL GARDEN MASTERS':'WAVEDASH MASTERS';
+  $('leaderboard-platform').textContent=global?'All platforms · Top 10':'Wavedash · Top 10';
+  $('leaderboard-global').setAttribute('aria-pressed',String(global));
+  $('leaderboard-wavedash').setAttribute('aria-pressed',String(!global));
+  $('leaderboard-entries').replaceChildren();$('leaderboard-status').textContent='Loading Garden Masters…';
+  $('leaderboard-refresh').disabled=true;
+  const entries=await (global?globalLeaderboard:wavedash).getScores();
+  if(request!==leaderboardRequest||phase!=='leaderboard')return;
+  $('leaderboard-refresh').disabled=false;
+  $('leaderboard-status').textContent=entries===null?'Could not load scores. Please try again.':entries.length?'Completed three-garden runs · highest score wins.':'No scores yet. Clear all three gardens to set the first!';
+  for(const entry of entries||[]){
+    const row=document.createElement('li');
+    for(const text of [`#${entry.rank}`,entry.name,String(entry.score)]){
+      const cell=document.createElement('span');cell.textContent=text;row.append(cell);
+    }
+    $('leaderboard-entries').append(row);
+  }
+}
+async function shareGlobalScore(){
+  if(!pendingGlobalRun||$('global-share').disabled)return;
+  const request=++globalSubmitRequest;
+  $('global-share').disabled=true;$('global-score-status').textContent='Sharing global score…';
+  const result=await globalLeaderboard.postScore(pendingGlobalRun,$('global-player-name').value);
+  if(request!==globalSubmitRequest)return;
+  $('global-score-status').textContent=result.message;
+  $('global-share').disabled=result.ok;
+}
+function closeLeaderboard(){
+  if(phase!=='leaderboard')return;
+  leaderboardRequest++;phase=leaderboardReturn;updateUI();
+  $(leaderboardReturn==='title'?'title-leaderboard':'result-leaderboard').focus({preventScroll:true});
+}
+async function uploadRunScore(score){
+  const request=++scoreRequest;pendingScore=score;
+  $('score-status').textContent='Submitting completed run to Garden Masters…';$('score-retry').hidden=true;
+  const sent=await wavedash.postScore(score);
+  if(request!==scoreRequest)return;
+  $('score-status').textContent=sent?'Run submitted to Garden Masters!':'Score not submitted. Check your connection and retry.';
+  $('score-retry').hidden=sent;
+}
 function doRewind(){
   if(phase==='title'||perfect()||garden.path.length<2)return;
   rewind(garden,140);garden.grace=.9;garden.burst=0;garden.queued=false;garden.rewinds=(garden.rewinds||0)+1;
@@ -86,6 +141,15 @@ function showResult(){
   phase='result';const saved=bloomCount(garden),cleared=perfect(),last=garden.index===LEVELS.length-1;
   if(!cleared)failureAudio.play(garden.endedBy==='water'?'water':garden.endedBy==='bug'?'bug':'terrain',{muted});
   if(cleared){best=Math.max(best,bank+stageScore());try{localStorage.setItem('crooked-garden-best-v2',String(best));}catch{}}
+  if(cleared){
+    runSeconds+=garden.clock;
+    const completedScore=runProgress.clear(garden.index,bank+stageScore());
+    if(completedScore!==null){
+      wavedash.unlock('THE_GARDEN_LIVES');
+      pendingGlobalRun={runId:crypto.randomUUID(),score:completedScore,completedGardens:3,durationSeconds:Math.ceil(runSeconds)};
+      if(wavedash.active)void uploadRunScore(completedScore);
+    }
+  }
   $('result-tag').textContent=cleared?`GARDEN ${garden.index+1} COMPLETE`:'THE WILD FIGHTS BACK';
   $('result-flowers').textContent='✿'.repeat(saved)+'○'.repeat(3-saved);
   $('result-title').textContent=cleared?(last?'THE GARDEN LIVES.':'KEEP ON GROWING.'):garden.endedBy==='bug'?'THE SWARM GOT YOU.':garden.endedBy==='water'?'OUT OF WATER.':'WATCH THE ROOTS.';
@@ -100,9 +164,14 @@ function updateUI(){
   $('title-screen').hidden=phase!=='title';$('pause-screen').hidden=phase!=='paused';$('result-screen').hidden=phase!=='result';
   $('help-screen').hidden=phase!=='help';
   $('asset-credits-screen').hidden=phase!=='credits';
+  $('leaderboard-screen').hidden=phase!=='leaderboard';
+  $('title-leaderboard').hidden=$('result-leaderboard').hidden=false;
+  $('leaderboard-wavedash').hidden=!wavedash.active;
+  $('global-share-panel').hidden=!pendingGlobalRun;
+  $('score-status').hidden=!wavedash.active||!$('score-status').textContent;
   $('help-back').textContent=helpReturn==='title'?'← Back to menu':'← Back to pause';
   $('help-play').textContent=helpReturn==='title'?'START GAME ▶':'RESUME GAME ▶';
-  $('hud').hidden=phase==='title'||phase==='credits'||(phase==='help'&&helpReturn==='title');$('play-controls').hidden=phase!=='playing';
+  $('hud').hidden=phase==='title'||phase==='credits'||phase==='leaderboard'||(phase==='help'&&helpReturn==='title');$('play-controls').hidden=phase!=='playing';
   $('game-root').inert=phase!=='playing';
   $('game').dataset.phase=phase;
   $('water').max=MAX_WATER;$('water').value=garden.water;$('water').classList.toggle('low',garden.water<150);$('water-label').textContent=Math.ceil(garden.water);
@@ -131,6 +200,12 @@ $('how-to-play').onclick=openHelp;$('pause-help').onclick=openHelp;$('help-back'
 $('help-motion').onclick=()=>{helpMotion=!helpMotion;updateHelpMotion();};
 $('help-play').onclick=()=>{if(helpReturn==='title')begin();else{phase='paused';resume();}updateHelpMotion();};
 $('asset-credits').onclick=openCredits;$('credits-back').onclick=closeCredits;$('credits-done').onclick=closeCredits;
+$('title-leaderboard').onclick=$('result-leaderboard').onclick=$('leaderboard-refresh').onclick=showLeaderboard;
+$('leaderboard-back').onclick=closeLeaderboard;
+$('leaderboard-global').onclick=()=>{leaderboardSource='global';void showLeaderboard();};
+$('leaderboard-wavedash').onclick=()=>{if(wavedash.active){leaderboardSource='wavedash';void showLeaderboard();}};
+$('global-share').onclick=shareGlobalScore;
+$('score-retry').onclick=()=>{if(pendingScore!==null)void uploadRunScore(pendingScore);};
 $('next').onclick=()=>{if(perfect()){if(garden.index+1<LEVELS.length)begin(garden.index+1,bank+stageScore());else begin();}else retry();};
 $('music').onclick=async()=>{
   muted=!muted;
@@ -151,9 +226,9 @@ async function init(){
   document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();music.pause();}else if(!muted&&phase==='playing')music.play().catch(()=>{});});
   $('game-root').addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();});
   window.addEventListener('keydown',e=>{
-    if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(phase==='credits')closeCredits();else if(phase==='help')closeHelp();else if(phase==='playing')pause();else if(phase==='paused')resume();}
+    if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(phase==='leaderboard')closeLeaderboard();else if(phase==='credits')closeCredits();else if(phase==='help')closeHelp();else if(phase==='playing')pause();else if(phase==='paused')resume();}
     if(e.code==='Tab'&&phase!=='playing'){
-      const panel=$(phase==='title'?'title-screen':phase==='paused'?'pause-screen':phase==='help'?'help-screen':phase==='credits'?'asset-credits-screen':'result-screen');
+      const panel=$(phase==='title'?'title-screen':phase==='paused'?'pause-screen':phase==='help'?'help-screen':phase==='credits'?'asset-credits-screen':phase==='leaderboard'?'leaderboard-screen':'result-screen');
       const items=[...panel.querySelectorAll('button,a[href],summary,[tabindex="0"]')].filter(el=>!el.disabled&&!el.hidden);
       const first=items[0],last=items.at(-1);
       if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
@@ -161,7 +236,7 @@ async function init(){
     }
   });
   $('flower-icons').replaceChildren(...garden.level.flowers.map((f,i)=>{const token=document.createElement('span');token.id=`flower-${i}`;token.className='flower-token';token.textContent='✿';return token;}));
-  new ResizeObserver(resize).observe($('game-root'));resize();phase='title';$('startup-credit').hidden=true;$('game').setAttribute('aria-busy','false');updateUI();$('play').focus({preventScroll:true});
+  new ResizeObserver(resize).observe($('game-root'));resize();phase='title';$('startup-credit').hidden=true;$('game').setAttribute('aria-busy','false');wavedash.init();leaderboardSource=wavedash.active?'wavedash':'global';$('global-player-name').value=globalLeaderboard.getName();updateUI();$('play').focus({preventScroll:true});
 }
 function keyboardGrowing(){return document.activeElement===$('game-root')&&L.keyIsDown('KeyG');}
 function update(){
@@ -179,11 +254,14 @@ function update(){
     if(stick.growing){const tip=garden.path.at(-1);light={x:tip.x+stick.x*100,y:tip.y+stick.y*100};}
     const captureSerial=garden.captureSerial;
     const event=tickArcade(garden,light,{growing:joystick.active?stick.growing:keyboardGrowing()});
+    if(bloomCount(garden)>0)wavedash.unlock('FIRST_BLOOM');
+    if(garden.captures>0)wavedash.unlock('BUG_GARDENER');
+    if(garden.maxCombo>=2)wavedash.unlock('DOUBLE_TROUBLE');
     if(garden.captureSerial!==captureSerial){captureFeedback();updateUI();}
     if(['dew','flower','won','swat'].includes(event))feedback(event);
     if(['blocked','dry','won'].includes(event))showResult();
   }
-  if(!['paused','help','credits'].includes(phase)){
+  if(!['paused','help','credits','leaderboard'].includes(phase)){
     particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.025;p.life-=.018;});
     popups=popups.filter(p=>p.life>0);popups.forEach(p=>{if(!reducedMotion)p.y-=.5;p.life-=1/60;});
   }

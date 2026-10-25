@@ -1,0 +1,4 @@
+# Public project identity only. Authenticate separately with the Wavedash CLI.
+game_id = "j979mjdw9vq5vtftw9b2v6n7198gy2w7"
+upload_dir = "./dist"
+entrypoint = "index.html"

@@ -319,7 +319,8 @@ try{
   await capturePage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await capturePage.goto(url);await capturePage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
   await capturePage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
-  await capturePage.locator('#play').click();
+  // Its centre is clickable throughout the intentional breathing animation.
+  await capturePage.locator('#play').click({force:true});
   const captureState=()=>capturePage.evaluate(()=>window.crookedGarden.getState());
   const captureRoute=[[430,550],[500,550],[500,435],[380,435],[380,380],[360,360],[300,360],[300,435],[395,435]];
   for(const [x,y] of captureRoute){

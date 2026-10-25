@@ -15,7 +15,7 @@ try{
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}`);
   await page.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
   await page.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
-  await page.locator('#play').click();
+  await page.locator('#play').click({force:true});
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const frames={grow:[],loop:[]};
   const clips={grow:{x:590,y:475,width:265,height:205},loop:{x:565,y:325,width:300,height:205}};

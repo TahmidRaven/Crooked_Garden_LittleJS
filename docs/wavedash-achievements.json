@@ -1,0 +1,9 @@
+{
+  "achievements": [
+    {"identifier":"FIRST_BLOOM","display_name":"First Bloom","description":"Restore your first flower.","secret":false,"stat_requirement":null},
+    {"identifier":"BUG_GARDENER","display_name":"Bug Gardener","description":"Capture a bug in a closed vine loop.","secret":false,"stat_requirement":null},
+    {"identifier":"DOUBLE_TROUBLE","display_name":"Double Trouble","description":"Capture at least two bugs in the same loop.","secret":false,"stat_requirement":null},
+    {"identifier":"THE_GARDEN_LIVES","display_name":"The Garden Lives","description":"Clear all three gardens in one run.","secret":false,"stat_requirement":null}
+  ],
+  "stats": []
+}

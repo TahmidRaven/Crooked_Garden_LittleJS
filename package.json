@@ -11,6 +11,7 @@
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser.mjs",
     "test:joystick": "node tests/joystick-browser.mjs",
+    "test:wavedash": "node tests/wavedash-browser.mjs",
     "art:pot": "node scripts/render-flower-pot.mjs",
     "package": "npm run build && node scripts/package.mjs"
   },

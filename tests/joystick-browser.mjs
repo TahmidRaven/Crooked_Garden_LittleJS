@@ -14,7 +14,8 @@ try{
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}`);
   await page.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
   await page.clock.pauseAt(new Date(Date.now()+1000));
-  await page.locator('#play').tap();
+  // Breathing keeps the bounding box animated; tap its centre without waiting for stillness.
+  await page.locator('#play').tap({force:true});
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const cdp=await page.context().newCDPSession(page);
   const touch=(type,touchPoints)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints});

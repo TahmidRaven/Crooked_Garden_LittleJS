@@ -84,7 +84,9 @@ Enemy motion is bounded to clear areas between roots. Earlier gardens have two d
 
 ## Score and progression
 
-Restore flowers, gather dew, capture bugs (especially in combos), stun distinct bugs, and preserve water. Score carries between gardens; rewind applies a penalty. A bug only awards stun credit once and capture credit once per attempt. Best score is stored locally in this browser under `crooked-garden-best-v2`; there is no online leaderboard or account sync. Storage failures do not prevent play.
+Restore flowers, gather dew, capture bugs (especially in combos), stun distinct bugs, and preserve water. Score carries between gardens; rewind applies a penalty. A bug only awards stun credit once and capture credit once per attempt. Best score is stored locally in this browser under `crooked-garden-best-v2`; unfinished runs are not cloud-saved. Storage failures do not prevent play.
+
+On Wavedash only, the optional host SDK also submits a completed three-garden run to **Garden Masters** and unlocks four achievements. Local best scores remain separate from online completed-run boards; old local records are never submitted. See [Wavedash setup](docs/WAVEDASH.md) for portal definitions, build upload and live verification. All hosts additionally offer a shared **All platforms** Top 10 and optional final-run submission through Supabase. Guest authentication is created only when the player chooses to share; reading rankings needs no guest account. See [Supabase setup](docs/SUPABASE.md). Neither online service blocks offline gameplay.
 
 ## Develop
 
