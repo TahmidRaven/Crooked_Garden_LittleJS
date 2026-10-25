@@ -2,6 +2,8 @@
 
 Game ID: `j979mjdw9vq5vtftw9b2v6n7198gy2w7` (public project identity).
 
+Game page: [Play Crooked Garden on Wavedash](https://wavedash.com/games/crookedgarden).
+
 ## Features in this build
 
 - **Garden Masters**: highest score wins, numeric display, one personal best per Wavedash player. Only a run that clears gardens 1, 2 and 3 in order is submitted. Partial gardens and losses never submit. Existing retries and rewind penalties are unchanged. This is a casual, client-submitted leaderboard, not server-verified anti-cheat.

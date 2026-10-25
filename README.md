@@ -3,6 +3,7 @@
 Grow a vine, catch bugs in loops, and reach every flower before your water runs out.
 
 [![Play on itch.io](docs/play-button.svg)](https://ravendeath.itch.io/crooked-garden)
+[![Play on Wavedash](docs/play-wavedash-button.svg)](https://wavedash.com/games/crookedgarden)
 
 <img src="screenshots/cover-v3-630x500.png" alt="Crooked Garden: a winding vine, flowers and flying bugs in a dark forest" width="480">
 
@@ -29,7 +30,7 @@ Upload [`buildDirectories/crooked-garden.zip`](buildDirectories/crooked-garden.z
 
 ## Wavedash
 
-On Wavedash, completed three-garden runs automatically submit to the native **Garden Masters** leaderboard. Four achievements reward your first flower (**First Bloom**), first catch (**Bug Gardener**), a multi-catch (**Double Trouble**), and clearing all three gardens (**The Garden Lives**). The achievement definitions have been imported; the uploaded Wavedash build still needs live gameplay verification before publishing. [Setup and verification checklist](docs/WAVEDASH.md).
+On [Wavedash](https://wavedash.com/games/crookedgarden), completed three-garden runs automatically submit to the native **Garden Masters** leaderboard. Four achievements reward your first flower (**First Bloom**), first catch (**Bug Gardener**), a multi-catch (**Double Trouble**), and clearing all three gardens (**The Garden Lives**). The achievement definitions have been imported; verify scores and achievements whenever uploading a new build. [Setup and verification checklist](docs/WAVEDASH.md).
 
 ## Global leaderboard
 

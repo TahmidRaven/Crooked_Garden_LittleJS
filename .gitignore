@@ -9,3 +9,4 @@ plan.md
 !.env.example
 supabase/.temp/
 supabase/.branches/
+__pycache__/

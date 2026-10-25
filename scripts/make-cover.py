@@ -1,10 +1,14 @@
 """Compose itch cover art from the game's credited sprites and original garden shapes."""
 from pathlib import Path
+import argparse
 import math
 import random
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--wavedash',action='store_true',help='Render widescreen V3 covers without overwriting the itch originals')
+options=parser.parse_args()
 ART = ROOT / 'public/assets/art'
 OUT = ROOT / 'screenshots'
 S = 3
@@ -125,6 +129,10 @@ for x,y in [(380,282),(420,367),(530,401),(150,322)]:
 font_path=Path('/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf')
 if not font_path.exists():
     font_path=Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
+if options.wavedash:
+    from wavedash_cover import render_wavedash_cover
+    render_wavedash_cover(image,font_path,ART,OUT)
+    raise SystemExit
 def text_center(text,y,size,color,stroke=0):
     font=ImageFont.truetype(str(font_path),size*S)
     box=font.getbbox(text);x=((W-34)*S-(box[2]-box[0]))/2
