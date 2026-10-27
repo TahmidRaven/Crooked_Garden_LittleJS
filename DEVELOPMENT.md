@@ -64,9 +64,13 @@ Opening the guide never resets or advances a run. Back or Esc returns to the men
 | Protected burst | Tap **Burst** to arm, then grow; tap again to cancel | **Shift** while growing |
 | Pause / resume | Pause icon, then Keep growing | **Space** pauses; **Esc** toggles pause |
 | Rewind | Rewind button | **Z** |
-| New attempt / fresh swarm | Retry button | **R** |
+| Retry current garden / fresh swarm | Retry button; 3 for the entire run, −300 points each | **R** |
 
-Rewind restores vine/water/collectible history, grants a 0.9-second recovery shield, and costs 100 points. A run starts with **three total rewinds across all gardens**. `src/run-resources.js` keeps the allowance and cumulative penalty outside garden snapshots: retrying any garden (including garden 1) restores neither, and advancing gardens does not charge the same penalty twice. Only starting a new run resets them. Each successful rewind shows a “REWIND · −100 PTS” popup and a two-second HUD notice; the button displays the remaining count. At zero, the button/keyboard action cannot rewind and the result-screen recovery option is hidden. It does not reset enemy time or cooldowns. Retrying gives a new swarm, not an identical replay. Switching tabs automatically pauses. Sound is enabled by default; music starts on the player's Start action, not on page load, to respect browser autoplay restrictions. The HUD has mute/unmute and optional browser-fullscreen controls.
+Rewind restores vine/water/collectible history, grants a 0.9-second recovery shield, and costs 100 points. A run starts with **three total rewinds across all gardens**. `src/run-resources.js` keeps the allowance and cumulative penalty outside garden snapshots: retrying any garden (including garden 1) restores neither, and advancing gardens does not charge the same penalty twice. Only starting a new run resets them. Each successful rewind shows a “REWIND · −100 PTS” popup and a two-second HUD notice; the button displays the remaining count. At zero, the button/keyboard action cannot rewind and the result-screen recovery option is hidden. It does not reset enemy time or cooldowns.
+
+The entire run additionally allows **three retries at 300 points each**, kept in that same run-resource object but separate from the three rewinds. Buttons, paused retries, **R** and failed-result retries all consume the same run-wide allowance; a voluntary restart also counts so it cannot bypass the limit. Reaching a new garden refills neither allowance, and penalties remain cumulative. Retry gives a new swarm, clears only the current garden's growth, and shows “RETRY · −300 PTS” plus a two-second HUD notice. At zero, active/pause/keyboard retry are blocked. The failure screen offers **Start New Run** instead (or a remaining rewind), resetting all progression and resources rather than granting a free extra attempt. Banked stage scores are gross; the combined rewind/retry penalty is deducted exactly once for HUD, results and both online leaderboards, floored at zero. Existing stored online records are not deleted or reset by these client-side rule changes.
+
+Switching tabs automatically pauses. Sound is enabled by default; music starts on the player's Start action, not on page load, to respect browser autoplay restrictions. The HUD has mute/unmute and optional browser-fullscreen controls.
 
 The Kenney joystick is rendered at 45% opacity over the garden. Its origin stays at the initial touch/click; the knob has circular clamped travel and a neutral dead zone. Growth direction is relative to the vine tip, not an absolute target under the cursor. Desktop uses a small cream dot cursor until a drag begins; the old glowing aim target is removed. A second touch can activate Burst while steering. Release, cancellation, pause, retry and resize clear the joystick input.
 
@@ -110,6 +114,12 @@ npm run package
 If Node has `NODE_OPTIONS=--no-experimental-fetch`, clear it for Playwright: `env NODE_OPTIONS='' npm run test:browser`.
 
 The full-window Canvas2D scene scales the world without stretching it and supports high-DPI displays. The floating joystick uses screen-space drag offsets, independent of the garden camera. HUD and touch controls stay in screen space across portrait/landscape sizes. Reduced-motion settings suppress particles/ambient movement and sprite animation.
+
+### Adventure button theme and local font
+
+`src/adventure-ui.css` is imported after the base layout stylesheet. The original Kenney Adventure SVGs provide wood/metal primary buttons, cream secondary buttons, plain wooden action controls and round HUD buttons. Nine-sliced `::before` borders preserve artwork corners without changing hit boxes or stretching labels. `::after` adds a subtle left-to-right sheen to all enabled buttons; disabled buttons stay still and hover/press uses brightness. The main button retains its breathing effect. On losses, the Retry frame breathes gently without moving its hit box or label. Keyboard focus outlines and reduced-motion support remain.
+
+Courier Prime Regular/Bold are locally bundled under OFL 1.1 and loaded before revealing the menu; the title, interface and reward popups all use it, with system-font fallbacks for missing symbols. The engine's own splash branding is untouched. It is a documented close match, not an assertion about the pack sample's unidentified font. Font/image licenses and source hashes ship in the build. Asset checks validate SVGs and font integrity; browser checks cover desktop, phone, short landscape and actual local font loading. Earlier promotional screenshots/video retain the previous interface styling until explicitly re-recorded.
 
 ### Starting planter
 

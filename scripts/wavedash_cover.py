@@ -1,10 +1,10 @@
-"""Recompose the existing V3 key art for Wavedash's 16:9 cover slot."""
+"""Recompose the garden key art for Wavedash's 16:9 cover slot."""
 import math
 import random
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 
-def render_wavedash_cover(scene,font_path,art,out):
+def render_wavedash_cover(scene,font_path,art,out,version=3):
     width,height=1920,1080
     image=Image.new('RGB',(width,height))
     pixels=image.load()
@@ -34,7 +34,8 @@ def render_wavedash_cover(scene,font_path,art,out):
 
     title=Image.new('RGBA',image.size)
     draw=ImageDraw.Draw(title)
-    for text,y,size,color in [('CROOKED',248,151,'#f6f3d1'),('GARDEN',413,178,'#c3e68f')]:
+    titles=[('CROOKED',230,200,'#f6f3d1'),('GARDEN',402,234,'#c3e68f')] if version==4 else [('CROOKED',248,151,'#f6f3d1'),('GARDEN',413,178,'#c3e68f')]
+    for text,y,size,color in titles:
         font=ImageFont.truetype(str(font_path),size)
         draw.text((110,y+9),text,font=font,fill='#031a1d',stroke_width=4,stroke_fill='#031a1d')
         draw.text((110,y),text,font=font,fill=color,stroke_width=2,stroke_fill='#031a1d')
@@ -47,6 +48,6 @@ def render_wavedash_cover(scene,font_path,art,out):
     draw.text((178,112),'AFTER HOURS ARCADE',font=ImageFont.truetype(str(font_path),26),anchor='lm',fill='#eadfbb')
     out.mkdir(exist_ok=True)
     for w,h in [(1920,1080),(1280,720)]:
-        path=out/f'cover-v3-wavedash-{w}x{h}.png'
+        path=out/f'cover-v{version}-wavedash-{w}x{h}.png'
         image.convert('RGB').resize((w,h),Image.Resampling.LANCZOS).save(path,optimize=True)
         print(path)

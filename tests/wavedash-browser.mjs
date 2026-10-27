@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from '@playwright/test';
 import {preview} from 'vite';
+import {waitForPage} from './wait-for-page.mjs';
 
 const server=await preview({preview:{host:'127.0.0.1',port:0,open:false}});
 let browser;
@@ -42,21 +43,21 @@ try{
       async uploadLeaderboardScore(...args){window.__waveCalls.push(['upload',...args]);return {success:!window.__waveFailUpload};}
     };
   });
-  await page.clock.install({time:new Date('2026-10-25T12:00:00Z')});
-  await page.goto(url);await page.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
-  await page.clock.pauseAt(new Date('2026-10-25T12:00:10Z'));
+  const clockStart=new Date('2026-10-25T12:00:00Z');
+  await page.clock.install({time:clockStart});await page.clock.pauseAt(clockStart);
+  await page.goto(url);await page.clock.runFor(3000);await waitForPage(page,()=>window.crookedGarden?.getState().phase==='title');
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const calls=()=>page.evaluate(()=>window.__waveCalls);
   assert.deepEqual((await calls()).filter(c=>c[0]==='init'),[['init','title',true]],'SDK init waits until art/title are ready and runs once');
   assert.deepEqual((await calls()).find(c=>c[0]==='board'),['board','Garden Masters',1,0]);
   assert.equal(await page.locator('#title-leaderboard').isVisible(),true);
   await page.locator('#title-leaderboard').click();
-  await page.waitForFunction(()=>document.querySelectorAll('#leaderboard-entries li').length===2);
+  await waitForPage(page,()=>document.querySelectorAll('#leaderboard-entries li').length===2);
   await page.locator('#leaderboard-global').click();
-  await page.waitForFunction(()=>document.getElementById('leaderboard-entries').textContent.includes('Global Gardener'));
+  await waitForPage(page,()=>document.getElementById('leaderboard-entries').textContent.includes('Global Gardener'));
   assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,0,'Viewing global rankings never creates an account');
   await page.locator('#leaderboard-wavedash').click();
-  await page.waitForFunction(()=>document.querySelectorAll('#leaderboard-entries li').length===2);
+  await waitForPage(page,()=>document.querySelectorAll('#leaderboard-entries li').length===2);
   assert.equal((await state()).phase,'leaderboard');
   assert.equal(await page.locator('#leaderboard-entries img').count(),0,'Player names are text, never HTML');
   assert.match(await page.locator('#leaderboard-entries').textContent(),/<img src=x/);
@@ -66,9 +67,9 @@ try{
   await page.keyboard.press('Escape');assert.equal((await state()).phase,'title');
   assert.equal(await page.evaluate(()=>document.activeElement.id),'title-leaderboard');
   await page.evaluate(()=>window.__waveFailList=true);await page.locator('#title-leaderboard').click();
-  await page.waitForFunction(()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
+  await waitForPage(page,()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
   await page.evaluate(()=>window.__waveFailList=false);await page.locator('#leaderboard-refresh').click();
-  await page.waitForFunction(()=>document.querySelectorAll('#leaderboard-entries li').length===2);
+  await waitForPage(page,()=>document.querySelectorAll('#leaderboard-entries li').length===2);
   await mkdir('artifacts',{recursive:true});
   for(const [width,height] of [[320,568],[390,844],[568,320]]){
     await page.setViewportSize({width,height});await page.clock.runFor(50);
@@ -115,9 +116,9 @@ try{
     await page.locator('#next').click();await follow(route);assert.equal((await state()).phase,'result');
   }
   await page.clock.runFor(2100);
-  await page.waitForFunction(()=>!document.getElementById('score-retry').hidden);
+  await waitForPage(page,()=>!document.getElementById('score-retry').hidden);
   const final=await state(),uploads=(await calls()).filter(c=>c[0]==='upload');
-  await page.waitForFunction(()=>document.getElementById('best-label').textContent==='8000');
+  await waitForPage(page,()=>document.getElementById('best-label').textContent==='8000');
   assert.match(await page.locator('.result-stats').textContent(),/GLOBAL BEST/);
   assert.notEqual(await page.locator('#best-label').textContent(),'999999','Displayed best comes from Supabase, never browser storage');
   assert.equal(uploads.length,1);assert.deepEqual(uploads[0],['upload','garden-masters-id',final.score,true]);
@@ -127,20 +128,20 @@ try{
     assert.equal(unlocks.length,2,`${id} retries an early refusal then stops`);assert.ok(unlocks.every(c=>c[2]===true));
   }
   await page.evaluate(()=>window.__waveFailUpload=false);await page.locator('#score-retry').click();
-  await page.waitForFunction(()=>document.getElementById('score-status').textContent.includes('Run submitted'));
+  await waitForPage(page,()=>document.getElementById('score-status').textContent.includes('Run submitted'));
   assert.equal((await calls()).filter(c=>c[0]==='upload').length,2);assert.equal(await page.locator('#score-retry').isVisible(),false);
   await page.locator('#result-leaderboard').click();await page.locator('#leaderboard-back').click();
   assert.equal((await state()).phase,'result');assert.equal((await calls()).filter(c=>c[0]==='upload').length,2,'Reopening results does not resubmit');
   await page.screenshot({path:'artifacts/wavedash-final-result.png'});
   assert.equal(await page.locator('#global-share-panel').isVisible(),true,'Global sharing is offered only on a complete run');
   await page.locator('#global-player-name').fill('<script>');await page.locator('#global-share').click();
-  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('3–24'));
+  await waitForPage(page,()=>document.getElementById('global-score-status').textContent.includes('3–24'));
   assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,0,'Invalid names never create an account');
   await page.locator('#global-player-name').fill('Raven');await page.locator('#global-share').click();
-  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Could not share'));
+  await waitForPage(page,()=>document.getElementById('global-score-status').textContent.includes('Could not share'));
   assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,1);
   failGlobalUpload=false;await page.locator('#global-share').click();
-  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
+  await waitForPage(page,()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
   const shared=globalCalls.filter(c=>c.url.includes('/functions/'));
   assert.equal(shared.length,2);assert.equal(shared[0].body.runId,shared[1].body.runId,'Retries keep an idempotent submission ID');
   assert.equal(shared[1].body.score,final.score);assert.equal(shared[1].body.completedGardens,3);
@@ -160,20 +161,20 @@ try{
   }
   assert.equal(await page.locator('#global-share').isEnabled(),true,'Every completed run gets a fresh share action');
   await page.locator('#global-share').click();
-  await page.waitForFunction(()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
+  await waitForPage(page,()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
   const submissions=globalCalls.filter(c=>c.url.includes('/functions/'));
   assert.equal(submissions.length,3);assert.notEqual(submissions[2].body.runId,submissions[1].body.runId);
   assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,1,'Two full runs share one guest login');
   assert.equal(savedRuns.size,2,'The backend receives both runs rather than only one best');
   failGlobalRead=true;await page.locator('#result-leaderboard').click();await page.locator('#leaderboard-global').click();
-  await page.waitForFunction(()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
+  await waitForPage(page,()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
   await page.locator('#leaderboard-back').click();
   assert.equal(await page.locator('#best-label').textContent(),'—','Network failure never falls back to an unrelated local best');
   const offline=await browser.newPage();offline.on('pageerror',e=>errors.push(e.message));
-  await offline.goto(url);await offline.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
+  await offline.goto(url);await waitForPage(offline,()=>window.crookedGarden?.getState().phase==='title');
   await offline.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',route=>route.fulfill({status:503,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'{}'}));
   assert.equal(await offline.locator('#title-leaderboard').isVisible(),true);assert.equal(await offline.locator('#leaderboard-wavedash').isVisible(),false);
-  await offline.locator('#title-leaderboard').click();await offline.waitForFunction(()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
+  await offline.locator('#title-leaderboard').click();await waitForPage(offline,()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
   await offline.locator('#leaderboard-back').click();await offline.locator('#play').click({force:true});
   assert.equal(await offline.evaluate(()=>window.crookedGarden.getState().phase),'playing');
   assert.deepEqual(errors,[]);

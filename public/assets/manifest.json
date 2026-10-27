@@ -8,7 +8,38 @@
     "path": "art/after-hours-arcade.png",
     "sha256": "2867077663c9b049100ab15a6e5ae9b90aceaa370c673fbe60eb5a772f98f0e8"
   },
+  "fonts": [
+    {
+      "name": "Courier Prime",
+      "author": "The Courier Prime Project Authors",
+      "source": "https://github.com/quoteunquoteapps/CourierPrime",
+      "download": "https://github.com/google/fonts/tree/main/ofl/courierprime",
+      "license": "OFL-1.1",
+      "licenseFile": "licenses/courier-prime-OFL.txt",
+      "verifiedOn": "2026-10-27",
+      "files": [
+        {"path":"fonts/courier-prime-regular.ttf","original":"CourierPrime-Regular.ttf","sha256":"72f793376f8e2841656bf21d77a5de010f2929bd6956a22ee848ad0c7eb978af"},
+        {"path":"fonts/courier-prime-bold.ttf","original":"CourierPrime-Bold.ttf","sha256":"ff1f38786c849d1c41fa8e447960abdb2bd75fdfb0cfcdeb524fad65a5af3638"}
+      ]
+    }
+  ],
   "packs": [
+    {
+      "name": "UI Pack - Adventure",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/ui-pack-adventure",
+      "itch": "https://kenney.itch.io/kenney-game-assets",
+      "download": "https://kenney.nl/media/pages/assets/ui-pack-adventure/9a877376bc-1723597274/kenney_ui-pack-adventure.zip",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/kenney-ui-adventure.txt",
+      "verifiedOn": "2026-10-27",
+      "files": [
+        {"path":"ui/adventure-wood.svg","original":"Vector/panel_brown_dark_corners_a.svg","sha256":"83064e4ef629bade17df4bd634c5125942a8ee7f3697fb9823b9e20117bbc147"},
+        {"path":"ui/adventure-cream.svg","original":"Vector/panel_brown_corners_a.svg","sha256":"13b4010208df6d74b6d371606364290e8b5b8e4842a5ed863e0f74722ae9f8c2"},
+        {"path":"ui/adventure-plain-wood.svg","original":"Vector/panel_brown_dark.svg","sha256":"37ac9f8800348da62e51d1e756bd6ae225fe99efc9ddd1f0e5366e8355135add"},
+        {"path":"ui/adventure-round.svg","original":"Vector/round_brown.svg","sha256":"5d22b2d4053eeb2d6af80d2a85f11479563ecbf796b941341d619665c2e978aa"}
+      ]
+    },
     {
       "name": "Mobile Controls",
       "author": "Kenney",

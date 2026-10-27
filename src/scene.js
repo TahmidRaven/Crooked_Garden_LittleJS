@@ -69,7 +69,7 @@ export function renderScene(c,{garden:g,view:v,ticks,phase,reducedMotion,particl
       for(let j=0;j<7;j++){const a=j*Math.PI*2/7;oval(c,Math.cos(a)*17,Math.sin(a)*17,14,9,f.color,a);}oval(c,0,0,9,9,'#ffe4a1');
     }else{
       c.strokeStyle=`${f.color}99`;c.lineWidth=2;c.setLineDash([2,7]);c.beginPath();c.arc(0,0,27+Math.sin(t*2+i)*2,0,Math.PI*2);c.stroke();c.setLineDash([]);
-      oval(c,0,0,11,17,f.color,-.3);leaf(c,-7,12,15,-1.1,'#679e56');c.fillStyle='#fff4d3';c.font='bold 13px Arial';c.textAlign='center';c.fillText('✦',0,-30);
+      oval(c,0,0,11,17,f.color,-.3);leaf(c,-7,12,15,-1.1,'#679e56');c.fillStyle='#fff4d3';c.font='700 13px "Courier Prime", Arial, sans-serif';c.textAlign='center';c.fillText('✦',0,-30);
     }
     c.restore();
   });
@@ -94,7 +94,7 @@ export function renderScene(c,{garden:g,view:v,ticks,phase,reducedMotion,particl
       oval(c,0,0,16,11,pose.species==='bee'?'#f1cb39':'#c99647');oval(c,-8,-2,3,3,'#102d23');
     }
     c.restore();
-    c.fillStyle=bug.stunned?'#f9d580':color;c.font='bold 17px Arial';c.textAlign='center';c.fillText(bug.stunned?'✧':bug.warning?'!':bug.kind==='hunter'?'⌁':bug.kind==='charger'?'↯':'·',0,-29);
+    c.fillStyle=bug.stunned?'#f9d580':color;c.font='700 17px "Courier Prime", Arial, sans-serif';c.textAlign='center';c.fillText(bug.stunned?'✧':bug.warning?'!':bug.kind==='hunter'?'⌁':bug.kind==='charger'?'↯':'·',0,-29);
     c.restore();
   }
   const tip=path.at(-1);
@@ -106,6 +106,6 @@ export function renderScene(c,{garden:g,view:v,ticks,phase,reducedMotion,particl
   if(g.burst>0||g.grace>0){c.strokeStyle=g.burst>0?'#ffdc89':'#ccf3ce';c.lineWidth=4;c.beginPath();c.arc(tip.x,tip.y,23,0,Math.PI*2);c.stroke();}
   renderVineTip(c,g,{reducedMotion,phase});
   for(const p of particles){c.globalAlpha=p.life;oval(c,p.x,p.y,p.size||3,p.size||3,p.color);}c.globalAlpha=1;
-  for(const p of popups){c.globalAlpha=Math.min(1,p.life*2);c.font='bold 17px Arial';c.textAlign='center';c.lineWidth=4;c.strokeStyle='#071f20';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y);}c.globalAlpha=1;
+  for(const p of popups){c.globalAlpha=Math.min(1,p.life*2);c.font='700 17px "Courier Prime", monospace';c.textAlign='center';c.lineWidth=4;c.strokeStyle='#071f20';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y);}c.globalAlpha=1;
   c.restore();
 }

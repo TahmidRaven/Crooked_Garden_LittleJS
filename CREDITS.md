@@ -62,6 +62,22 @@
 - **Files:** `Sprites/Style C/Large (2×)/joystick_circle_pad_a.png` and `Sprites/Style B/Large (2×)/joystick_circle_nub_a.png` → `public/assets/art/joystick-pad.png` and `joystick-nub.png`.
 - **Changes:** original PNGs unchanged; scaled, partially transparent and subtly sepia-tinted with CSS. Hashes and exact source paths are recorded in the asset manifest.
 
+## Wooden interface frames — Kenney
+
+- **Pack:** [UI Pack - Adventure](https://kenney.nl/assets/ui-pack-adventure), by Kenney. The archive identifies version 1.1.
+- **License:** CC0 1.0 Universal, verified on the official asset page and the archive's `License.txt`, October 27, 2026. Bundled notice: `public/assets/licenses/kenney-ui-adventure.txt`.
+- **Download:** https://kenney.nl/media/pages/assets/ui-pack-adventure/9a877376bc-1723597274/kenney_ui-pack-adventure.zip
+- **Files:** `Vector/panel_brown_dark_corners_a.svg`, `panel_brown_corners_a.svg`, `panel_brown_dark.svg`, `round_brown.svg` → the four `public/assets/ui/adventure-*.svg` files.
+- **Changes:** source SVGs unchanged; rectangular frames use CSS nine-slice scaling, round controls scale uniformly. Hover/press brightness changes are applied with CSS. No Kenney logo is included. Exact original paths and hashes are in the asset manifest.
+
+## Interface typeface — Courier Prime
+
+- **Font:** [Courier Prime](https://github.com/quoteunquoteapps/CourierPrime), by The Courier Prime Project Authors.
+- **Source:** [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/courierprime), `CourierPrime-Regular.ttf` and `CourierPrime-Bold.ttf`, downloaded October 27, 2026.
+- **License:** SIL Open Font License 1.1. Original copyright/license included as `public/assets/licenses/courier-prime-OFL.txt`.
+- **Files:** `public/assets/fonts/courier-prime-regular.ttf` and `courier-prime-bold.ttf`. Unmodified, loaded locally with `@font-face`; no runtime font CDN.
+- **Scope:** Game title, interface text and gameplay reward popups, with system-font fallbacks for missing symbol glyphs. The engine's own native splash branding is unchanged. The Adventure archive does not include/name the sample font, so Courier Prime is a close typewriter-style match, not a claim of an exact match. Font hashes are tracked separately under `fonts` in the asset manifest; these font files are OFL, not CC0. Earlier promotional covers/video retain their original lettering.
+
 ## Discovery and license notes
 
 [Kenney's itch.io page](https://kenney.itch.io/kenney-game-assets) lists the All-in-1 bundle as CC0 and explains it is a collection of freely available packs. The bundle is paid; individual packs can be downloaded free from the creator's official asset pages. No bundle purchase or paid content was used. [Kenney's support page](https://kenney.nl/support) confirms commercial use is permitted; Kenney's logo is reserved and is **not** bundled.

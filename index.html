@@ -45,9 +45,9 @@
     <div id="play-controls" class="play-controls" hidden>
       <p id="state-label" class="play-hint" aria-live="polite">HOLD TO GROW · WAKE ALL 3 FLOWERS</p>
       <div class="action-dock">
-        <button id="undo" class="dock-button" title="Rewind (Z) · −100 points" aria-label="Rewind vine: 3 left this run; costs 100 points">↶<small id="rewind-label">REWIND · 3</small></button>
-        <button id="boost" class="burst-button" aria-pressed="false"><span>↯</span><div><strong id="burst-label">BURST</strong><small id="burst-detail">SHIFT · 30 WATER</small></div></button>
-        <button id="restart" class="dock-button" title="New attempt (R)" aria-label="Retry garden with a new swarm">↻<small>RETRY</small></button>
+        <button id="undo" class="dock-button" title="Rewind (Z) · −100 points" aria-label="Rewind vine: 3 left this run; costs 100 points"><strong>REWIND</strong><small id="rewind-label">3 LEFT</small></button>
+        <button id="boost" class="burst-button" aria-pressed="false"><div><strong id="burst-label">BURST</strong><small id="burst-detail">SHIFT · 30 WATER</small></div></button>
+        <button id="restart" class="dock-button" title="Retry garden (R) · 3 left this run · −300 points" aria-label="Retry this garden: 3 left for the entire run; costs 300 points"><strong>RETRY</strong><small id="retry-label">3 LEFT</small></button>
       </div>
     </div>
 
@@ -101,7 +101,7 @@
               <figure class="help-scene"><img src="./assets/help/stunned-bugs.png" data-still="./assets/help/stunned-bugs.png" data-motion="./assets/help/burst.gif" width="480" height="328" alt="A real Burst protects the growing vine as it approaches the bugs."></figure>
             </article>
           </div>
-          <div class="help-safety"><div class="help-control-labels" aria-hidden="true"><span>Ⅱ Pause</span><span>↶ Rewind · −100 pts</span></div><p>Letting go stops the vine, but bugs keep moving. Pause freezes everything. You get three rewinds for the entire run, costing 100 points each. Retrying a garden does not refill them.</p></div>
+          <div class="help-safety"><div class="help-control-labels" aria-hidden="true"><span>Ⅱ Pause</span><span>Rewind · −100 pts</span><span>Retry · −300 pts</span></div><p>Letting go stops the vine, but bugs keep moving. Pause freezes everything. For the entire run: three rewinds at 100 points each, and three retries at 300 each. New gardens refill neither; penalties stay.</p></div>
           <details class="help-keys"><summary>Keyboard controls</summary><dl><div><dt><kbd>Arrows</kbd> + <kbd>G</kbd></dt><dd>Aim; hold G to grow.</dd></div><div><dt><kbd>Shift</kbd></dt><dd>Burst.</dd></div><div><dt><kbd>Space</kbd> / <kbd>Esc</kbd></dt><dd>Pause. Esc resumes.</dd></div><div><dt><kbd>Z</kbd></dt><dd>Rewind.</dd></div><div><dt><kbd>R</kbd></dt><dd>Retry.</dd></div></dl></details>
         </div>
         <div class="help-bottom"><span>Paused while you read.</span><button id="help-play" class="primary-button">START GAME ▶</button></div>
@@ -115,6 +115,8 @@
           <div class="studio-brand"><img src="./assets/art/after-hours-arcade.png" width="40" height="40" alt="" decoding="async"><span>AFTER HOURS ARCADE</span></div>
           <div class="credits-owner"><p class="overline">GAME DESIGN & DEVELOPMENT</p><h3><a href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a></h3><p>The game, original vine and flower drawings, forest scene and effects were made for Crooked Garden. How to Play uses cropped gameplay screenshots. The external art and music used alongside them are credited below.</p></div>
           <div class="help-grid">
+            <article class="help-card credit-card"><h3>Interface art · Kenney</h3><p>Wood, parchment and metal-corner button frames from <a href="https://kenney.nl/assets/ui-pack-adventure" target="_blank" rel="noopener">UI Pack - Adventure</a>. Original SVGs are unchanged and scaled with nine-slice borders.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-ui-adventure.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
+            <article class="help-card credit-card"><h3>UI font · Courier Prime</h3><p>Courier Prime by The Courier Prime Project Authors, distributed through <a href="https://github.com/google/fonts/tree/main/ofl/courierprime" target="_blank" rel="noopener">Google Fonts</a>. Regular and Bold are bundled locally, unmodified. Chosen as a typewriter-style match; the Kenney sample's exact font is not identified.</p><p><strong>License: SIL Open Font License 1.1.</strong><br><a href="./assets/licenses/courier-prime-OFL.txt" target="_blank" rel="noopener">Included font license ↗</a></p></article>
             <article class="help-card credit-card"><h3>Joystick · Kenney</h3><p>From <a href="https://kenney.nl/assets/mobile-controls" target="_blank" rel="noopener">Mobile Controls</a> by Kenney. Circular pad and thumb grip, scaled for the screen; original PNGs unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-mobile-controls.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
             <article class="help-card credit-card"><h3>Flying insects · Kenney</h3><p>From <a href="https://kenney.nl/assets/platformer-art-deluxe" target="_blank" rel="noopener">Platformer Art Deluxe</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney Vleugels</a>.</p><p>Fly and bee wing-animation pairs with stable body anchors, mirroring and a slight flight bank. Hunter bodies are recoloured warm amber at load time, preserving white wings. Active bugs glow; stunned bugs keep their colours and show stars. Original PNG files are unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-platformer.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
             <article class="help-card credit-card"><h3>Starting planter · Kenney</h3><p>From <a href="https://kenney.nl/assets/furniture-kit" target="_blank" rel="noopener">Furniture Kit</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney</a>.</p><p>A 2D render of the container from the plantSmall1 model, with the original plant removed and a dark soil surface added. The vine starts at the soil opening. Original mesh/material sources are retained unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-furniture.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
@@ -157,10 +159,14 @@
           <p id="global-share-note">Optional: save this run. Your name and personal best appear on the leaderboard. A guest identity kept in this browser can submit every new run.</p>
           <p id="global-score-status" class="platform-status" role="status"></p>
         </div>
-        <button id="next" class="primary-button">TRY AGAIN ▶</button>
-        <button id="result-undo" class="text-button">↶ Rewind and keep going</button>
-        <button id="result-home" class="text-button">Main menu</button>
-        <button id="result-leaderboard" class="text-button" hidden>Garden Masters leaderboard</button>
+        <div class="result-actions">
+          <button id="result-undo" class="primary-button" hidden><span id="result-undo-label">REWIND</span><small id="result-undo-detail">3 left · −100 pts</small></button>
+          <button id="next" class="primary-button"><span id="next-label">TRY AGAIN</span><small id="next-detail" hidden></small></button>
+        </div>
+        <div class="result-footer">
+          <button id="result-home" class="text-button">Main menu</button>
+          <button id="result-leaderboard" class="text-button" hidden>Leaderboard</button>
+        </div>
       </div>
     </section>
   </main>

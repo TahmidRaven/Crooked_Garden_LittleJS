@@ -73,3 +73,29 @@ test('bundled external assets have sources, CC0 license evidence, and matching h
     }
   }
 });
+
+test('Adventure button assets are local, static original SVGs with explicit license evidence',async()=>{
+  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
+  const pack=manifest.packs.find(pack=>pack.name==='UI Pack - Adventure');assert.ok(pack);assert.equal(pack.files.length,4);
+  for(const file of pack.files){
+    const svg=await readFile(`public/assets/${file.path}`,'utf8');
+    assert.match(svg,/<svg\s/);assert.match(svg,/<path\s/);
+    assert.doesNotMatch(svg,/<(?:script|foreignObject|image)\b|(?:xlink:)?href\s*=/i,'No active content or external SVG dependencies');
+  }
+  const css=await readFile('src/adventure-ui.css','utf8');
+  assert.match(css,/border-image:/);assert.match(css,/adventure-wood\.svg/);assert.match(css,/adventure-round\.svg/);
+});
+
+test('Courier Prime is bundled unmodified under OFL rather than mislabelled CC0',async()=>{
+  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
+  const font=manifest.fonts.find(font=>font.name==='Courier Prime');assert.ok(font);assert.equal(font.license,'OFL-1.1');assert.equal(font.files.length,2);
+  const license=await readFile(`public/assets/${font.licenseFile}`,'utf8');
+  assert.match(license,/SIL OPEN FONT LICENSE Version 1\.1/);assert.match(license,/Courier Prime Project Authors/);
+  for(const file of font.files){
+    const bytes=await readFile(`public/assets/${file.path}`);
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
+    assert.equal(bytes.subarray(0,4).toString('hex'),'00010000','TrueType font signature');
+  }
+  const css=await readFile('src/adventure-ui.css','utf8');assert.match(css,/@font-face/);
+  assert.doesNotMatch(css,/fonts\.googleapis\.com|fonts\.gstatic\.com/,'No runtime font CDN');
+});

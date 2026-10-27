@@ -6,7 +6,8 @@ import {spawnSync} from 'node:child_process';
 import {chromium} from '@playwright/test';
 import {preview} from 'vite';
 
-const directory='artifacts/gameplay-video';
+const version4=process.argv.includes('--v4');
+const directory=version4?'artifacts/gameplay-video-v4':'artifacts/gameplay-video';
 await mkdir(directory,{recursive:true});
 await mkdir('screenshots',{recursive:true});
 const server=await preview({preview:{host:'127.0.0.1',port:0,open:false}});
@@ -16,9 +17,9 @@ try{
   context=await browser.newContext({viewport:{width:1920,height:1080},recordVideo:{dir:directory,size:{width:1920,height:1080}}});
   const videoStarted=Date.now();
   const page=await context.newPage();
-  await page.addInitScript(()=>{
+  await page.addInitScript(seed=>{
     // Reproducible randomness only, not pre-baked enemies, captures or scores.
-    Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(42);return array;}});
+    Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(seed);return array;}});
     const NativeAudioContext=window.AudioContext,NativeAudio=window.Audio;
     const mix=new NativeAudioContext(),output=mix.createMediaStreamDestination(),taps=new Map();
     const originalConnect=AudioNode.prototype.connect;
@@ -57,7 +58,7 @@ try{
       };
       recorder.stop();
     });
-  });
+  },version4?41:42);
   const events=[];
   const mark=async feature=>events.push({feature,wall:Date.now(),state:await page.evaluate(()=>window.crookedGarden.getState())});
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}`);
@@ -68,6 +69,17 @@ try{
   await page.locator('#play').click({force:true});
   await mark('Floating joystick and growth');
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
+  if(version4){
+    // A real terrain loss, then a paid retry: show the new recovery hierarchy.
+    await page.mouse.move(260,780);await page.mouse.down();await page.mouse.move(260,732);
+    await page.waitForFunction(()=>window.crookedGarden.getState().phase==='result');await page.mouse.up();
+    await mark('Updated loss screen: primary Rewind and secondary Retry');
+    await page.waitForTimeout(1500);
+    await page.locator('#next').click();
+    assert.equal((await state()).retriesLeft,2);assert.equal((await state()).retryPenalty,300);
+    await mark('Retry: minus 300 points, two run-wide retries remaining');
+    await page.waitForTimeout(1100);
+  }
   async function grow(x,y,stopOnCapture=false){
     const anchor={x:260,y:780};
     await page.mouse.move(anchor.x,anchor.y);await page.mouse.down();
@@ -135,7 +147,7 @@ try{
   await writeFile(audioPath,Buffer.from(audio.base64,'base64'));
   const video=page.video();await context.close();context=null;
   const rawVideo=await video.path();
-  const output='screenshots/crooked-garden-gameplay-1920x1080.mp4';
+  const output=version4?'screenshots/crooked-garden-gameplay-v4-1920x1080.mp4':'screenshots/crooked-garden-gameplay-1920x1080.mp4';
   const audioOffset=(audio.started-videoStarted)/1000;
   const encoded=spawnSync('ffmpeg',['-y','-hide_banner','-loglevel','warning',
     '-i',rawVideo,'-itsoffset',String(audioOffset),'-i',audioPath,

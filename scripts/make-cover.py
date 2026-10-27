@@ -7,7 +7,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--wavedash',action='store_true',help='Render widescreen V3 covers without overwriting the itch originals')
+parser.add_argument('--wavedash',action='store_true',help='Render widescreen covers without overwriting the itch originals')
+parser.add_argument('--version',type=int,choices=[3,4],default=3,help='V4 uses the current locally bundled Courier Prime lettering')
 options=parser.parse_args()
 ART = ROOT / 'public/assets/art'
 OUT = ROOT / 'screenshots'
@@ -129,26 +130,34 @@ for x,y in [(380,282),(420,367),(530,401),(150,322)]:
 font_path=Path('/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf')
 if not font_path.exists():
     font_path=Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
+if options.version==4:
+    font_path=ROOT/'public/assets/fonts/courier-prime-bold.ttf'
 if options.wavedash:
     from wavedash_cover import render_wavedash_cover
-    render_wavedash_cover(image,font_path,ART,OUT)
+    render_wavedash_cover(image,font_path,ART,OUT,version=options.version)
     raise SystemExit
 def text_center(text,y,size,color,stroke=0):
     font=ImageFont.truetype(str(font_path),size*S)
-    box=font.getbbox(text);x=((W-34)*S-(box[2]-box[0]))/2
+    box=font.getbbox(text);x=((W if options.version==4 else W-34)*S-(box[2]-box[0]))/2
     lettering=Image.new('RGBA',image.size)
     draw=ImageDraw.Draw(lettering)
     draw.text((x,y*S+5*S),text,font=font,fill='#031a1d',stroke_width=stroke*S,stroke_fill='#031a1d')
     draw.text((x,y*S),text,font=font,fill=color,stroke_width=stroke*S,stroke_fill='#031a1d')
     image.alpha_composite(lettering.rotate(3,Image.Resampling.BICUBIC,center=(290*S,150*S)))
 
-text_center('CROOKED',53,77,'#f6f3d1',2)
-text_center('GARDEN',132,91,'#c3e68f',2)
-font=ImageFont.truetype(str(font_path),12*S)
+if options.version==4:
+    text_center('CROOKED',42,116,'#f6f3d1',1)
+    text_center('GARDEN',118,136,'#c3e68f',1)
+else:
+    text_center('CROOKED',53,77,'#f6f3d1',2)
+    text_center('GARDEN',132,91,'#c3e68f',2)
+font=ImageFont.truetype(str(font_path),(14 if options.version==4 else 12)*S)
 ImageDraw.Draw(image).text((70*S,235*S),'GROW. LOOP. BLOOM.',font=font,fill='#e4d38e')
 sprite('after-hours-arcade.png',(81,27),19)
 font=ImageFont.truetype(str(font_path),10*S)
 ImageDraw.Draw(image).text((97*S,21*S),'AFTER HOURS ARCADE',font=font,fill='#eadfbb')
 OUT.mkdir(exist_ok=True)
-image.convert('RGB').resize((1260,1000),Image.Resampling.LANCZOS).save(OUT/'cover-v3-1260x1000.png',optimize=True)
-image.convert('RGB').resize((630,500),Image.Resampling.LANCZOS).save(OUT/'cover-v3-630x500.png',optimize=True)
+for width,height in [(1260,1000),(630,500)]:
+    path=OUT/f'cover-v{options.version}-{width}x{height}.png'
+    image.convert('RGB').resize((width,height),Image.Resampling.LANCZOS).save(path,optimize=True)
+    print(path)

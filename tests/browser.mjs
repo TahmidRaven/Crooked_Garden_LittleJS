@@ -3,6 +3,7 @@ import {mkdir} from 'node:fs/promises';
 import {chromium} from '@playwright/test';
 import {preview} from 'vite';
 import {captureWaterReward} from '../src/arcade.js';
+import {waitForPage} from './wait-for-page.mjs';
 
 // Use real floating-joystick gestures, not the retired absolute-pointer aiming.
 async function steer(page,x,y,start=true){
@@ -54,7 +55,7 @@ try{
   await page.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await page.clock.pauseAt(new Date('2026-10-22T12:00:01Z'));
   await page.goto(url,{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.crookedGarden);
+  await waitForPage(page,()=>window.crookedGarden);
   assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('game-styled')),true);
   assert.equal(await page.evaluate(()=>window.crookedGarden.getState().phase),'loading');
   assert.equal(await page.locator('#title-screen').isVisible(),false,'The menu cannot cover the engine splash');
@@ -67,13 +68,18 @@ try{
   assert.equal(await page.locator('#startup-credit').isVisible(),true);
   assert.equal(await page.locator('#game').getAttribute('aria-busy'),'true');
   releaseArt();await page.clock.resume();
-  await page.waitForFunction(()=>window.crookedGarden.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
+  await waitForPage(page,()=>window.crookedGarden.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
   await page.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
   assert.equal(await page.locator('#startup-credit').isVisible(),false);
   assert.equal(await page.locator('#game').getAttribute('aria-busy'),'false');
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const point=(x,y,start=true)=>steer(page,x,y,start);
   assert.equal((await state()).phase,'title');
+  assert.ok(await page.evaluate(()=>[...document.fonts].filter(font=>font.family==='Courier Prime').length===2&&[...document.fonts].filter(font=>font.family==='Courier Prime').every(font=>font.status==='loaded')),'Both local Courier Prime faces load before the menu appears');
+  assert.match(await page.locator('#play').evaluate(el=>getComputedStyle(el).fontFamily),/Courier Prime/);
+  assert.match(await page.locator('h1').evaluate(el=>getComputedStyle(el).fontFamily),/Courier Prime/,'The title uses the same locally bundled typeface');
+  assert.match(await page.locator('#play').evaluate(el=>getComputedStyle(el,'::before').borderImageSource),/adventure-wood\.svg/,'The menu uses actual Kenney wood artwork');
+  assert.match(await page.locator('#how-to-play').evaluate(el=>getComputedStyle(el,'::before').borderImageSource),/adventure-cream\.svg/);
   assert.equal(await page.locator('#title-screen .studio-brand').innerText(),'AFTER HOURS ARCADE');
   assert.ok(await page.locator('#title-screen .studio-brand img').evaluate(img=>img.complete&&img.naturalWidth>0),'Original studio logo loads');
   assert.equal(await page.locator('#hud').isVisible(),false);
@@ -91,7 +97,7 @@ try{
   assert.match(await page.locator('#asset-credits-screen').textContent(),/pebonius/);
   assert.match(await page.locator('#asset-credits-screen').textContent(),/CC0/);
   await page.clock.runFor(1000);assert.equal((await state()).clock,beforeCredits.clock);assert.equal((await state()).seed,beforeCredits.seed);
-  for(const file of ['kenney-platformer.txt','kenney-foliage.txt','pebonius-music.txt','kenney-furniture.txt']){
+  for(const file of ['kenney-platformer.txt','kenney-foliage.txt','pebonius-music.txt','kenney-furniture.txt','kenney-ui-adventure.txt']){
     const response=await page.request.get(`${url}/assets/licenses/${file}`);assert.equal(response.status(),200);assert.match(await response.text(),/CC0/);
   }
   assert.equal((await page.request.get(`${url}/assets/manifest.json`)).status(),200);
@@ -106,7 +112,7 @@ try{
   assert.equal(await page.locator('#help-title').textContent(),'HOW TO PLAY');
   assert.match(await page.locator('#help-screen').textContent(),/Touch or click anywhere in the garden/);
   assert.equal(await page.locator('#help-screen img').count(),4);
-  await page.waitForFunction(()=>[...document.querySelectorAll('#help-screen img')].every(img=>img.complete&&img.naturalWidth>0));
+  await waitForPage(page,()=>[...document.querySelectorAll('#help-screen img')].every(img=>img.complete&&img.naturalWidth>0));
   assert.ok(await page.locator('#help-screen img').evaluateAll(images=>images.every(img=>img.alt.length>10)),'Guide crops have descriptive alternatives');
   assert.equal(await page.locator('#help-screen img[src$=".gif"]').count(),3);
   await page.locator('#help-motion').click();
@@ -137,6 +143,10 @@ try{
   await page.locator('#how-to-play').click();await page.locator('#help-play').click();
   assert.equal((await state()).phase,'playing');
   assert.equal(await page.locator('#hud').isVisible(),true);
+  for(const id of ['pause','boost','restart'])assert.equal(await page.locator(`#${id}`).evaluate(el=>getComputedStyle(el,'::after').animationName),'wood-button-shine','Shine applies to HUD and gameplay buttons');
+  for(const id of ['undo','boost','restart'])assert.doesNotMatch(await page.locator(`#${id}`).textContent(),/[↶↻↯]/,'Gameplay action buttons use text, not decorative symbol glyphs');
+  assert.equal(await page.locator('#undo strong').textContent(),'REWIND');
+  assert.equal(await page.locator('#rewind-label').textContent(),'3 LEFT');
   assert.equal(await page.locator('#music').getAttribute('aria-pressed'),'true','Sound defaults to enabled');
   assert.equal(await page.locator('#music').getAttribute('aria-label'),'Mute sound');
   assert.ok(await page.evaluate(()=>window.__musicPlayRequests.some(src=>src.endsWith('/assets/calm-theme.ogg'))),'Starting the game starts its music');
@@ -174,10 +184,20 @@ try{
   assert.equal((await state()).phase,'playing');assert.equal((await state()).seed,pausedState.seed);assert.equal((await state()).points,pausedState.points);
   await point(300,300);await page.clock.runFor(4000);await page.mouse.up();
   assert.equal((await state()).phase,'result');assert.equal((await state()).status,'blocked');
+  assert.match(await page.locator('#result-undo').getAttribute('class'),/primary-button/,'Rewind is the main recovery action');
+  assert.match(await page.locator('#next').getAttribute('class'),/text-button/,'Retry is secondary while rewind is available');
+  assert.equal(await page.locator('#next').evaluate(el=>getComputedStyle(el,'::before').animationName),'retry-breathe','The loss-screen retry frame breathes without moving its hit box');
+  assert.equal(await page.locator('#result-leaderboard').isVisible(),false,'No leaderboard navigation competes on a loss');
+  assert.match(await page.locator('#result-undo-detail').textContent(),/3 left · −100 pts/);
+  assert.equal(await page.locator('#result-home').evaluate(el=>getComputedStyle(el,'::before').content),'none','Main menu is a plain text link');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'result-undo');
+  await page.screenshot({path:'artifacts/result-actions-loss.png',fullPage:true});
   assert.equal(await page.evaluate(()=>window.__sfxStarts.length),0,'Muted losses produce no synthesized sound');
   await page.locator('#result-undo').click();assert.equal((await state()).phase,'playing');
   const old=await state();await page.locator('#restart').click();
   assert.notEqual((await state()).seed,old.seed);assert.notDeepEqual((await state()).bugs,old.bugs,'Retry changes the swarm');
+  assert.equal((await state()).retriesLeft,2);assert.equal((await state()).retryPenalty,300);
+  assert.match(await page.locator('#state-label').textContent(),/−300 PTS/);
 
   async function follow(route){
     for(const [x,y] of route){
@@ -204,6 +224,8 @@ try{
     assert.equal((await state()).stage,stage);
     assert.equal((await state()).rewindsLeft,2,'Advancing gardens preserves the run-wide rewind allowance');
     assert.equal((await state()).rewindPenalty,100,'An earlier garden’s penalty remains charged once');
+    assert.equal((await state()).retriesLeft,2,'Advancing gardens does not refill the three run-wide retries');
+    assert.equal((await state()).retryPenalty,300,'Retry penalties carry across gardens');
     if(stage===2)assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,3);
     if(stage===0){
       await follow(routes[0].slice(0,1));
@@ -220,7 +242,7 @@ try{
   }
   assert.equal((await state()).stage,0);assert.equal((await state()).score,0);assert.ok((await state()).best>0);
   await page.locator('#music').click();
-  await page.waitForFunction(()=>document.querySelector('#music').getAttribute('aria-pressed')==='true');
+  await waitForPage(page,()=>document.querySelector('#music').getAttribute('aria-pressed')==='true');
   const audioBefore=await page.evaluate(()=>window.__sfxStarts.length);
   await point(300,300);await page.clock.runFor(1300);await page.mouse.up();
   assert.equal((await state()).phase,'result');
@@ -252,7 +274,7 @@ try{
   const sizes=[[320,568],[360,640],[390,844],[430,932],[768,1024],[1024,768],[1280,720],[1440,900],[568,320],[667,375],[844,390]];
   for(const [width,height] of sizes){
     await page.setViewportSize({width,height});await page.clock.runFor(100);
-    await page.waitForFunction(()=>Math.abs(window.crookedGarden.getState().view.width-innerWidth)<1);
+    await waitForPage(page,()=>Math.abs(window.crookedGarden.getState().view.width-innerWidth)<1);
     const layout=await page.evaluate(()=>{
       const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
       return {width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight,canvas:rect('#game-root canvas'),controls:['#boost','#undo','#restart','#pause','#music','#flower-icons','.vitals'].map(rect)};
@@ -299,7 +321,7 @@ try{
   }
 
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});await watch(mobile);await mobile.addInitScript(seedSource);
-  await mobile.goto(url);await mobile.waitForFunction(()=>window.crookedGarden?.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
+  await mobile.goto(url);await waitForPage(mobile,()=>window.crookedGarden?.getState().phase==='title'&&Object.values(window.crookedGarden.getState().art).every(Boolean));
   await mobile.locator('#how-to-play').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'help');
   await mobile.locator('#help-play').tap();
   await mobile.locator('#boost').tap();assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().queued),true);
@@ -308,7 +330,7 @@ try{
   const touch=await mobile.context().newCDPSession(mobile);
   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
   await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+40*dx/length,y:y+40*dy/length}]});
-  await mobile.waitForFunction(()=>window.crookedGarden.getState().flowers[0]);
+  await waitForPage(mobile,()=>window.crookedGarden.getState().flowers[0]);
   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   assert.equal(await mobile.evaluate(()=>window.crookedGarden.getState().phase),'playing');
   await mobile.screenshot({path:'artifacts/vine-mobile.png',fullPage:true});
@@ -319,7 +341,7 @@ try{
   const shortSplash=await browser.newPage({viewport:{width:568,height:320}});await watch(shortSplash);
   await shortSplash.clock.install({time:new Date('2026-10-22T12:00:00Z')});
   await shortSplash.clock.pauseAt(new Date('2026-10-22T12:00:01Z'));
-  await shortSplash.goto(url,{waitUntil:'domcontentloaded'});await shortSplash.waitForFunction(()=>window.crookedGarden);
+  await shortSplash.goto(url,{waitUntil:'domcontentloaded'});await waitForPage(shortSplash,()=>window.crookedGarden);
   await shortSplash.clock.runFor(800);
   assert.equal(await shortSplash.locator('#startup-credit').isVisible(),true);
   const branding=await shortSplash.locator('#startup-credit').boundingBox();
@@ -329,7 +351,7 @@ try{
   const capturePage=await browser.newPage({viewport:{width:1280,height:800}});await watch(capturePage);
   await capturePage.addInitScript(()=>Object.defineProperty(crypto,'getRandomValues',{value:array=>{array.fill(42);return array;}}));
   await capturePage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
-  await capturePage.goto(url);await capturePage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
+  await capturePage.goto(url);await waitForPage(capturePage,()=>window.crookedGarden?.getState().phase==='title');
   await capturePage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
   // Its centre is clickable throughout the intentional breathing animation.
   await capturePage.locator('#play').click({force:true});
@@ -373,12 +395,13 @@ try{
   assert.equal((await captureState()).captures,0);assert.ok((await captureState()).captured.every(value=>!value));
   const reducedPage=await browser.newPage({viewport:{width:960,height:720},reducedMotion:'reduce'});await watch(reducedPage);await reducedPage.addInitScript(seedSource);
   await reducedPage.clock.install({time:new Date('2026-10-22T12:00:00Z')});
-  await reducedPage.goto(url);await reducedPage.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
+  await reducedPage.goto(url);await waitForPage(reducedPage,()=>window.crookedGarden?.getState().phase==='title');
   await reducedPage.clock.pauseAt(new Date('2026-10-22T12:00:10Z'));
   await reducedPage.locator('#how-to-play').click();
   assert.equal(await reducedPage.locator('#help-screen img[src$=".gif"]').count(),0,'Reduced motion defaults to static guide illustrations');
   assert.equal(await reducedPage.locator('#help-motion').getAttribute('aria-pressed'),'false');
   await reducedPage.locator('#help-play').click();
+  assert.equal(await reducedPage.locator('#boost').evaluate(el=>getComputedStyle(el,'::after').animationName),'none','Reduced motion disables the button shine');
   await steer(reducedPage,430,550);await reducedPage.clock.runFor(1300);await reducedPage.mouse.up();
   assert.equal(await reducedPage.evaluate(()=>window.crookedGarden.getState().flowers[0]),true,'Detailed vine rendering also works with reduced motion');
   await reducedPage.screenshot({path:'artifacts/vine-reduced-motion.png',fullPage:true});

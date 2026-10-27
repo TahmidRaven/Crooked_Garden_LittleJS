@@ -6,6 +6,11 @@ See [`itch-page/`](itch-page/) for the 1260×300 banner, 1920×1080 page backgro
 
 ## Itch cover
 
+- [`cover-v4-630x500.png`](cover-v4-630x500.png) — current recommended itch upload, using the game's Courier Prime title lettering.
+- [`cover-v4-1260x1000.png`](cover-v4-1260x1000.png) — 2× V4 master.
+
+V4 retains the original garden key art and credited sprites, with larger Courier Prime lettering matching the current game. Generate with `python3 scripts/make-cover.py --version 4`. Earlier covers remain unchanged.
+
 - `cover-v3-630x500.png` — new no-loop key-art cover: tilted title, larger bloom and flying bugs, winding vine, mossy shelf, forest light and foreground foliage.
 - `cover-v3-1260x1000.png` — 2× master of the no-loop cover.
 
@@ -14,21 +19,32 @@ See [`itch-page/`](itch-page/) for the 1260×300 banner, 1920×1080 page backgro
 
 The generator now produces the v3 no-loop alternative. Earlier covers are retained for comparison.
 
-- `cover-630x500.png` — recommended itch cover upload.
+- `cover-630x500.png` — original itch cover, retained for comparison.
 - `cover-1260x1000.png` — 2× master of the same cover.
 
-The cover is composed promotional artwork, not a gameplay screenshot: original vine/flower/forest shapes, the game's credited Kenney sprites, and After Hours Arcade's raven mark. Hunter colours match the game. Regenerate with `python3 scripts/make-cover.py` (Pillow; uses local Arial Rounded Bold on macOS, DejaVu Sans Bold fallback on Linux).
+The covers are composed promotional artwork, not gameplay screenshots: original vine/flower/forest shapes, the game's credited Kenney sprites, and After Hours Arcade's raven mark. Hunter colours match the game. The default V3 generator uses local Arial Rounded Bold on macOS or DejaVu Sans Bold on Linux; V4 uses the game's bundled Courier Prime Bold under OFL 1.1. Pillow is required.
 
-The vine reconnects to its older horizontal stem at the bright join ring, enclosing both bugs. The glow and DOUBLE CATCH label depict the capture moment.
+The original unversioned cover depicts a loop capture with a bright join ring and DOUBLE CATCH label. V3/V4 instead use an open winding vine and a larger bloom.
 
 ## Wavedash cover — 16:9
 
-- [`cover-v3-wavedash-1920x1080.png`](cover-v3-wavedash-1920x1080.png) — recommended Wavedash wide-cover upload.
+- [`cover-v4-wavedash-1920x1080.png`](cover-v4-wavedash-1920x1080.png) — current recommended Wavedash wide cover.
+- [`cover-v4-wavedash-1280x720.png`](cover-v4-wavedash-1280x720.png) — smaller V4 alternative.
+
+V4 uses the current title typeface and a widescreen composition, without cropping/stretching the title or garden artwork. Generate with `python3 scripts/make-cover.py --version 4 --wavedash`.
+
+- [`cover-v3-wavedash-1920x1080.png`](cover-v3-wavedash-1920x1080.png) — previous Wavedash wide cover.
 - [`cover-v3-wavedash-1280x720.png`](cover-v3-wavedash-1280x720.png) — smaller 16:9 alternative.
 
 Recomposed from V3: title and studio branding on the left, original planter/vine/bloom and insects on the right, with the forest extended across the canvas. No stretching or title cropping. Promotional key art, not a gameplay screenshot. Regenerate with `python3 scripts/make-cover.py --wavedash`; this leaves the original itch covers untouched.
 
 ## Gameplay video — 16:9
+
+[`crooked-garden-gameplay-v4-1920x1080.mp4`](crooked-garden-gameplay-v4-1920x1080.mp4) — current 50-second showcase: 1920×1080, 30 fps, H.264 + stereo AAC. It records the latest Courier Prime interface, wooden buttons/shine, simplified loss screen, an actual −300-point retry, a loop catch/Burst/stun, an actual −100-point rewind, all three gardens and the live leaderboard. Both remaining allowances carry across the recorded gardens. No game state or scores were injected, no leaderboard score was submitted, and audio comes from the actual game.
+
+Reproduce after building with `env -u NODE_OPTIONS node scripts/record-gameplay.mjs --v4`. This writes separate V4 footage and metadata under ignored `artifacts/gameplay-video-v4/`, preserving the prior MP4 and raw take.
+
+### Previous video
 
 [`crooked-garden-gameplay-1920x1080.mp4`](crooked-garden-gameplay-1920x1080.mp4) — approximately 37 seconds, 1920×1080, 30 fps, H.264 video and stereo AAC game audio. Cropped to the browser game viewport (no browser chrome), with the loading screen trimmed off. Shows the animated menu, floating joystick, flowers/dew, a genuine loop catch and reward, Burst/stuns, rewind with the −100-point cue, three gardens, final score-sharing UI and the live public leaderboard.
 

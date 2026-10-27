@@ -5,7 +5,9 @@ Grow a vine, catch bugs in loops, and reach every flower before your water runs 
 [![Play on itch.io](docs/play-button.svg)](https://ravendeath.itch.io/crooked-garden)
 [![Play on Wavedash](docs/play-wavedash-button.svg)](https://wavedash.com/games/crookedgarden)
 
-<img src="screenshots/cover-v3-630x500.png" alt="Crooked Garden: a winding vine, flowers and flying bugs in a dark forest" width="480">
+<img src="screenshots/cover-v4-630x500.png" alt="Crooked Garden: a winding vine, flowers and flying bugs in a dark forest" width="480">
+
+[Latest gameplay video](screenshots/crooked-garden-gameplay-v4-1920x1080.mp4) · [16:9 Wavedash cover](screenshots/cover-v4-wavedash-1920x1080.png)
 
 ## Controls
 
@@ -16,13 +18,19 @@ Grow a vine, catch bugs in loops, and reach every flower before your water runs 
 
 You have **3 rewinds for the entire three-garden run**. Each costs **100 points**, with a “−100 PTS” popup and a remaining-use counter. Retrying a garden restores neither rewinds nor deducted points; only starting a new run resets the allowance.
 
+You also have **3 retries for the entire run**, costing **300 points each**, separate from rewinds. The Retry button, pause-menu retry, **R**, and retrying after a loss all use that same allowance. New gardens refill neither allowance, and all penalties carry through the run. Once retries are spent, keep playing the current attempt or use a remaining rewind; after losing, start a new run.
+
 Letting go stops the vine—not the bugs. Sound is **on by default**; music starts when you start playing. Tap **♫** to mute or unmute.
 
 The joystick is translucent so you can see the garden beneath it. On desktop, a small cream cursor marks where you'll click; the joystick replaces it while dragging. Pause, release, touch cancellation and resizing clear the stick input.
 
 ## Main menu
 
-**How to Play** and **Leaderboard** sit side by side beneath **Let It Grow**. The buttons have a soft left-to-right glow; Let It Grow breathes between 0.9× and 1.05×, with a centred label and no play icon. Reduced-motion settings disable these animations.
+**How to Play** and **Leaderboard** sit side by side beneath **Let It Grow**. The game uses Kenney's wooden Adventure frames and locally bundled Courier Prime throughout the title, interface and reward popups. It is a close match to the pack's typewriter-style sample; the exact sample font is not identified. Button corners use nine-slice scaling, with press feedback and a subtle left-to-right shine on every enabled button. Let It Grow keeps its 0.9×–1.05× breathing effect; Retry gently breathes on the loss screen. Reduced-motion settings disable these effects.
+
+Gameplay actions use centred text instead of decorative symbols: **REWIND / 3 LEFT**, **BURST**, and **RETRY / 3 LEFT**. Retry use also shows a “−300 PTS” popup and remaining-count notice.
+
+On a loss, **Rewind** is the primary recovery action when available; **Retry garden** is secondary, with counts/costs beneath each label. Main menu is a plain text link. Leaderboard navigation appears only on cleared-garden results and the main menu, not losses.
 
 ## Browser build
 

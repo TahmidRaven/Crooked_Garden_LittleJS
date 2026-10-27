@@ -11,10 +11,11 @@ try{
   await page.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',route=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'[]'}));
   page.on('pageerror',e=>errors.push(e.message));
   page.on('response',r=>{if(r.status()>=400)errors.push(`${r.status()} ${r.url()}`);});
-  await page.clock.install();
+  const clockStart=new Date('2026-10-27T12:00:00Z');
+  await page.clock.install({time:clockStart});await page.clock.pauseAt(clockStart);
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}`);
+  await page.clock.runFor(3000);
   await page.waitForFunction(()=>window.crookedGarden?.getState().phase==='title');
-  await page.clock.pauseAt(new Date(Date.now()+1000));
   // Breathing keeps the bounding box animated; tap its centre without waiting for stillness.
   await page.locator('#play').tap({force:true});
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
@@ -74,7 +75,8 @@ try{
   assert.equal(await page.locator('#joystick-controls').evaluate(el=>getComputedStyle(el).opacity),'0.45','The entire joystick is translucent');
   assert.equal((await state()).rewindsLeft,3);
   for(let used=1;used<=3;used++){
-    await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(50);await page.mouse.up();
+    // Include a complete UI refresh interval before checking the rewind button.
+    await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(100);await page.mouse.up();
     await page.locator('#undo').click();
     assert.equal((await state()).rewindsLeft,3-used);assert.equal((await state()).rewindPenalty,used*100);
     assert.match(await page.locator('#state-label').textContent(),/−100 PTS/);
@@ -93,10 +95,20 @@ try{
   await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(2000);await page.mouse.up();
   assert.equal((await state()).phase,'result');assert.equal(await page.locator('#result-undo').isVisible(),false,'No result-screen recovery after three uses');
   await page.locator('#next').click();assert.equal((await state()).rewindsLeft,0,'A failed-garden retry is not a new run');
-  await page.locator('#pause').click();await page.locator('#home').click();await page.locator('#play').tap({force:true});
+  assert.equal((await state()).retriesLeft,1);assert.equal((await state()).retryPenalty,600);
+  await page.keyboard.press('r');await page.clock.runFor(20);
+  assert.equal((await state()).retriesLeft,0);assert.equal((await state()).retryPenalty,900);
+  assert.equal(await page.locator('#restart').isDisabled(),true);
+  const noRetries=await state();await page.keyboard.press('r');
+  assert.equal((await state()).seed,noRetries.seed,'R cannot bypass exhausted retries');
+  await page.locator('#pause').click();assert.equal(await page.locator('#pause-retry').isDisabled(),true);await page.locator('#resume').click();
+  await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(2000);await page.mouse.up();
+  assert.equal((await state()).phase,'result');assert.equal(await page.locator('#next-label').textContent(),'START NEW RUN');
+  await page.locator('#next').click();
   assert.equal((await state()).rewindsLeft,3);assert.equal((await state()).rewindPenalty,0,'Starting a genuinely new run restores the allowance');
+  assert.equal((await state()).retriesLeft,3);assert.equal((await state()).retryPenalty,0);
   assert.deepEqual(errors,[]);
-  console.log('Floating joystick checks passed: touch/mouse, multitouch Burst, layouts, three run-wide rewinds, penalty feedback, retry persistence and new-run reset.');
+  console.log('Controls checks passed: floating stick, three rewinds + three retries per entire run, -100/-300 feedback, exhausted keyboard/pause guards and new-run reset.');
 }finally{
   await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));
 }

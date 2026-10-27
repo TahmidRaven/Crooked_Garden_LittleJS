@@ -1,0 +1,75 @@
+@font-face{font-family:"Courier Prime";src:url('/assets/fonts/courier-prime-regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Courier Prime";src:url('/assets/fonts/courier-prime-bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+
+:root{font-family:"Courier Prime","Courier New",monospace;--ui-wood:url('/assets/ui/adventure-wood.svg');--ui-cream:url('/assets/ui/adventure-cream.svg');--ui-plain:url('/assets/ui/adventure-plain-wood.svg')}
+button{position:relative;isolation:isolate}
+h1{font-family:"Courier Prime","Courier New",monospace;font-weight:700;letter-spacing:-2px}
+h1 em{letter-spacing:-2px}
+
+/* Nine-sliced original Kenney SVGs: the frame corners never stretch with the label. */
+button:is(.primary-button,.secondary-button,.burst-button,.dock-button,.text-button){position:relative;isolation:isolate;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;text-shadow:none;filter:none}
+button:is(.primary-button,.secondary-button,.burst-button,.dock-button,.text-button)::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;width:auto;transform:none;opacity:1;filter:none;animation:none;border:12px solid transparent;border-image:var(--ui-cream) 16 fill stretch;background:none}
+.primary-button::before,.burst-button::before{border-image-source:var(--ui-wood)!important}
+.primary-button,.burst-button{color:#fff1d2;font-weight:700}
+.primary-button{font-size:17px;letter-spacing:.2px;padding:14px 25px}
+.secondary-button,.text-button{color:#4b301b;font-weight:700}
+.secondary-button{font-size:14px;letter-spacing:0}
+.text-button{width:fit-content;padding-inline:18px;font-size:13px}
+.dock-button{color:#fff1d2;font-family:"Courier Prime","Courier New",monospace;flex-direction:column;gap:3px}
+.dock-button strong{font-size:11px;line-height:1.15;letter-spacing:0;font-weight:700}
+.dock-button:disabled{opacity:.6}
+.action-dock .dock-button::before{border-width:7px;border-image:var(--ui-plain) 8 fill stretch!important}
+.dock-button small{font-family:"Courier Prime","Courier New",monospace;color:#fff1d2;font-size:9px;line-height:1.15;font-weight:400;letter-spacing:0}
+.burst-button{gap:0;padding-inline:14px;text-align:center}
+.burst-button strong{font-size:19px;letter-spacing:0}.burst-button small{font-size:10px;font-weight:700;letter-spacing:0}
+.burst-button[aria-pressed="true"]{background:none;box-shadow:none;outline:none}
+.burst-button[aria-pressed="true"]::before{filter:brightness(1.12)}
+.burst-button:focus-visible{outline:3px solid #ffe5a3;outline-offset:4px}
+
+.icon-button{border:0;border-radius:0;background:transparent url('/assets/ui/adventure-round.svg') center/100% 100% no-repeat;color:#50341f;font-family:"Courier Prime",Arial,sans-serif;backdrop-filter:none;box-shadow:none}
+.icon-button .off-dot{right:8px;bottom:8px;box-shadow:0 0 0 1px #6d4b27}
+
+.title-content .menu-shortcuts{width:min(100%,272px);gap:8px}
+.title-content .menu-shortcuts .secondary-button{color:#4b301b;font-size:12px;font-weight:700;line-height:1;letter-spacing:-.25px;border-radius:0;padding-inline:12px;overflow:visible}
+.title-content .menu-shortcuts .secondary-button::before{animation:none;transform:none;filter:none;opacity:1;width:auto;inset:0;border:9px solid transparent;border-image:var(--ui-cream) 16 fill stretch;background:none}
+#play{border-radius:0;font-size:17px;padding-inline:24px;overflow:visible}
+#play::before{animation:none;transform:none;filter:none;opacity:1;width:auto;inset:0;border:12px solid transparent;border-image:var(--ui-wood) 16 fill stretch;background:none}
+
+.title-credits button{color:#c6d792;font-weight:400}.title-credits button::before{content:none}
+.help-topbar .text-button,.help-tools .text-button,.leaderboard-tabs .text-button{border:0;color:#4b301b}
+.leaderboard-tabs button[aria-pressed="true"]{background:none;color:#fff1d2}
+.leaderboard-tabs button[aria-pressed="true"]::before{border-image-source:var(--ui-wood)}
+.global-share-panel .text-button{color:#4b301b}
+.help-page kbd{font-family:"Courier Prime","Courier New",monospace}
+.help-control-labels{flex-wrap:wrap}
+.text-button{max-width:100%}
+.result-actions{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(100%,280px);margin:0 auto}
+.result-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;margin:0;max-width:100%}
+.result-actions .primary-button{width:100%;min-width:0;min-height:64px;padding:12px 20px}
+.result-actions .text-button{min-height:48px;padding:10px 20px;font-size:13px}
+.result-actions small{font-size:11px;font-weight:400;line-height:1.2;letter-spacing:0}
+.result-footer{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:12px auto 0}
+.result-footer .text-button{background:none;color:#b7cbb0;border:0;box-shadow:none;font-size:12px;font-weight:400;margin:0;padding:8px;min-height:40px}
+.result-footer .text-button::before{content:none}
+/* Keep artwork on ::before; a separate sheen passes beneath the labels. */
+button::after{content:"";position:absolute;inset:6px;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 40%,#fff5ce45 49%,transparent 58%) 150% 0/300% 100% no-repeat;animation:wood-button-shine 5s ease-in-out infinite}
+button:disabled::after{animation:none;opacity:0}
+.title-content .menu-shortcuts button:nth-child(2)::after{animation-delay:.5s}
+@keyframes wood-button-shine{0%,15%{background-position:150% 0;opacity:0}25%{opacity:1}65%,100%{background-position:-50% 0;opacity:0}}
+#game[data-phase="result"] #next.retry-breathe::before{animation:retry-breathe 3.6s ease-in-out infinite}
+@keyframes retry-breathe{0%,100%{scale:.97}50%{scale:1.03}}
+@media(prefers-reduced-motion:reduce){button::after{animation:none;opacity:0}#game[data-phase="result"] #next.retry-breathe::before{animation:none;scale:1}}
+@media(hover:hover){.result-footer .text-button:hover{background:none;color:#f4e4ac;text-decoration:underline;text-underline-offset:3px}}
+@media(max-height:500px){.result-actions{gap:7px}.result-actions .primary-button{min-height:54px;padding:9px 18px}.result-actions .text-button{min-height:42px;padding:7px 16px}.result-footer{margin-top:8px}.result-footer .text-button{min-height:36px}}
+
+@media(hover:hover){
+  .icon-button:hover{background:transparent url('/assets/ui/adventure-round.svg') center/100% 100% no-repeat;filter:brightness(1.06)}
+  .dock-button:hover,.text-button:hover,.secondary-button:hover{background:none}
+  button:is(.primary-button,.secondary-button,.burst-button,.dock-button,.text-button):hover:not(:disabled)::before{filter:brightness(1.08)}
+  .primary-button:hover,.burst-button:hover:not(:disabled){filter:none}
+}
+button:is(.primary-button,.secondary-button,.burst-button,.dock-button,.text-button):active:not(:disabled)::before{filter:brightness(.9)}
+
+@media(max-width:600px){.primary-button{font-size:15px}.dock-button strong{font-size:10px}.burst-button strong{font-size:17px}.burst-button small{font-size:9px}.help-topbar .text-button{font-size:12px;padding-inline:14px}.help-bottom .primary-button{font-size:13px}}
+@media(max-height:500px){.primary-button,#play{font-size:14px}.title-content .menu-shortcuts .secondary-button{font-size:11px}.dock-button strong{font-size:10px}.dock-button small{font-size:8px}.burst-button strong{font-size:15px}.burst-button small{font-size:8px}.text-button{font-size:12px}}
+@media(orientation:landscape) and (max-height:500px){.dock-button{flex-direction:column;gap:2px}.dock-button strong{font-size:12px}.dock-button small{font-size:9px}.burst-button{padding-inline:8px;gap:0}.burst-button strong{font-size:14px}.burst-button small{font-size:7px}}
