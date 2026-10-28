@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,access,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve,sep} from 'node:path';
 
@@ -58,13 +58,19 @@ test('guide motion clips are small animated GIFs with recorded dimensions and ha
   }
 });
 
-test('bundled external assets have sources, CC0 license evidence, and matching hashes',async()=>{
+test('bundled external assets have sources, explicit license evidence, and matching hashes',async()=>{
   const root=resolve('public/assets'),manifest=JSON.parse(await readFile(`${root}/manifest.json`,'utf8'));
   assert.ok(manifest.packs.length>=3,'Music and both art packs should be documented');
   for(const pack of manifest.packs){
-    assert.equal(pack.license,'CC0-1.0');assert.ok(pack.author);assert.match(pack.source,/^https:\/\//);
+    if(pack.name==='Free Pixel Art Forest')assert.equal(pack.license,'LicenseRef-Eder-Muniz');
+    else assert.equal(pack.license,'CC0-1.0');
+    assert.ok(pack.author);assert.match(pack.source,/^https:\/\//);
     assert.match(pack.itch,/^https:\/\/[^/]+\.itch\.io\//);
-    const license=await readFile(resolve(root,pack.licenseFile),'utf8');assert.match(license,/CC0|Creative Commons Zero/);
+    const license=await readFile(resolve(root,pack.licenseFile),'utf8');
+    if(pack.name==='Free Pixel Art Forest'){
+      assert.match(license,/commercially/);assert.match(license,/appropriate credit/);
+      assert.match(await readFile(resolve(root,pack.permissionsFile),'utf8'),/open source projects/);
+    }else assert.match(license,/CC0|Creative Commons Zero/);
     for(const asset of pack.files){
       const file=resolve(root,asset.path);assert.ok(file.startsWith(root+sep));
       const bytes=await readFile(file);assert.ok(bytes.length>0);assert.ok(asset.original);
@@ -74,21 +80,10 @@ test('bundled external assets have sources, CC0 license evidence, and matching h
   }
 });
 
-test('Adventure button assets are local, static original SVGs with explicit license evidence',async()=>{
+test('Courier Prime Bold is retained under OFL for the cover generator, not gameplay',async()=>{
   const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
-  const pack=manifest.packs.find(pack=>pack.name==='UI Pack - Adventure');assert.ok(pack);assert.equal(pack.files.length,4);
-  for(const file of pack.files){
-    const svg=await readFile(`public/assets/${file.path}`,'utf8');
-    assert.match(svg,/<svg\s/);assert.match(svg,/<path\s/);
-    assert.doesNotMatch(svg,/<(?:script|foreignObject|image)\b|(?:xlink:)?href\s*=/i,'No active content or external SVG dependencies');
-  }
-  const css=await readFile('src/adventure-ui.css','utf8');
-  assert.match(css,/border-image:/);assert.match(css,/adventure-wood\.svg/);assert.match(css,/adventure-round\.svg/);
-});
-
-test('Courier Prime is bundled unmodified under OFL rather than mislabelled CC0',async()=>{
-  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
-  const font=manifest.fonts.find(font=>font.name==='Courier Prime');assert.ok(font);assert.equal(font.license,'OFL-1.1');assert.equal(font.files.length,2);
+  const font=manifest.fonts.find(font=>font.name==='Courier Prime');assert.ok(font);assert.equal(font.license,'OFL-1.1');assert.equal(font.files.length,1);
+  assert.match(font.scope,/cover/);assert.match(font.files[0].path,/courier-prime-bold/);
   const license=await readFile(`public/assets/${font.licenseFile}`,'utf8');
   assert.match(license,/SIL OPEN FONT LICENSE Version 1\.1/);assert.match(license,/Courier Prime Project Authors/);
   for(const file of font.files){
@@ -96,6 +91,54 @@ test('Courier Prime is bundled unmodified under OFL rather than mislabelled CC0'
     assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
     assert.equal(bytes.subarray(0,4).toString('hex'),'00010000','TrueType font signature');
   }
-  const css=await readFile('src/adventure-ui.css','utf8');assert.match(css,/@font-face/);
+  const css=await readFile('src/simple-ui.css','utf8');assert.match(css,/@font-face/);
   assert.doesNotMatch(css,/fonts\.googleapis\.com|fonts\.gstatic\.com/,'No runtime font CDN');
+});
+
+test('selected flat-line buttons, common icons and stars have local CC0 provenance',async()=>{
+  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
+  const pack=manifest.packs.find(pack=>pack.name==='UI Pack');assert.ok(pack);assert.equal(pack.files.length,8);
+  for(const file of pack.files){
+    assert.match(file.sourceSha256,/^[a-f0-9]{64}$/);
+    const svg=await readFile(`public/assets/${file.path}`,'utf8');assert.match(svg,/<svg\s/);
+    assert.doesNotMatch(svg,/<(?:script|foreignObject|image)\b|(?:xlink:)?href\s*=/i);
+  }
+  const css=await readFile('src/simple-ui.css','utf8');assert.match(css,/simple-button-primary\.svg/);assert.match(css,/simple-square\.svg/);
+});
+
+test('hover and select cues are small credited original local OGG files',async()=>{
+  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
+  const pack=manifest.packs.find(pack=>pack.name==='Interface Sounds');assert.ok(pack);assert.equal(pack.license,'CC0-1.0');assert.equal(pack.files.length,2);
+  for(const file of pack.files){
+    const bytes=await readFile(`public/assets/${file.path}`);assert.equal(bytes.subarray(0,4).toString(),'OggS');assert.ok(bytes.length<20000);
+  }
+  assert.match(await readFile(`public/assets/${pack.licenseFile}`,'utf8'),/CC0/);
+});
+
+test('retired skins, rejected backgrounds and unused font formats are removed',async()=>{
+  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
+  assert.deepEqual(manifest.fonts.map(f=>f.name).sort(),['Courier Prime','Kaph']);
+  assert.ok(!manifest.packs.some(p=>p.name==='Amber Forest / Forest Background'||p.name==='UI Pack - Adventure'));
+  for(const path of ['src/adventure-ui.css','public/assets/ui/adventure-wood.svg','public/assets/art/amber-forest.png','scripts/prepare-amber-forest.py','public/assets/fonts/Kaph_Font_1_20'])await assert.rejects(access(path));
+  assert.deepEqual((await readdir('public/assets/fonts')).filter(name=>!name.startsWith('.')).sort(),['courier-prime-bold.ttf','kaph-italic.woff2','kaph-regular.woff2']);
+  assert.doesNotMatch(await readFile('src/art.js','utf8'),/foliage:/,'Promotional foliage is not loaded during game startup');
+});
+
+test('Kaph 1.20 is bundled unchanged with GGBotNet credit and used throughout the game',async()=>{
+  const manifest=JSON.parse(await readFile('public/assets/manifest.json','utf8'));
+  const font=manifest.fonts.find(font=>font.name==='Kaph');assert.ok(font);assert.equal(font.license,'OFL-1.1');assert.equal(font.author,'GGBotNet');
+  const notice=await readFile(`public/assets/${font.licenseFile}`,'utf8');assert.match(notice,/GGBotNet/);assert.match(notice,/SIL OPEN FONT LICENSE Version 1\.1/);
+  for(const file of font.files){
+    const bytes=await readFile(`public/assets/${file.path}`);
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
+    assert.equal(bytes.subarray(0,4).toString(),'wOF2');
+  }
+  assert.match(await readFile('src/simple-ui.css','utf8'),/kaph-regular\.woff2/);
+  assert.match(await readFile('src/scene.js','utf8'),/Kaph/);
+  for(const path of ['src/menu.css','src/simple-ui.css','src/scene.js','src/main.js'])assert.doesNotMatch(await readFile(path,'utf8'),/Courier Prime|EB Garamond/);
+});
+
+test('every in-game local license link still resolves after unused-asset cleanup',async()=>{
+  const html=await readFile('index.html','utf8');
+  for(const [,file] of html.matchAll(/href="\.\/assets\/(licenses\/[^"#]+)"/g))assert.ok((await readFile(`public/assets/${file}`)).length>0,file);
 });

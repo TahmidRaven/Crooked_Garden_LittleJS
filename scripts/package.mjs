@@ -7,7 +7,7 @@ await copyFile('CREDITS.md','dist/CREDITS.md');
 await mkdir('buildDirectories',{recursive:true});
 const archive=resolve('buildDirectories/crooked-garden.zip');
 // Synchronize an existing ZIP too, so removed assets cannot linger.
-const result=spawnSync('zip',['-r','-FS',archive,'.'],{cwd:'dist',stdio:'inherit'});
+const result=spawnSync('zip',['-r','-FS',archive,'.','-x','*/.DS_Store','.DS_Store'],{cwd:'dist',stdio:'inherit'});
 if(result.error)throw result.error;
 if(result.status!==0)throw new Error(`zip exited with status ${result.status}`);
 console.log(`itch.io package: ${archive}`);

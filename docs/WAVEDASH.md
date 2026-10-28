@@ -2,7 +2,7 @@
 
 Game ID: `j979mjdw9vq5vtftw9b2v6n7198gy2w7` (public project identity).
 
-Game page: [Play Crooked Garden on Wavedash](https://wavedash.com/games/crookedgarden).
+Game page: [Play Crooked Garden on Wavedash](https://wavedash.com/games/crooked-garden).
 
 ## Features in this build
 

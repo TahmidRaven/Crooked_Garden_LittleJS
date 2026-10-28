@@ -1,5 +1,5 @@
 {
-  "verifiedOn": "2026-10-23",
+  "verifiedOn": "2026-10-29",
   "branding": {
     "name": "After Hours Arcade raven mark",
     "owner": "TahmidRaven / After Hours Arcade",
@@ -10,34 +10,107 @@
   },
   "fonts": [
     {
+      "name":"Kaph",
+      "author":"GGBotNet",
+      "source":"https://ggbot.itch.io/kaph-font",
+      "download":"https://ggbot.itch.io/kaph-font",
+      "license":"OFL-1.1",
+      "licenseFile":"licenses/kaph-OFL.txt",
+      "verifiedOn":"2026-10-27",
+      "version":"1.20",
+      "modifications":"User-supplied Kaph_Font_1_20 Regular/Italic WOFF2 files copied unchanged to normalized paths. Duplicate font formats removed; original hashes and license retained.",
+      "files":[
+        {"path":"fonts/kaph-regular.woff2","original":"Kaph_Font_1_20/Web Open Font Format (.woff)/Kaph-Regular.woff2","sha256":"29f40f0e41bc1f22f83970176ada2f837fef85eb825bf09f35d11075330280f0"},
+        {"path":"fonts/kaph-italic.woff2","original":"Kaph_Font_1_20/Web Open Font Format (.woff)/Kaph-Italic.woff2","sha256":"945b1a07f7c5a293b50b64b1e5c0fdb9d2e677de268b9b6044c6e8889257663a"}
+      ]
+    },
+    {
       "name": "Courier Prime",
       "author": "The Courier Prime Project Authors",
       "source": "https://github.com/quoteunquoteapps/CourierPrime",
       "download": "https://github.com/google/fonts/tree/main/ofl/courierprime",
       "license": "OFL-1.1",
       "licenseFile": "licenses/courier-prime-OFL.txt",
+      "scope":"Bold face retained for scripts/make-cover.py and existing V4 promotional media; not loaded by the game.",
       "verifiedOn": "2026-10-27",
       "files": [
-        {"path":"fonts/courier-prime-regular.ttf","original":"CourierPrime-Regular.ttf","sha256":"72f793376f8e2841656bf21d77a5de010f2929bd6956a22ee848ad0c7eb978af"},
         {"path":"fonts/courier-prime-bold.ttf","original":"CourierPrime-Bold.ttf","sha256":"ff1f38786c849d1c41fa8e447960abdb2bd75fdfb0cfcdeb524fad65a5af3638"}
       ]
     }
   ],
   "packs": [
     {
-      "name": "UI Pack - Adventure",
-      "author": "Kenney",
-      "source": "https://kenney.nl/assets/ui-pack-adventure",
-      "itch": "https://kenney.itch.io/kenney-game-assets",
-      "download": "https://kenney.nl/media/pages/assets/ui-pack-adventure/9a877376bc-1723597274/kenney_ui-pack-adventure.zip",
-      "license": "CC0-1.0",
-      "licenseFile": "licenses/kenney-ui-adventure.txt",
-      "verifiedOn": "2026-10-27",
-      "files": [
-        {"path":"ui/adventure-wood.svg","original":"Vector/panel_brown_dark_corners_a.svg","sha256":"83064e4ef629bade17df4bd634c5125942a8ee7f3697fb9823b9e20117bbc147"},
-        {"path":"ui/adventure-cream.svg","original":"Vector/panel_brown_corners_a.svg","sha256":"13b4010208df6d74b6d371606364290e8b5b8e4842a5ed863e0f74722ae9f8c2"},
-        {"path":"ui/adventure-plain-wood.svg","original":"Vector/panel_brown_dark.svg","sha256":"37ac9f8800348da62e51d1e756bd6ae225fe99efc9ddd1f0e5366e8355135add"},
-        {"path":"ui/adventure-round.svg","original":"Vector/round_brown.svg","sha256":"5d22b2d4053eeb2d6af80d2a85f11479563ecbf796b941341d619665c2e978aa"}
+      "name":"Free Pixel Art Forest",
+      "author":"Eder Muniz (edermunizz)",
+      "source":"https://edermunizz.itch.io/free-pixel-art-forest",
+      "itch":"https://edermunizz.itch.io/",
+      "license":"LicenseRef-Eder-Muniz",
+      "licenseFile":"licenses/eder-forest.txt",
+      "permissionsFile":"licenses/eder-forest-permissions.txt",
+      "terms":"https://edermunizlicense.carrd.co/",
+      "archiveSha256":"2931f715abc770b4203a117bffea660ad9db1980603bdb36aa0ed83a1650d737",
+      "verifiedOn":"2026-10-29",
+      "modifications":"Author-provided flattened preview colour-managed to sRGB to preserve browser appearance, cropped to shaded canopy/trunks (0,350,928,760), with a 64px cross-blended wrap boundary, producing an 864x410 background. Runtime raises the decorative grass to the unchanged planter base, with matching dark ground behind the HUD and cached gentle horizontal scrolling; reduced motion is static. Original license and linked open-source permission evidence included. No standalone asset redistribution. Reproduce with scripts/prepare-dark-forest.py.",
+      "files":[{"path":"art/dark-forest.png","original":"Free Pixel Art Forest/Preview/Background.png","sha256":"70099a18455095bb49a4b895a71463d78157bb874b57c817f5c90907d5470b58","sourceSha256":"85e9ba1fd527b55b5c26acd52899b82ea5cd0e84fe4b5a65e59ebc2d39e0473d"}]
+    },
+    {
+      "name":"Game Icons",
+      "author":"Kenney",
+      "source":"https://kenney.nl/assets/game-icons",
+      "itch":"https://kenney.itch.io/kenney-game-assets",
+      "download":"https://kenney.nl/media/pages/assets/game-icons/1ebf9c14af-1677661579/kenney_game-icons.zip",
+      "license":"CC0-1.0",
+      "licenseFile":"licenses/kenney-game-icons.txt",
+      "verifiedOn":"2026-10-27",
+      "modifications":"Original white export PNG unchanged, scaled down for credit links.",
+      "files":[{"path":"ui/link-external.png","original":"PNG/White/2x/export.png","sha256":"1007229740b373c9478a62bffec84e5a252454a970422f8d395c96ed07a22e81"}]
+    },
+    {
+      "name":"UI Pack (RPG Expansion)",
+      "itch":"https://kenney.itch.io/kenney-game-assets",
+      "author":"Kenney",
+      "source":"https://kenney.nl/assets/ui-pack-rpg-expansion",
+      "download":"https://kenney.nl/media/pages/assets/ui-pack-rpg-expansion/7ec4a46657-1677661824/kenney_ui-pack-rpg-expansion.zip",
+      "license":"CC0-1.0",
+      "licenseFile":"licenses/kenney-ui-rpg.txt",
+      "verifiedOn":"2026-10-27",
+      "modifications":"Original bronze pointing gauntlet PNG unchanged; scaled for initial/idle route guidance to the nearest available dew or flower and reused as the menu/selection cursor with a fingertip hotspot.",
+      "files":[{"path":"art/tutorial-hand.png","original":"PNG/cursorGauntlet_bronze.png","sha256":"5ffb29888116ed36b78e84f09ae935c1833bde816dbe66be8a17ad5be0649285"}]
+    },
+    {
+      "name":"Interface Sounds",
+      "author":"Kenney",
+      "source":"https://kenney.nl/assets/interface-sounds",
+      "itch":"https://kenney.itch.io/kenney-game-assets",
+      "download":"https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "license":"CC0-1.0",
+      "licenseFile":"licenses/kenney-interface-sounds.txt",
+      "verifiedOn":"2026-10-27",
+      "modifications":"Original OGG files unchanged, renamed and played at reduced volume. Hover uses tick_001; select uses click_001.",
+      "files":[
+        {"path":"audio/ui-hover.ogg","original":"Audio/tick_001.ogg","sha256":"9d057b918024c787bbe6c00beed13a7ef72a3fa0c259add3cef36582792f4230"},
+        {"path":"audio/ui-select.ogg","original":"Audio/click_001.ogg","sha256":"ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9"}
+      ]
+    },
+    {
+      "name":"UI Pack",
+      "author":"Kenney",
+      "source":"https://kenney.nl/assets/ui-pack",
+      "itch":"https://kenney.itch.io/kenney-game-assets",
+      "download":"https://kenney.nl/media/pages/assets/ui-pack/f651646eab-1718203990/kenney_ui-pack.zip",
+      "license":"CC0-1.0",
+      "licenseFile":"licenses/kenney-ui-pack.txt",
+      "verifiedOn":"2026-10-27",
+      "modifications":"Fourth-row flat-line buttons and light icons recoloured to the garden palette; all SVG geometry unchanged. Rewind mirrors the repeat icon with CSS. Gold star unchanged, empty star recoloured. Reproduce with scripts/prepare-simple-ui.py --row 4.",
+      "files":[
+        {"path":"ui/simple-button.svg","original":"Vector/Grey/button_rectangle_line.svg","sha256":"e4616ba3440aea49b63836d1b5a87cd345d8ad3efc78cb4e7c7068eedbc27b41","sourceSha256":"bf95ab68c31ad7f71db21740b6c1039a14db3e1bff180a0f38a9a9a6a8fbc0d8"},
+        {"path":"ui/simple-button-primary.svg","original":"Vector/Grey/button_rectangle_line.svg","sha256":"1afca13950af88f3d5da482a8ab25b7eac0f1d147fb0cdbc5bfbbe2951ba6977","sourceSha256":"bf95ab68c31ad7f71db21740b6c1039a14db3e1bff180a0f38a9a9a6a8fbc0d8"},
+        {"path":"ui/simple-square.svg","original":"Vector/Grey/button_square_line.svg","sha256":"89c57f68657437540718df27d46fc33f52983aa1197b18c9e06d73da7782528a","sourceSha256":"61667488077c33669fd6853f19cb4f69605bbf189098be1adfbb5ccc69dfc32f"},
+        {"path":"ui/simple-round.svg","original":"Vector/Grey/button_round_line.svg","sha256":"2f678051e1e3c2adb81b02a7008d005ed9c4b9b261f3ab69ea2386161b6d2395","sourceSha256":"a221346e554035d6e82f01dcde99cdded8c8514da45cfc127ff94158acf58b44"},
+        {"path":"ui/simple-repeat.svg","original":"Vector/Extra/icon_repeat_light.svg","sha256":"53e4c27b29a3b025e831bab417f30b5e3d7de5117ed209b5054261619146f6d4","sourceSha256":"7301bc9705160885eb9efeb32e4b9b32d9cca51c0c3251c3938a2c8de3c4814d"},
+        {"path":"ui/simple-play.svg","original":"Vector/Extra/icon_play_light.svg","sha256":"239b53e3ff4c083fb4ed8b06c9b85635064ef6a71f6c0b2f8842846a96891124","sourceSha256":"a22d50c1b783e79f1bd29dd4b1f98d41b1b24ccbcc3642b28e0c82ae5623b18d"},
+        {"path":"ui/rating-star.svg","original":"Vector/Yellow/star.svg","sha256":"41ea9884be256264c4aa0871f6ce7fd94c4b3cdd7782298ccce04da1d49cebac","sourceSha256":"41ea9884be256264c4aa0871f6ce7fd94c4b3cdd7782298ccce04da1d49cebac"},
+        {"path":"ui/rating-star-empty.svg","original":"Vector/Grey/star_outline.svg","sha256":"8be292cbaef064b99ef3900ed40c1072724491cc04aa2ab0fc867a78495f4d94","sourceSha256":"88f7acccb7b973d3ba502f93956aa60f59d50f665f195fb07af0d6b8d3f49afa"}
       ]
     },
     {
@@ -49,9 +122,16 @@
       "verifiedOn": "2026-10-24",
       "license": "CC0-1.0",
       "licenseFile": "licenses/kenney-mobile-controls.txt",
+      "modifications": "Joystick PNGs unchanged. HUD SVG icons recoloured from white to cream (#E7E9CF), geometry unchanged.",
       "files": [
+        {"path":"ui/hud-music.svg","original":"Vector/Icons/icon_music.svg","sha256":"217092085040e896f4886dfdb2e03bfdbb2ad05060305e7c0a873d53f48e2546","sourceSha256":"fb3d4f15eb5bfa5944c7cee99c655fbe9d88e92f6ae89f7b9a50247c7a7084d9"},
+        {"path":"ui/hud-music-muted.svg","original":"Vector/Icons/icon_music_disabled.svg","sha256":"e546ab094844e94b83c7afde75d41962f1a1b3a41a9b40387c30e56d85c0a328","sourceSha256":"39964bb8c8692d65a6292e893bad760bed739fced24ced7147959cf3d7134475"},
         {"path": "art/joystick-pad.png", "original": "Sprites/Style C/Large (2×)/joystick_circle_pad_a.png", "sha256": "91f0fd64138f780cfd8a260b5fe76ef0c1a07edcfd96015e6056b27c910d7ff0"},
-        {"path": "art/joystick-nub.png", "original": "Sprites/Style B/Large (2×)/joystick_circle_nub_a.png", "sha256": "c8e07205fb92da4213bc75b35b33934a61ceb636e506e287afe0ef057c8fc07a"}
+        {"path": "art/joystick-nub.png", "original": "Sprites/Style B/Large (2×)/joystick_circle_nub_a.png", "sha256": "c8e07205fb92da4213bc75b35b33934a61ceb636e506e287afe0ef057c8fc07a"},
+        {"path":"ui/hud-pause.svg","original":"Vector/Icons/icon_pause.svg","sha256":"2485ef8e21482a1503202bdc4b90bd0bb28c1c23a2d2f59d3051ad17ed00442b","sourceSha256":"e2d1207d98d0826820cf5319331bdcf4c6e87d69731d1e94a6149bf91a4da007"},
+        {"path":"ui/hud-resume.svg","original":"Vector/Icons/icon_play.svg","sha256":"3bf04318ea6854f527468e15a76cb43fb7ac36d05612645411f9171238222ed6","sourceSha256":"2eb829dedafbae93272b3ee69e7c861561ddf294c246fc804d60fb13b44f6c7b"},
+        {"path":"ui/hud-fullscreen.svg","original":"Vector/Icons/icon_size_larger.svg","sha256":"40d992293d2f65bab4f1b082e311e5277005b53942b13aa6b5661238e01d3262","sourceSha256":"1d587c5005c2b18b55282e2b3644fc42bbf7e2d6c593bb15a4c5a1e384e492eb"},
+        {"path":"ui/hud-windowed.svg","original":"Vector/Icons/icon_size_smaller.svg","sha256":"285aa6b93a033afc92304ef983f54254b602422936b9c6fc7e0c09d384b3f171","sourceSha256":"9c97b9ed87d0f626b8a392b834bd8d2705e9c7c873183c8f27f986a3d2ad25c7"}
       ]
     },
     {
@@ -73,6 +153,7 @@
       "download": "https://kenney.nl/media/pages/assets/foliage-sprites/b65bd70c69-1677495980/kenney_foliage-sprites.zip",
       "license": "CC0-1.0",
       "licenseFile": "licenses/kenney-foliage.txt",
+      "scope":"Promotional cover/page generators only; not loaded by gameplay.",
       "files": [
         {"path": "art/foliage.png", "original": "PNG/Flat/sprite_0042.png", "sha256": "8e701f5e6582de9e453b5b50a143bf8677721540eb37469820993583aa411264"}
       ]
@@ -85,7 +166,13 @@
       "download": "https://kenney.nl/media/pages/assets/platformer-art-deluxe/cb30f83169-1677696393/kenney_platformer-art-deluxe.zip",
       "license": "CC0-1.0",
       "licenseFile": "licenses/kenney-platformer.txt",
+      "modifications":"Insect source PNGs unchanged (hunter palette adjusted at runtime). Cropped/recoloured dirt-cave barbs sit on the outer surfaces of thicker muted/scaled bridge planks (no crate cross), inside existing collision rectangles. Reproduce with scripts/prepare-branch-hazards.py.",
       "files": [
+        {"path":"art/timber-tiles.png","original":"Base pack/Tiles/bridge.png (opaque centre crop, rounded end caps removed)","sha256":"a059a37839cb0ccdb3dd0b1d7c076dcdd4e6fd648d16043973764f194463dafb","sourceSha256":"bb5702dd62667d9082958ec70e79c1facfa661a3a06770334a9733055b027641"},
+        {"path":"art/barbed-branch.png","original":"Request pack/Tiles/dirtCaveSpikeBottom.png + Request pack/Tiles/dirtCaveSpikeTop.png (hooks only, no central rail)","sha256":"b32067fd40477e3a19e6f2789d2b04c4cc1688ee557346fa47c5ac784b4e72c3","sources":[
+          {"path":"Request pack/Tiles/dirtCaveSpikeBottom.png","sha256":"71b0237287dac83c9a83d0eaed101e8645feadad783e62cf855050e48d2d92ac"},
+          {"path":"Request pack/Tiles/dirtCaveSpikeTop.png","sha256":"9cf1f0a1fcd95c580286890e9599f67e5891ed7aecc25df24e1a86f2ba2c12ba"}
+        ]},
         {"path": "art/fly-flight-1.png", "original": "Extra animations and enemies/Enemy sprites/fly.png", "sha256": "101280651e14214bee74e5e9411d394a4d1cb41767c4c5842f05837090b82376"},
         {"path": "art/fly-flight-2.png", "original": "Extra animations and enemies/Enemy sprites/fly_fly.png", "sha256": "478f33e03d6873e557f6759a0509da3d336e9b03d4b429f99eab675ffc871d0a"},
         {"path": "art/bee-flight-1.png", "original": "Extra animations and enemies/Enemy sprites/bee.png", "sha256": "b85144ba48ddf71eea8c8864b2d5791d3a1e43b06586d2a52b75cb6cfad019a8"},

@@ -1,0 +1,25 @@
+Free Pixel Art Forest — Eder Muniz
+License/source evidence checked October 29, 2026.
+
+Asset page: https://edermunizz.itch.io/free-pixel-art-forest
+Author's terms linked by that page: https://edermunizlicense.carrd.co/
+Original archive license: eder-forest.txt (included unchanged beside this file).
+
+The archive's custom license permits personal/commercial use and modification,
+requires appropriate credit, and prohibits redistribution/resale as an asset.
+This is NOT CC0 and is not labelled CC BY-ND by this project: the asset page's
+license metadata differs from the archive and the author's explicitly linked terms.
+
+Relevant verbatim statements from the author's linked terms:
+
+"You can use any asset personally and commercially."
+"You can modify/ adapt the asset."
+"You can NOT re-distribute the files, no matter how much you modify it, you can use it but not share or re-sell it as an asset."
+"You CAN use this on open source projects, even if the project is open to modification, you can use but appropriate credit is needed. The project also need the correspondent txt file (license.txt) of the asset on the open source project."
+"Just put my name (Eder Muniz) or a link to my itch page."
+
+The asset page also prohibits NFT/crypto use. Crooked Garden has no NFT/crypto use.
+Only the background actually used in this game is bundled; no unused source pack,
+PSD, standalone asset bundle or asset export feature is provided.
+
+Credit: Forest background by Eder Muniz — https://edermunizz.itch.io/

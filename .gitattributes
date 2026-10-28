@@ -1,3 +1,5 @@
 # Preserve vendor model exports byte-for-byte, including their original whitespace.
 source-assets/flower-pot/*.obj -text -whitespace
 source-assets/flower-pot/*.mtl -text -whitespace
+# Keep original third-party license notices byte-for-byte (including CRLF).
+public/assets/licenses/*.txt -text -whitespace

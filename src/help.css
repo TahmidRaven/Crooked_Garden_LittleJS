@@ -1,0 +1,65 @@
+/* Short visual lessons and quiet credits, sharing the garden's flat-line theme. */
+.help-screen{min-height:0;min-width:0}
+.help-page{min-width:0;overflow:hidden}
+.help-scroll{min-width:0;touch-action:pan-y pinch-zoom;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;scroll-padding-block:16px}
+.help-scroll img{-webkit-user-drag:none;user-select:none}
+.help-topbar,.help-bottom{position:relative;z-index:1}
+.compact-guide,.compact-credits{width:min(860px,100%)}
+.compact-guide .help-topbar h2,.compact-credits .help-topbar h2{font-size:22px;font-weight:500;letter-spacing:.06em}
+.compact-guide .help-topbar h2,.compact-credits .help-topbar h2,.compact-guide .help-step-number{color:var(--text-accent)}
+.compact-guide .help-tools{margin-bottom:14px}
+.compact-guide .help-walkthrough{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.compact-guide .help-lesson{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:18px;border:1px solid #81ad9129;border-radius:4px;background:#0c29244d}
+.compact-guide .help-step-number{float:right;margin:0 0 8px 12px;font-size:12px;letter-spacing:0}
+.compact-guide .help-lesson h3{font-size:17px;font-weight:500;letter-spacing:0;margin-bottom:7px}
+.compact-guide .help-lesson p{font-size:13px;line-height:1.55;max-width:none}
+.compact-guide figure{margin:0;margin-top:auto;border:0;border-radius:3px;overflow:hidden;background:#0a2523}
+.compact-guide figure img{width:100%;height:150px;object-fit:contain;display:block}
+.compact-guide figcaption{display:none}
+.compact-guide .help-safety{padding-top:18px}
+.compact-guide .help-safety p{font-size:12px;color:#96ad91}
+.compact-guide .help-keys{margin-top:8px;border-top:1px solid #81ad9129}
+.compact-guide .help-keys summary,.compact-credits .help-keys summary{font-size:12px;font-weight:500}
+.compact-guide .help-recovery p{padding:0 0 12px;font-size:12px}
+.compact-guide .help-bottom .primary-button,.compact-credits .help-bottom .primary-button{font-size:14px;font-weight:600;letter-spacing:0}
+.compact-credits{max-width:680px}
+.compact-credits .credits-owner{text-align:center;margin:8px 0 24px;padding:0}
+.compact-credits .credits-owner .overline{font-size:10px;letter-spacing:.15em;color:#8ca487;margin-bottom:8px}
+.compact-credits .credits-owner h3{font-size:28px;font-weight:500;margin:0 0 10px}
+.compact-credits a{color:#d8e2c3;text-decoration:none;overflow-wrap:anywhere}
+.compact-credits a[target="_blank"]::after{content:"";display:inline-block;width:11px;height:11px;margin-left:6px;vertical-align:baseline;background:url('/assets/ui/link-external.png') center/contain no-repeat;opacity:.6}
+.compact-credits a:hover{color:#fff3ca}
+.compact-credits a:focus-visible{outline:1px solid #d3deaf;outline-offset:3px}
+.compact-credits .studio-brand{justify-content:center;margin:0;gap:7px;opacity:.65}
+.compact-credits .studio-brand img{width:24px;height:24px}
+.compact-credits .studio-brand span{font-size:9px;letter-spacing:.12em}
+.credit-list{margin:0}
+.credit-list>div{display:grid;grid-template-columns:140px minmax(0,1fr);gap:16px;padding:16px 0;border-top:1px solid #81ad9129;align-items:baseline}
+.credit-list dt{font-size:12px;color:#91a88b}
+.credit-list dd{margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px}
+.credit-list dd span{flex:none;font-size:9px;color:#9bb18e;letter-spacing:.04em}
+.credits-thanks{padding:20px 0;border-top:1px solid #81ad9129}
+.compact-credits .credits-thanks .overline{font-size:9px;letter-spacing:.14em;color:var(--text-accent);margin-bottom:8px}
+.compact-credits .credits-thanks h3{font-size:17px;font-weight:500;margin-bottom:6px}
+.compact-credits .credits-thanks p{font-size:12px;line-height:1.6;max-width:440px}
+.compact-credits .credits-jam{margin:20px 0;font-size:11px;text-align:center;color:#8ca487}
+.compact-credits .credit-details{margin-top:0;border-top:1px solid #81ad9129}
+.credit-sources{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}
+.credit-sources li{font-size:11px;line-height:1.6;padding:9px 0;border-top:1px solid #81ad911a;color:#8ca487}
+.compact-credits .credits-license-note{margin:12px 0;font-size:11px;line-height:1.7;color:#8ca487}
+@media(max-width:600px){
+  .compact-guide .help-walkthrough{grid-template-columns:1fr;gap:12px}
+  .compact-guide .help-lesson{padding:14px;gap:12px}
+  .compact-guide figure img{height:160px}
+  .compact-guide .help-topbar h2,.compact-credits .help-topbar h2{font-size:17px}
+  .credit-list>div{grid-template-columns:1fr;gap:7px;padding:13px 0}
+  .credit-list dd{font-size:13px}
+  .compact-credits .credits-owner h3{font-size:25px}
+  .credit-sources{grid-template-columns:1fr}
+}
+@media(max-height:500px) and (min-width:601px){
+  .compact-guide .help-lesson{padding:12px}
+  .compact-guide figure img{height:115px}
+  .compact-credits .credits-owner{margin:0 0 14px}
+  .credit-list>div{padding:10px 0}
+}

@@ -1,0 +1,79 @@
+@font-face{font-family:"Kaph";src:url('/assets/fonts/kaph-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Kaph";src:url('/assets/fonts/kaph-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+:root{--game-font:"Kaph",Arial,sans-serif;--text-accent:#ead58d;--text-accent-bright:#fff0bc;font-family:var(--game-font);--simple-button:url('/assets/ui/simple-button.svg');--simple-primary:url('/assets/ui/simple-button-primary.svg')}
+
+/* Kenney UI Pack's fourth-row flat-line buttons, recoloured without changing geometry. */
+button{position:relative;isolation:isolate;border:0;border-radius:3px;background:none;box-shadow:none;backdrop-filter:none;text-shadow:none;color:#e7e9cf}
+button,button:hover,button:focus,button:focus-visible,button:active,button *{text-decoration:none!important}
+button:not(.icon-button)::before,#title-screen #play::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;width:auto;opacity:1;transform:none;scale:1;filter:none;animation:none;background:none;border:8px solid transparent;border-image:var(--simple-button) 10 fill stretch}
+button::after{content:none!important;animation:none!important}
+.primary-button::before,.burst-button::before,.quiet-screen .menu-primary::before,#title-screen #play::before{border-image-source:var(--simple-primary)}
+.primary-button,.secondary-button,.text-button,.burst-button,.dock-button,.quiet-screen .menu-button,.help-topbar .text-button,.help-tools .text-button,.leaderboard-tabs .text-button,.global-share-panel .text-button{border:0;border-radius:3px;background:none;box-shadow:none;filter:none;color:#e7e9cf}
+.primary-button{font-size:16px;font-weight:700;letter-spacing:0}
+.secondary-button,.text-button{font-size:13px;letter-spacing:0}
+.text-button{width:fit-content;max-width:100%;padding-inline:18px}
+button:focus-visible,.quiet-screen .menu-button:focus-visible{outline:none;text-decoration:none;color:#ffffff}
+.quiet-screen .menu-button:focus-visible{font-weight:500}
+button:disabled{opacity:.4}
+/* Reuse the tutorial's original 30px Kenney hand, with the hotspot at its fingertip. */
+#game .screen,#game button:not(:disabled),#game a[href],#game summary{cursor:url('/assets/art/tutorial-hand.png') 3 3,pointer}
+button:active:not(:disabled),.quiet-screen .menu-button:active:not(:disabled){translate:0 1px}
+@media(hover:hover){button:hover:not(:disabled)::before{filter:brightness(1.12)}.quiet-screen .menu-button:hover:not(:disabled){background:none;color:#f3f0d9}.icon-button:hover{filter:brightness(1.12)}}
+
+.icon-button,.icon-button:hover{background:transparent url('/assets/ui/simple-round.svg') center/100% 100% no-repeat;border:0;border-radius:0;backdrop-filter:none;color:#e7e9cf}
+.icon-button::before{content:none}
+.icon-button img{display:block;width:20px;height:20px;margin:auto;pointer-events:none}
+#fullscreen,#fullscreen:hover,#fullscreen:focus-visible,#fullscreen:active{background:none;border:0;box-shadow:none;min-width:44px;min-height:44px}
+#fullscreen img{width:24px;height:24px}
+.icon-button:focus-visible img{filter:brightness(1.3)}
+#resume{flex-direction:row;align-items:center;justify-content:center;gap:9px}
+.resume-icon{display:inline-block;width:15px;height:18px;pointer-events:none}
+.dock-button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;font-family:var(--game-font)}
+.dock-button::before{border-image-source:url('/assets/ui/simple-square.svg')!important}
+.control-icon{width:23px;height:23px;display:block;object-fit:contain;pointer-events:none}
+.rewind-icon{transform:scaleX(-1)}
+.dock-button .control-name{font-size:9px;font-weight:700;line-height:1;letter-spacing:0;color:#e7e9cf}
+.dock-button .control-count{position:absolute;top:6px;right:6px;display:grid;place-items:center;min-width:12px;padding:1px 2px;background:#102b24;color:#d2ddc0;font-size:9px;line-height:1;font-weight:400;border-radius:2px;letter-spacing:0}
+.burst-button{gap:8px;padding-inline:14px;text-align:left}
+.burst-icon{display:flex;align-items:center;gap:1px;flex:none;pointer-events:none}
+.burst-icon img{width:16px;height:20px;display:block;object-fit:contain}
+.burst-button strong{font-size:17px;letter-spacing:0}.burst-button small{font-size:9px;letter-spacing:0}
+.burst-button[aria-pressed="true"]{background:none;box-shadow:none}
+.burst-button[aria-pressed="true"]::before{filter:brightness(1.2)}
+
+.title-nav,.pause-nav{gap:7px}
+.quiet-screen .menu-button{color:#e7e9cf}
+.quiet-screen .menu-button small{color:#b4c5a3}
+.quiet-screen .menu-button{font-size:18px}
+#title-screen h1{font-size:clamp(48px,6vw,82px);letter-spacing:.035em}
+#title-screen h1 em{letter-spacing:.035em;color:var(--text-accent)}
+.quiet-screen .menu-primary,.primary-button,#burst-label,#score-label{color:var(--text-accent)}
+.quiet-screen .menu-primary:focus-visible,.primary-button:focus-visible{color:var(--text-accent-bright)}
+@media(hover:hover){.quiet-screen .menu-primary:hover:not(:disabled),.primary-button:hover:not(:disabled){color:var(--text-accent-bright)}}
+#title-screen #play{font-size:20px}
+#result-screen .result-actions .menu-button{font-size:18px}
+#title-screen #play{animation:none;scale:1}
+#result-screen .result-actions{display:flex;flex-direction:column;align-items:center;gap:9px}
+#result-screen .result-footer{display:flex;flex-direction:column;align-items:center;gap:9px;width:240px;max-width:100%;margin:9px auto 0}
+#result-screen .result-footer .menu-button{width:100%;max-width:100%;min-height:40px;padding-inline:14px;color:#c1cfb5;font-size:16px}
+#result-screen .global-share-panel .menu-button{width:240px;max-width:100%}
+#result-screen #global-share{min-height:40px}
+#result-screen #score-retry{color:#c1cfb5;padding-inline:14px}
+.leaderboard-tabs button[aria-pressed="true"]{background:none;color:#f0ebd0}
+.leaderboard-tabs button[aria-pressed="true"]::before{border-image-source:var(--simple-primary)}
+.help-page kbd{font-family:var(--game-font)}
+.help-control-labels{flex-wrap:wrap}
+
+.result-rating{margin:0 auto 18px;text-align:center}
+.rating-stars{display:flex;justify-content:center;align-items:center;gap:7px;height:44px}
+.rating-stars img{width:32px;height:32px;display:block;object-fit:contain}
+.rating-stars img:nth-child(2){width:40px;height:40px}
+.rating-stars img.earned.star-pop{animation:rating-star-pop .48s ease-out both;transform-origin:center}
+@keyframes rating-star-pop{0%{opacity:0;transform:scale(.2) rotate(-10deg)}65%{opacity:1;transform:scale(1.18) rotate(3deg)}85%{opacity:1;transform:scale(.96) rotate(-1deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+.rating-caption{margin:5px 0 0;font:10px/1.4 var(--game-font);color:#879e80}
+@media(prefers-reduced-motion:reduce){.rating-stars img.earned.star-pop{animation:none;opacity:1;transform:none}}
+@media(max-width:600px){#title-screen h1{font-size:clamp(30px,10.5vw,48px)}}
+@media(max-height:500px){#title-screen h1{font-size:38px}.quiet-screen .menu-button,#title-screen #play,#result-screen .result-actions .menu-button{font-size:17px}}
+@media(max-width:600px){.dock-button .control-icon{width:21px;height:21px}.dock-button .control-name{font-size:8px}.burst-button strong{font-size:15px}.burst-button small{font-size:8px}.title-nav,.pause-nav{gap:6px}}
+@media(max-height:500px){.dock-button .control-icon{width:19px;height:19px}.dock-button .control-name{font-size:8px}.burst-button strong{font-size:14px}.burst-button small{font-size:7px}.title-nav,.pause-nav{gap:3px}.rating-stars{height:34px}.rating-stars img{width:26px;height:26px}.rating-stars img:nth-child(2){width:32px;height:32px}.result-rating{margin-bottom:10px}}
+@media(orientation:landscape) and (max-height:500px){.dock-button{flex-direction:row;gap:8px}.dock-button .control-name{font-size:10px}.dock-button .control-count{top:8px;right:8px}.burst-button{padding-inline:8px;gap:5px}.burst-icon img{width:12px;height:16px}.burst-button strong{font-size:13px}}

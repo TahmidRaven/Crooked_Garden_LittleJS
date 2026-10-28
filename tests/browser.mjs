@@ -41,6 +41,12 @@ try{
   await page.addInitScript(()=>{
     window.__sfxStarts=[];
     window.__musicPlayRequests=[];
+    window.__guideDraws=0;
+    const drawImage=CanvasRenderingContext2D.prototype.drawImage;
+    CanvasRenderingContext2D.prototype.drawImage=function(image,...args){
+      if(image?.src?.endsWith('/assets/art/tutorial-hand.png'))window.__guideDraws++;
+      return drawImage.call(this,image,...args);
+    };
     const originalPlay=HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play=function(...args){window.__musicPlayRequests.push(this.src);return originalPlay.apply(this,args);};
     const original=AudioBufferSourceNode.prototype.start;
@@ -75,13 +81,19 @@ try{
   const state=()=>page.evaluate(()=>window.crookedGarden.getState());
   const point=(x,y,start=true)=>steer(page,x,y,start);
   assert.equal((await state()).phase,'title');
-  assert.ok(await page.evaluate(()=>[...document.fonts].filter(font=>font.family==='Courier Prime').length===2&&[...document.fonts].filter(font=>font.family==='Courier Prime').every(font=>font.status==='loaded')),'Both local Courier Prime faces load before the menu appears');
-  assert.match(await page.locator('#play').evaluate(el=>getComputedStyle(el).fontFamily),/Courier Prime/);
-  assert.match(await page.locator('h1').evaluate(el=>getComputedStyle(el).fontFamily),/Courier Prime/,'The title uses the same locally bundled typeface');
-  assert.match(await page.locator('#play').evaluate(el=>getComputedStyle(el,'::before').borderImageSource),/adventure-wood\.svg/,'The menu uses actual Kenney wood artwork');
-  assert.match(await page.locator('#how-to-play').evaluate(el=>getComputedStyle(el,'::before').borderImageSource),/adventure-cream\.svg/);
-  assert.equal(await page.locator('#title-screen .studio-brand').innerText(),'AFTER HOURS ARCADE');
-  assert.ok(await page.locator('#title-screen .studio-brand img').evaluate(img=>img.complete&&img.naturalWidth>0),'Original studio logo loads');
+  assert.ok(await page.evaluate(()=>[...document.fonts].filter(font=>font.family==='Kaph').length===2&&[...document.fonts].filter(font=>font.family==='Kaph').every(font=>font.status==='loaded')),'Local Kaph regular and italic load before the menu appears');
+  assert.match(await page.locator('#play').evaluate(el=>getComputedStyle(el).fontFamily),/Kaph/);
+  assert.match(await page.locator('h1').evaluate(el=>getComputedStyle(el).fontFamily),/Kaph/,'Menus use Kaph');
+  for(const selector of ['#title-screen','#play','#creator-link','#help-screen summary'])assert.match(await page.locator(selector).first().evaluate(el=>getComputedStyle(el).cursor),/tutorial-hand\.png.*3 3/,'Menus and selectable controls use the Kenney hand cursor');
+  assert.doesNotMatch(await page.locator('#game-root').evaluate(el=>getComputedStyle(el).cursor),/tutorial-hand/,'Gameplay retains its steering cursor');
+  assert.match(await page.locator('#play').evaluate(el=>getComputedStyle(el,'::before').borderImageSource),/simple-button-primary\.svg/,'Menus use the selected theme-tinted flat-line button');
+  assert.equal(await page.locator('#play').evaluate(el=>getComputedStyle(el,'::after').animationName),'none','Menus have no constant shine');
+  assert.equal(await page.locator('#title-screen .studio-brand').count(),0,'No studio banner on the main menu');
+  assert.equal(await page.locator('#title-screen button').count(),4,'The main menu has only four choices');
+  assert.ok((await page.locator('#title-screen').innerText()).split(/\s+/).length<15,'No marketing copy on the main menu');
+  await page.keyboard.press('ArrowDown');assert.equal(await page.evaluate(()=>document.activeElement.id),'how-to-play');
+  await page.keyboard.press('ArrowUp');assert.equal(await page.evaluate(()=>document.activeElement.id),'play');
+  assert.ok(await page.evaluate(()=>window.__musicPlayRequests.some(src=>src.endsWith('/assets/audio/ui-hover.ogg'))),'User keyboard navigation plays the hover cue');
   assert.equal(await page.locator('#hud').isVisible(),false);
   assert.equal(await page.locator('aside,footer,header').count(),0,'No website-style sidebar/header/footer');
   await mkdir('artifacts',{recursive:true});
@@ -91,16 +103,29 @@ try{
   assert.equal(await page.locator('a[href*="github.com/TahmidRaven"]').count(),0,'No creator credit points to the project GitHub page');
   const beforeCredits=await state();
   await page.locator('#asset-credits').click();assert.equal((await state()).phase,'credits');
+  assert.ok(await page.evaluate(()=>window.__musicPlayRequests.some(src=>src.endsWith('/assets/audio/ui-select.ogg'))),'Button selection plays the local select cue');
   assert.equal(await page.locator('#asset-credits-title').textContent(),'CREDITS');
   assert.equal(await page.locator('#asset-credits-screen .studio-brand').innerText(),'AFTER HOURS ARCADE');
   assert.match(await page.locator('#asset-credits-screen').textContent(),/Kenney/);
   assert.match(await page.locator('#asset-credits-screen').textContent(),/pebonius/);
+  assert.equal(await page.locator('.credit-list a[href="https://edermunizz.itch.io/free-pixel-art-forest"]').textContent(),'Eder Muniz');
   assert.match(await page.locator('#asset-credits-screen').textContent(),/CC0/);
+  assert.equal(await page.locator('#asset-credits-screen a[href="https://dan5626.itch.io/"]').count(),1,'Special thanks links to Dan5626');
+  assert.doesNotMatch(await page.locator('#asset-credits-screen').innerText(),/↗/,'Credit links use real Kenney icons instead of font arrows');
+  assert.match(await page.locator('#creator-link').evaluate(el=>getComputedStyle(el,'::after').backgroundImage),/link-external\.png/);
+  assert.match(await page.locator('.credits-thanks').innerText(),/solo developer.*playtester/);
+  assert.ok((await page.locator('#asset-credits-screen .help-scroll').innerText()).split(/\s+/).length<130,'Credits stay concise with detailed sources collapsed');
+  assert.equal(await page.locator('.credit-details').getAttribute('open'),null);
+  await page.locator('.credit-details summary').click();
+  assert.equal(await page.locator('.credit-sources a[href$="kaph-OFL.txt"]').isVisible(),true);
+  assert.equal(await page.locator('.credit-list a[href="https://ggbot.itch.io/kaph-font"]').textContent(),'Kaph · GGBotNet');
+  await page.locator('.credit-details summary').click();
   await page.clock.runFor(1000);assert.equal((await state()).clock,beforeCredits.clock);assert.equal((await state()).seed,beforeCredits.seed);
   for(const file of ['kenney-platformer.txt','kenney-foliage.txt','pebonius-music.txt','kenney-furniture.txt','kenney-ui-adventure.txt']){
     const response=await page.request.get(`${url}/assets/licenses/${file}`);assert.equal(response.status(),200);assert.match(await response.text(),/CC0/);
   }
   assert.equal((await page.request.get(`${url}/assets/manifest.json`)).status(),200);
+  await page.locator('#credits-back').focus();
   await page.keyboard.press('Shift+Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'credits-done');
   await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'credits-back');
   await page.screenshot({path:'artifacts/asset-credits.png',fullPage:true});
@@ -121,10 +146,10 @@ try{
   await page.locator('#help-motion').click();
   assert.equal(await page.locator('#help-screen img[src$=".gif"]').count(),3);
   assert.doesNotMatch(await page.locator('#help-screen').textContent(),/75%|240|300 points/,'Keep balance maths out of the basic guide');
-  assert.equal(await page.locator('#help-screen details').getAttribute('open'),null);
+  assert.ok(await page.locator('#help-screen details').evaluateAll(items=>items.every(item=>!item.open)));
   assert.ok((await page.locator('#help-screen .help-scroll').innerText()).split(/\s+/).length<200,'Basic instructions should stay short');
-  await page.locator('#help-screen summary').click();assert.notEqual(await page.locator('#help-screen details').getAttribute('open'),null);
-  await page.locator('#help-screen summary').click();
+  await page.locator('#help-screen .help-recovery summary').click();assert.notEqual(await page.locator('#help-screen .help-recovery').getAttribute('open'),null);
+  await page.locator('#help-screen .help-recovery summary').click();
   await page.locator('#help-screen .help-scroll').evaluate(el=>el.scrollTop=0);
   await page.locator('#help-back').focus();
   await page.clock.runFor(1000);
@@ -139,20 +164,29 @@ try{
   await page.keyboard.press('Escape');
   assert.equal((await state()).phase,'title');
   assert.equal(await page.evaluate(()=>document.activeElement.id),'how-to-play');
-  assert.equal(await page.evaluate(()=>window.__musicPlayRequests.length),0,'The menu does not attempt autoplay before starting');
+  assert.equal(await page.evaluate(()=>window.__musicPlayRequests.filter(src=>src.endsWith('/assets/calm-theme.ogg')).length),0,'The menu does not autoplay music before starting');
   await page.locator('#how-to-play').click();await page.locator('#help-play').click();
   assert.equal((await state()).phase,'playing');
   assert.equal(await page.locator('#hud').isVisible(),true);
-  for(const id of ['pause','boost','restart'])assert.equal(await page.locator(`#${id}`).evaluate(el=>getComputedStyle(el,'::after').animationName),'wood-button-shine','Shine applies to HUD and gameplay buttons');
+  for(const id of ['pause','boost','restart'])assert.equal(await page.locator(`#${id}`).evaluate(el=>getComputedStyle(el,'::after').animationName),'none','The simple button skin stays still');
   for(const id of ['undo','boost','restart'])assert.doesNotMatch(await page.locator(`#${id}`).textContent(),/[↶↻↯]/,'Gameplay action buttons use text, not decorative symbol glyphs');
-  assert.equal(await page.locator('#undo strong').textContent(),'REWIND');
-  assert.equal(await page.locator('#rewind-label').textContent(),'3 LEFT');
+  assert.equal(await page.locator('#undo strong').textContent(),'Rewind');
+  assert.equal(await page.locator('#rewind-label').textContent(),'3');
+  assert.equal(await page.locator('#boost .burst-icon img').count(),2,'Burst uses two adjacent real play-icon assets');
   assert.equal(await page.locator('#music').getAttribute('aria-pressed'),'true','Sound defaults to enabled');
   assert.equal(await page.locator('#music').getAttribute('aria-label'),'Mute sound');
+  assert.match(await page.locator('#music img').getAttribute('src'),/hud-music\.svg$/);
+  assert.equal(await page.locator('#music .off-dot').count(),0,'On/off sprites replace the sound-status dot');
+  assert.ok(await page.locator('button').evaluateAll(buttons=>buttons.every(button=>!/[·•]/.test(button.textContent))),'Menu and gameplay buttons have no decorative dot separators');
   assert.ok(await page.evaluate(()=>window.__musicPlayRequests.some(src=>src.endsWith('/assets/calm-theme.ogg'))),'Starting the game starts its music');
   await page.locator('#music').click();
   assert.equal(await page.locator('#music').getAttribute('aria-pressed'),'false','Players can still mute; subsequent loss checks run muted');
+  assert.match(await page.locator('#music img').getAttribute('src'),/hud-music-muted\.svg$/);
+  const mutedUIRequests=await page.evaluate(()=>window.__musicPlayRequests.filter(src=>src.includes('/assets/audio/ui-')).length);
   assert.equal((await state()).art.flowerPot,true,'The real planter image must be decoded before play');
+  assert.equal((await state()).art.barbedBranch,true,'Approved Kenney barbed branches load before play');
+  assert.equal((await state()).art.timberTiles,true,'Timber backing tiles load before play');
+  assert.equal((await state()).art.darkForest,true,'The selected licensed dark forest is decoded before play');
   await page.screenshot({path:'artifacts/start-pot.png',fullPage:true});
   assert.equal(new Set((await state()).bugs.map(b=>b.kind)).size,2);
   const idle=await state(),insect=idle.bugs[0],iv=idle.view;
@@ -168,11 +202,23 @@ try{
   assert.equal((await state()).queued,false,'Menu Shift+Tab must not leak into a gameplay Burst');
   await page.locator('#boost').click();assert.equal((await state()).queued,true);
   await page.locator('#boost').click();assert.equal((await state()).queued,false);
+  assert.ok(await page.evaluate(()=>window.__guideDraws>0),'The waiting first garden renders the Kenney hand guide');
   await point(300,300);await page.clock.runFor(100);
+  const dismissedGuideDraws=await page.evaluate(()=>window.__guideDraws);
   assert.ok(635-(await state()).tip.y>=12,'Input moves the vine within 100ms');
   await page.mouse.up();const count=(await state()).points;
   await page.clock.runFor(200);assert.equal((await state()).points,count,'Release stops the vine');
+  assert.equal(await page.evaluate(()=>window.__guideDraws),dismissedGuideDraws,'The guide remains dismissed after the first drag is released');
   await page.keyboard.press('Space');await page.clock.runFor(100);
+  assert.match(await page.locator('#pause img').getAttribute('src'),/hud-pause\.svg$/);
+  assert.match(await page.locator('#resume img').getAttribute('src'),/hud-resume\.svg$/);
+  for(const selector of ['#fullscreen','#pause']){
+    await page.locator(selector).evaluate(el=>{
+      const style=getComputedStyle(el);
+      if(el.id==='fullscreen'&&(style.backgroundImage!=='none'||style.backgroundColor!=='rgba(0, 0, 0, 0)'||style.borderTopWidth!=='0px'))throw Error('Fullscreen must be frameless');
+      if(!el.querySelector('img').complete||!el.querySelector('img').naturalWidth)throw Error('HUD icon must load');
+    });
+  }
   assert.equal((await state()).phase,'paused');const frozen=(await state()).clock;
   await page.clock.runFor(1000);assert.equal((await state()).clock,frozen,'Pause freezes enemies too');
   const pausedState=await state();
@@ -184,15 +230,22 @@ try{
   assert.equal((await state()).phase,'playing');assert.equal((await state()).seed,pausedState.seed);assert.equal((await state()).points,pausedState.points);
   await point(300,300);await page.clock.runFor(4000);await page.mouse.up();
   assert.equal((await state()).phase,'result');assert.equal((await state()).status,'blocked');
-  assert.match(await page.locator('#result-undo').getAttribute('class'),/primary-button/,'Rewind is the main recovery action');
-  assert.match(await page.locator('#next').getAttribute('class'),/text-button/,'Retry is secondary while rewind is available');
-  assert.equal(await page.locator('#next').evaluate(el=>getComputedStyle(el,'::before').animationName),'retry-breathe','The loss-screen retry frame breathes without moving its hit box');
+  assert.match(await page.locator('#result-undo').getAttribute('class'),/menu-primary/,'Rewind is the main recovery action');
+  assert.doesNotMatch(await page.locator('#next').getAttribute('class'),/menu-primary/,'Retry is secondary while rewind is available');
+  assert.equal(await page.locator('#next').evaluate(el=>getComputedStyle(el,'::before').animationName),'none','Loss choices do not pulse or shine');
+  assert.equal(await page.locator('#global-best-stat').isVisible(),false,'Loss screens do not show extra leaderboard stats');
   assert.equal(await page.locator('#result-leaderboard').isVisible(),false,'No leaderboard navigation competes on a loss');
-  assert.match(await page.locator('#result-undo-detail').textContent(),/3 left · −100 pts/);
-  assert.equal(await page.locator('#result-home').evaluate(el=>getComputedStyle(el,'::before').content),'none','Main menu is a plain text link');
+  assert.match(await page.locator('#result-undo-detail').textContent(),/3 left −100 pts/);
+  assert.match(await page.locator('#result-home').evaluate(el=>getComputedStyle(el,'::before').borderImageSource),/simple-button\.svg/,'Result navigation uses the same simple button family');
+  assert.equal(await page.locator('.result-footer').evaluate(el=>getComputedStyle(el).flexDirection),'column','Result navigation is one centered vertical stack');
+  assert.equal(await page.locator('#result-undo').evaluate(el=>getComputedStyle(el).outlineStyle),'none','The asset border is not doubled by an outer focus frame');
+  assert.equal(await page.locator('#result-undo').evaluate(el=>getComputedStyle(el).textDecorationLine),'none','Focused recovery buttons have no underline');
+  assert.equal(await page.locator('#result-undo-detail').evaluate(el=>getComputedStyle(el).textDecorationLine),'none','Cost labels have no underline');
+  assert.equal(await page.locator('#result-rating').isVisible(),false,'Losses do not invent a star rating');
   assert.equal(await page.evaluate(()=>document.activeElement.id),'result-undo');
   await page.screenshot({path:'artifacts/result-actions-loss.png',fullPage:true});
   assert.equal(await page.evaluate(()=>window.__sfxStarts.length),0,'Muted losses produce no synthesized sound');
+  assert.equal(await page.evaluate(()=>window.__musicPlayRequests.filter(src=>src.includes('/assets/audio/ui-')).length),mutedUIRequests,'Muted navigation/selection never starts UI clips');
   await page.locator('#result-undo').click();assert.equal((await state()).phase,'playing');
   const old=await state();await page.locator('#restart').click();
   assert.notEqual((await state()).seed,old.seed);assert.notDeepEqual((await state()).bugs,old.bugs,'Retry changes the swarm');
@@ -234,7 +287,11 @@ try{
       await follow(routes[0].slice(1,-1));
       await page.screenshot({path:'artifacts/arcade.png',fullPage:true});
       await follow(routes[0].slice(-1));
-    }else await follow(routes[stage]);
+    }else{
+      await follow(routes[stage].slice(0,3));
+      await page.screenshot({path:`artifacts/garden-${stage+1}-progress.png`,fullPage:true});
+      await follow(routes[stage].slice(3));
+    }
     const s=await state();assert.equal(s.phase,'result');assert.ok(s.flowers.every(Boolean));
     assert.ok(s.score>=900,'Restoration adds to the run score');
     await page.screenshot({path:`artifacts/clear-${stage+1}.png`,fullPage:true});
@@ -305,8 +362,10 @@ try{
   for(const [width,height] of sizes){
     await page.setViewportSize({width,height});await page.clock.runFor(100);
     await page.locator('#title-screen').evaluate(el=>el.scrollTop=0);
-    const creator=await page.locator('#creator-link').boundingBox();
-    assert.ok(creator.y>=0&&creator.y+creator.height<=height+1,`${width}×${height}: creator credit is visible on the menu`);
+    for(const id of ['play','how-to-play','title-leaderboard','asset-credits']){
+      const r=await page.locator(`#${id}`).boundingBox();
+      assert.ok(r.x>=0&&r.y>=0&&r.x+r.width<=width+1&&r.y+r.height<=height+1,`${width}×${height}: menu choice ${id} is visible`);
+    }
     await page.locator('#asset-credits').click();assert.equal((await state()).phase,'credits');
     const layout=await page.evaluate(()=>{
       const scroll=document.querySelector('#asset-credits-screen .help-scroll');
@@ -390,7 +449,7 @@ try{
     await capturePage.mouse.up();
   }
   assert.ok((await captureState()).flowers.every(Boolean),'The loop bonus funds a full first-garden clear');
-  assert.equal((await captureState()).captureScore,800);assert.match(await capturePage.locator('#result-copy').textContent(),/2 bugs caught/);
+  assert.equal((await captureState()).captureScore,800);assert.equal(await capturePage.locator('#result-copy').isVisible(),false,'Win screens omit explanatory paragraphs');
   await capturePage.locator('#next').click();
   assert.equal((await captureState()).captures,0);assert.ok((await captureState()).captured.every(value=>!value));
   const reducedPage=await browser.newPage({viewport:{width:960,height:720},reducedMotion:'reduce'});await watch(reducedPage);await reducedPage.addInitScript(seedSource);

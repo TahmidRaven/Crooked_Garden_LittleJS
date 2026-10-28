@@ -103,7 +103,7 @@ try{
   assert.equal((await state()).seed,noRetries.seed,'R cannot bypass exhausted retries');
   await page.locator('#pause').click();assert.equal(await page.locator('#pause-retry').isDisabled(),true);await page.locator('#resume').click();
   await page.mouse.move(300,400);await page.mouse.down();await page.mouse.move(300,360);await page.clock.runFor(2000);await page.mouse.up();
-  assert.equal((await state()).phase,'result');assert.equal(await page.locator('#next-label').textContent(),'START NEW RUN');
+  assert.equal((await state()).phase,'result');assert.equal(await page.locator('#next-label').textContent(),'New Run');
   await page.locator('#next').click();
   assert.equal((await state()).rewindsLeft,3);assert.equal((await state()).rewindPenalty,0,'Starting a genuinely new run restores the allowance');
   assert.equal((await state()).retriesLeft,3);assert.equal((await state()).retryPenalty,0);

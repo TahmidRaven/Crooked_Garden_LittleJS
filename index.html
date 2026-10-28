@@ -30,9 +30,9 @@
       </div>
       <div class="stage-badge"><span id="stage-label">GARDEN 1 / 3</span><div id="flower-icons" aria-label="Flowers restored"></div></div>
       <nav class="hud-buttons" aria-label="Game settings">
-        <button id="music" class="icon-button" aria-label="Mute sound" aria-pressed="true" title="Toggle sound">♫<span class="off-dot"></span></button>
-        <button id="fullscreen" class="icon-button" aria-label="Enter fullscreen" title="Fullscreen">⛶</button>
-        <button id="pause" class="icon-button" aria-label="Pause game" title="Pause (Space)">Ⅱ</button>
+        <button id="fullscreen" class="icon-button" aria-label="Enter fullscreen" title="Enter fullscreen"><img src="./assets/ui/hud-fullscreen.svg" alt=""></button>
+        <button id="music" class="icon-button" aria-label="Mute sound" aria-pressed="true" title="Toggle sound"><img src="./assets/ui/hud-music.svg" alt=""></button>
+        <button id="pause" class="icon-button" aria-label="Pause game" title="Pause (Space)"><img src="./assets/ui/hud-pause.svg" alt=""></button>
       </nav>
     </div>
 
@@ -43,90 +43,104 @@
       </div>
     </div>
     <div id="play-controls" class="play-controls" hidden>
-      <p id="state-label" class="play-hint" aria-live="polite">HOLD TO GROW · WAKE ALL 3 FLOWERS</p>
+      <p id="state-label" class="play-hint" aria-live="polite">HOLD TO GROW — WAKE ALL 3 FLOWERS</p>
       <div class="action-dock">
-        <button id="undo" class="dock-button" title="Rewind (Z) · −100 points" aria-label="Rewind vine: 3 left this run; costs 100 points"><strong>REWIND</strong><small id="rewind-label">3 LEFT</small></button>
-        <button id="boost" class="burst-button" aria-pressed="false"><div><strong id="burst-label">BURST</strong><small id="burst-detail">SHIFT · 30 WATER</small></div></button>
-        <button id="restart" class="dock-button" title="Retry garden (R) · 3 left this run · −300 points" aria-label="Retry this garden: 3 left for the entire run; costs 300 points"><strong>RETRY</strong><small id="retry-label">3 LEFT</small></button>
+        <button id="undo" class="dock-button" title="Rewind (Z) −100 points" aria-label="Rewind vine: 3 left this run; costs 100 points"><img class="control-icon rewind-icon" src="./assets/ui/simple-repeat.svg" alt="" aria-hidden="true"><strong class="control-name">Rewind</strong><small id="rewind-label" class="control-count">3</small></button>
+        <button id="boost" class="burst-button" data-ui-press-sound="true" aria-pressed="false"><span class="burst-icon" aria-hidden="true"><img src="./assets/ui/simple-play.svg" alt=""><img src="./assets/ui/simple-play.svg" alt=""></span><div><strong id="burst-label">BURST</strong><small id="burst-detail">SHIFT 30 WATER</small></div></button>
+        <button id="restart" class="dock-button" title="Retry garden (R) 3 left this run −300 points" aria-label="Retry this garden: 3 left for the entire run; costs 300 points"><img class="control-icon" src="./assets/ui/simple-repeat.svg" alt="" aria-hidden="true"><strong class="control-name">Retry</strong><small id="retry-label" class="control-count">3</small></button>
       </div>
     </div>
 
-    <section id="title-screen" class="screen title-screen" role="dialog" aria-modal="true" aria-label="Main menu" hidden>
+    <section id="title-screen" class="screen title-screen quiet-screen" role="dialog" aria-modal="true" aria-label="Main menu" hidden>
       <div class="title-content">
-        <div class="studio-brand"><img src="./assets/art/after-hours-arcade.png" width="40" height="40" alt="" decoding="async"><span>AFTER HOURS ARCADE</span></div>
-        <p class="overline">A WILD LITTLE ARCADE</p>
         <h1>CROOKED<br><em>GARDEN</em></h1>
-        <p class="tagline">GROW. LOOP. BLOOM.</p>
-        <button id="play" class="primary-button">LET IT GROW</button>
-        <div class="menu-shortcuts">
-          <button id="how-to-play" class="secondary-button" aria-label="How to Play">HOW TO PLAY</button>
-          <button id="title-leaderboard" class="secondary-button" aria-label="Leaderboard">LEADERBOARD</button>
-        </div>
-        <p class="title-note">Catch bugs in loops. Bloom your way through three gardens.</p>
-        <div class="title-credits"><span>Made by</span><a id="creator-link" href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a><span aria-hidden="true">·</span><button id="asset-credits">Credits</button></div>
+        <nav class="title-nav" aria-label="Game menu">
+          <button id="play" class="menu-button menu-primary">Start</button>
+          <button id="how-to-play" class="menu-button">How to Play</button>
+          <button id="title-leaderboard" class="menu-button">Leaderboard</button>
+          <button id="asset-credits" class="menu-button">Credits</button>
+        </nav>
       </div>
     </section>
 
-    <section id="pause-screen" class="screen" role="dialog" aria-modal="true" aria-label="Game paused" hidden>
+    <section id="pause-screen" class="screen quiet-screen" role="dialog" aria-modal="true" aria-label="Game paused" hidden>
       <div class="menu-content">
-        <p class="overline">TAKE A BREATH</p><h2>PAUSED</h2>
-        <button id="resume" class="primary-button">KEEP GROWING ▶</button>
-        <button id="pause-help" class="text-button">How to Play</button>
-        <button id="pause-retry" class="text-button">New attempt · new swarm</button>
-        <button id="home" class="text-button">Back to main menu</button>
-        <p class="menu-note">Arrows aim · G grows · Shift bursts<br>Space pauses · Z rewinds · R retries</p>
+        <h2>Paused</h2>
+        <div class="pause-nav">
+          <button id="resume" class="menu-button menu-primary"><img class="resume-icon" src="./assets/ui/hud-resume.svg" alt="">Resume</button>
+          <button id="pause-help" class="menu-button">How to Play</button>
+          <button id="pause-retry" class="menu-button"><span>Retry</span><small id="pause-retry-detail"></small></button>
+          <button id="home" class="menu-button">Main Menu</button>
+        </div>
       </div>
     </section>
 
     <section id="help-screen" class="screen help-screen" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
-      <div class="help-page">
-        <div class="help-topbar"><h2 id="help-title">HOW TO PLAY</h2><button id="help-back" class="text-button">← Back to menu</button></div>
+      <div class="help-page compact-guide">
+        <div class="help-topbar"><h2 id="help-title">HOW TO PLAY</h2><button id="help-back" class="text-button">← Back</button></div>
         <div class="help-scroll" role="region" tabindex="0" aria-label="Game instructions">
           <div class="help-tools"><button id="help-motion" class="text-button" aria-pressed="false">Play clips</button></div>
           <div class="help-walkthrough">
             <article class="help-lesson">
-              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">01</span><h3>Touch, drag and grow</h3><p><strong>Touch or click anywhere in the garden.</strong> A translucent joystick appears there. Drag in the direction you want to grow. Release or centre it to stop.</p><p class="help-first-tip">Tap Burst with your other thumb while steering.</p></div>
+              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">01</span><h3>Drag to grow</h3><p>Touch or click anywhere in the garden. Drag to steer; release to stop.</p></div>
               <figure class="help-scene"><img src="./assets/help/steering.png" data-still="./assets/help/steering.png" data-motion="./assets/help/grow.gif" width="480" height="371" alt="The vine grows from its pot toward the orange flower, then bends around the ledge."></figure>
             </article>
             <article class="help-lesson">
-              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">02</span><h3>Flowers are the goal</h3><p>Reach all three to clear a garden. Growing uses water, so pick up blue drops along the way.</p></div>
+              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">02</span><h3>Wake every flower</h3><p>Reach all three. Collect blue drops to keep your water flowing.</p></div>
               <figure class="help-pickups"><img src="./assets/help/flowers-water.png" width="440" height="180" alt="Close-ups of a coral flower bud and a blue water drop."><figcaption><span>Flower · reach all three</span><span>Water · refill your tank</span></figcaption></figure>
             </article>
             <article class="help-lesson help-loop-lesson">
-              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">03</span><h3>Make a loop to catch bugs</h3><p>Grow around a bug, then join back onto your vine. Catches give water back. <strong>Keep loops small.</strong></p></div>
+              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">03</span><h3>Loop to catch bugs</h3><p>Circle a bug and reconnect to your vine. Small loops earn water back.</p></div>
               <figure class="help-loop-motion"><img src="./assets/help/loop-after.png" data-still="./assets/help/loop-after.png" data-motion="./assets/help/capture.gif" width="480" height="328" alt="The vine grows around two moving bugs, reconnects to its stem, and catches both."><figcaption>Grow around → join back → catch</figcaption></figure>
             </article>
             <article class="help-lesson">
-              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">04</span><h3>Burst past danger</h3><p>Press <kbd>Shift</kbd> while growing, or tap <strong>Burst</strong> then grow. It protects you from bugs, <strong>not ledges</strong>. Stars mean a bug is stunned.</p></div>
+              <div class="help-lesson-copy"><span class="help-step-number" aria-hidden="true">04</span><h3>Burst past bugs</h3><p>Tap Burst or press <kbd>Shift</kbd>, then grow. Safe from bugs, not ledges.</p></div>
               <figure class="help-scene"><img src="./assets/help/stunned-bugs.png" data-still="./assets/help/stunned-bugs.png" data-motion="./assets/help/burst.gif" width="480" height="328" alt="A real Burst protects the growing vine as it approaches the bugs."></figure>
             </article>
           </div>
-          <div class="help-safety"><div class="help-control-labels" aria-hidden="true"><span>Ⅱ Pause</span><span>Rewind · −100 pts</span><span>Retry · −300 pts</span></div><p>Letting go stops the vine, but bugs keep moving. Pause freezes everything. For the entire run: three rewinds at 100 points each, and three retries at 300 each. New gardens refill neither; penalties stay.</p></div>
+          <div class="help-safety"><p>Bugs keep moving when you let go. Pause to take a breath.</p></div>
+          <details class="help-keys help-recovery"><summary>Rewinds & retries</summary><p>Per run: 3 rewinds (−100 pts each) and 3 retries (−300 pts each). They do not refill between gardens.</p></details>
           <details class="help-keys"><summary>Keyboard controls</summary><dl><div><dt><kbd>Arrows</kbd> + <kbd>G</kbd></dt><dd>Aim; hold G to grow.</dd></div><div><dt><kbd>Shift</kbd></dt><dd>Burst.</dd></div><div><dt><kbd>Space</kbd> / <kbd>Esc</kbd></dt><dd>Pause. Esc resumes.</dd></div><div><dt><kbd>Z</kbd></dt><dd>Rewind.</dd></div><div><dt><kbd>R</kbd></dt><dd>Retry.</dd></div></dl></details>
         </div>
-        <div class="help-bottom"><span>Paused while you read.</span><button id="help-play" class="primary-button">START GAME ▶</button></div>
+        <div class="help-bottom"><span>Paused while you read.</span><button id="help-play" class="primary-button">Start Game</button></div>
       </div>
     </section>
 
     <section id="asset-credits-screen" class="screen help-screen" role="dialog" aria-modal="true" aria-labelledby="asset-credits-title" hidden>
-      <div class="help-page">
-        <div class="help-topbar"><h2 id="asset-credits-title">CREDITS</h2><button id="credits-back" class="text-button">← Back to menu</button></div>
+      <div class="help-page compact-credits">
+        <div class="help-topbar"><h2 id="asset-credits-title">CREDITS</h2><button id="credits-back" class="text-button">← Back</button></div>
         <div class="help-scroll" role="region" tabindex="0" aria-label="Asset sources and licenses">
-          <div class="studio-brand"><img src="./assets/art/after-hours-arcade.png" width="40" height="40" alt="" decoding="async"><span>AFTER HOURS ARCADE</span></div>
-          <div class="credits-owner"><p class="overline">GAME DESIGN & DEVELOPMENT</p><h3><a href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a></h3><p>The game, original vine and flower drawings, forest scene and effects were made for Crooked Garden. How to Play uses cropped gameplay screenshots. The external art and music used alongside them are credited below.</p></div>
-          <div class="help-grid">
-            <article class="help-card credit-card"><h3>Interface art · Kenney</h3><p>Wood, parchment and metal-corner button frames from <a href="https://kenney.nl/assets/ui-pack-adventure" target="_blank" rel="noopener">UI Pack - Adventure</a>. Original SVGs are unchanged and scaled with nine-slice borders.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-ui-adventure.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
-            <article class="help-card credit-card"><h3>UI font · Courier Prime</h3><p>Courier Prime by The Courier Prime Project Authors, distributed through <a href="https://github.com/google/fonts/tree/main/ofl/courierprime" target="_blank" rel="noopener">Google Fonts</a>. Regular and Bold are bundled locally, unmodified. Chosen as a typewriter-style match; the Kenney sample's exact font is not identified.</p><p><strong>License: SIL Open Font License 1.1.</strong><br><a href="./assets/licenses/courier-prime-OFL.txt" target="_blank" rel="noopener">Included font license ↗</a></p></article>
-            <article class="help-card credit-card"><h3>Joystick · Kenney</h3><p>From <a href="https://kenney.nl/assets/mobile-controls" target="_blank" rel="noopener">Mobile Controls</a> by Kenney. Circular pad and thumb grip, scaled for the screen; original PNGs unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-mobile-controls.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
-            <article class="help-card credit-card"><h3>Flying insects · Kenney</h3><p>From <a href="https://kenney.nl/assets/platformer-art-deluxe" target="_blank" rel="noopener">Platformer Art Deluxe</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney Vleugels</a>.</p><p>Fly and bee wing-animation pairs with stable body anchors, mirroring and a slight flight bank. Hunter bodies are recoloured warm amber at load time, preserving white wings. Active bugs glow; stunned bugs keep their colours and show stars. Original PNG files are unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-platformer.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
-            <article class="help-card credit-card"><h3>Starting planter · Kenney</h3><p>From <a href="https://kenney.nl/assets/furniture-kit" target="_blank" rel="noopener">Furniture Kit</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney</a>.</p><p>A 2D render of the container from the plantSmall1 model, with the original plant removed and a dark soil surface added. The vine starts at the soil opening. Original mesh/material sources are retained unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-furniture.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
-            <article class="help-card credit-card"><h3>Foliage · Kenney</h3><p>From <a href="https://kenney.nl/assets/foliage-sprites" target="_blank" rel="noopener">Foliage Sprites</a> by <a href="https://kenney.itch.io/" target="_blank" rel="noopener">Kenney</a>.</p><p>One branch silhouette is tinted sage green, mirrored and drawn translucently around the forest edges. Decorative only; the original PNG is unchanged.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/kenney-foliage.txt" target="_blank" rel="noopener">Included license notice ↗</a></p></article>
-            <article class="help-card credit-card"><h3>“calm theme” · pebonius</h3><p>Music by <a href="https://pebonius.itch.io/" target="_blank" rel="noopener">pebonius</a>, from <a href="https://opengameart.org/content/calm-music-0" target="_blank" rel="noopener">OpenGameArt</a>.</p><p>The original audio is looped at reduced playback volume. Sound effects are synthesized for this game.</p><p><strong>License: CC0 1.0 Universal.</strong><br><a href="./assets/licenses/pebonius-music.txt" target="_blank" rel="noopener">Source and license evidence ↗</a></p></article>
-            <article class="help-card credit-card"><h3>Engine, tools & jam</h3><p><a href="https://github.com/KilledByAPixel/LittleJS" target="_blank" rel="noopener">LittleJS</a> by Frank Force / KilledByAPixel — MIT. Built with <a href="https://vite.dev" target="_blank" rel="noopener">Vite</a> — MIT.</p><p>Made for <a href="https://itch.io/jam/littlejs-jam" target="_blank" rel="noopener">LittleJS Jam 3</a>, theme ZIGZAG.</p><p>Development assistance: OpenAI Codex and OpenCode (GPT-6.1 Sol). Generated concept images were used for discussion only and are not bundled.</p></article>
-          </div>
-          <p class="credits-license-note">The CC0 packs were downloaded free from their creators’ official pages. No paid bundle or third-party artist logo is included. The After Hours Arcade logo is the studio’s own branding. <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">About CC0 ↗</a> · <a href="./assets/manifest.json" target="_blank" rel="noopener">Exact source files and hashes ↗</a></p>
+          <div class="credits-owner"><p class="overline">A GAME BY</p><h3><a id="creator-link" href="https://tahmidraven.com" target="_blank" rel="noopener">TahmidRaven</a></h3><div class="studio-brand"><img src="./assets/art/after-hours-arcade.png" width="24" height="24" alt="" decoding="async"><span>AFTER HOURS ARCADE</span></div></div>
+          <dl class="credit-list">
+            <div><dt>Art & UI sounds</dt><dd><a href="https://kenney.nl" target="_blank" rel="noopener">Kenney</a><span>CC0</span></dd></div>
+            <div><dt>Background</dt><dd><a href="https://edermunizz.itch.io/free-pixel-art-forest" target="_blank" rel="noopener">Eder Muniz</a><span>Custom license</span></dd></div>
+            <div><dt>Music</dt><dd><a href="https://opengameart.org/content/calm-music-0" target="_blank" rel="noopener">“calm theme” · pebonius</a><span>CC0</span></dd></div>
+            <div><dt>Typeface</dt><dd><a href="https://ggbot.itch.io/kaph-font" target="_blank" rel="noopener">Kaph · GGBotNet</a><span>OFL 1.1</span></dd></div>
+            <div><dt>Engine</dt><dd><a href="https://github.com/KilledByAPixel/LittleJS" target="_blank" rel="noopener">LittleJS · Frank Force</a><span>MIT</span></dd></div>
+          </dl>
+          <div class="credits-thanks"><p class="overline">SPECIAL THANKS</p><h3><a href="https://dan5626.itch.io/" target="_blank" rel="noopener">Dan5626</a></h3><p>Fellow solo developer, playtester, and a huge help with suggestions and feedback. Check out his games.</p></div>
+          <p class="credits-jam">Made for <a href="https://itch.io/jam/littlejs-jam" target="_blank" rel="noopener">LittleJS Jam 3</a> · ZIGZAG</p>
+          <details class="help-keys credit-details"><summary>Sources & licenses</summary>
+            <ul class="credit-sources">
+              <li><a href="https://edermunizz.itch.io/free-pixel-art-forest" target="_blank" rel="noopener">Forest / Eder Muniz</a> · <a href="./assets/licenses/eder-forest.txt" target="_blank" rel="noopener">License</a> · <a href="./assets/licenses/eder-forest-permissions.txt" target="_blank" rel="noopener">Permissions</a></li>
+              <li><a href="https://kenney.nl/assets/game-icons" target="_blank" rel="noopener">Game Icons</a> · <a href="./assets/licenses/kenney-game-icons.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/ui-pack" target="_blank" rel="noopener">UI Pack 2.0</a> · <a href="./assets/licenses/kenney-ui-pack.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/mobile-controls" target="_blank" rel="noopener">Mobile Controls</a> · <a href="./assets/licenses/kenney-mobile-controls.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/ui-pack-rpg-expansion" target="_blank" rel="noopener">RPG Expansion</a> · <a href="./assets/licenses/kenney-ui-rpg.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/platformer-art-deluxe" target="_blank" rel="noopener">Platformer Art Deluxe</a> · <a href="./assets/licenses/kenney-platformer.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/furniture-kit" target="_blank" rel="noopener">Furniture Kit</a> · <a href="./assets/licenses/kenney-furniture.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/foliage-sprites" target="_blank" rel="noopener">Foliage Sprites</a> · <a href="./assets/licenses/kenney-foliage.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li><a href="https://kenney.nl/assets/interface-sounds" target="_blank" rel="noopener">Interface Sounds</a> · <a href="./assets/licenses/kenney-interface-sounds.txt" target="_blank" rel="noopener">CC0 notice</a></li>
+              <li>pebonius · <a href="./assets/licenses/pebonius-music.txt" target="_blank" rel="noopener">Music source & CC0 notice</a></li>
+              <li>GGBotNet · <a href="./assets/licenses/kaph-OFL.txt" target="_blank" rel="noopener">Kaph OFL 1.1 notice</a></li>
+              <li><a href="https://vite.dev" target="_blank" rel="noopener">Vite</a> · MIT</li>
+            </ul>
+            <p class="credits-license-note">Earlier promotional media: <a href="./assets/licenses/kenney-ui-adventure.txt" target="_blank" rel="noopener">Adventure UI (CC0)</a>, <a href="./assets/licenses/courier-prime-OFL.txt" target="_blank" rel="noopener">Courier Prime (OFL)</a>. Unused runtime skins and fonts have been removed.</p>
+            <p class="credits-license-note">Development assistance: OpenAI Codex & OpenCode. Concept images were for discussion only, not bundled.</p>
+            <p class="credits-license-note"><a href="./CREDITS.md" target="_blank" rel="noopener">Full credits & modifications</a> · <a href="./assets/manifest.json" target="_blank" rel="noopener">Asset manifest</a></p>
+          </details>
         </div>
-        <div class="help-bottom"><span>Thank you to the artists and open-source creators.</span><button id="credits-done" class="primary-button">BACK TO MENU</button></div>
+        <div class="help-bottom"><span>Thank you for playing.</span><button id="credits-done" class="primary-button">Main Menu</button></div>
       </div>
     </section>
 
@@ -138,34 +152,37 @@
           <p id="leaderboard-status" role="status"></p>
           <ol id="leaderboard-entries" class="leaderboard-entries" aria-label="Top scores"></ol>
         </div>
-        <div class="help-bottom"><span id="leaderboard-platform">All platforms · Top 10</span><button id="leaderboard-refresh" class="text-button">Refresh scores</button></div>
+        <div class="help-bottom"><span id="leaderboard-platform">All platforms — Top 10</span><button id="leaderboard-refresh" class="text-button">Refresh scores</button></div>
       </div>
     </section>
 
-    <section id="result-screen" class="screen" role="dialog" aria-modal="true" aria-label="Garden result" hidden>
+    <section id="result-screen" class="screen quiet-screen" role="dialog" aria-modal="true" aria-label="Garden result" hidden>
       <div class="menu-content">
         <p id="result-tag" class="overline"></p>
-        <div id="result-flowers" class="result-flowers" aria-hidden="true"></div>
         <h2 id="result-title"></h2>
+        <div id="result-rating" class="result-rating" role="img" hidden>
+          <div id="rating-stars" class="rating-stars" aria-hidden="true"><img src="./assets/ui/rating-star-empty.svg" alt=""><img src="./assets/ui/rating-star-empty.svg" alt=""><img src="./assets/ui/rating-star-empty.svg" alt=""></div>
+          <p id="rating-caption" class="rating-caption"></p>
+        </div>
         <p id="result-copy" class="result-copy"></p>
-        <div class="result-stats"><div><strong id="result-score">0</strong><span>SCORE</span></div><div><strong id="result-time">0s</strong><span>TIME</span></div><div title="Highest submitted score across all players, read from the global leaderboard."><strong id="best-label">…</strong><span>GLOBAL BEST</span></div></div>
-        <p id="global-best-note" class="local-best-note">Global best is the highest submitted score across all players.</p>
+        <div class="result-stats"><div><strong id="result-score">0</strong><span>Score</span></div><div id="global-best-stat" hidden title="Highest submitted score across all players, read from the global leaderboard."><strong id="best-label">…</strong><span>Global best</span></div></div>
         <p id="score-status" class="platform-status" role="status" hidden></p>
         <button id="score-retry" class="text-button" hidden>Retry score upload</button>
         <div id="global-share-panel" class="global-share-panel" hidden>
-          <label for="global-player-name">Public leaderboard name</label>
+          <label for="global-player-name">Public name</label>
           <input id="global-player-name" type="text" minlength="3" maxlength="24" autocomplete="nickname" value="Gardener" aria-describedby="global-share-note">
-          <button id="global-share" class="text-button">Share global score</button>
-          <p id="global-share-note">Optional: save this run. Your name and personal best appear on the leaderboard. A guest identity kept in this browser can submit every new run.</p>
+          <button id="global-share" class="menu-button">Submit</button>
+          <p id="global-share-note">Name and score are public. Guest session is saved in this browser.</p>
           <p id="global-score-status" class="platform-status" role="status"></p>
         </div>
         <div class="result-actions">
-          <button id="result-undo" class="primary-button" hidden><span id="result-undo-label">REWIND</span><small id="result-undo-detail">3 left · −100 pts</small></button>
-          <button id="next" class="primary-button"><span id="next-label">TRY AGAIN</span><small id="next-detail" hidden></small></button>
+          <button id="result-undo" class="menu-button menu-primary" hidden><span id="result-undo-label">Rewind</span><small id="result-undo-detail">3 left −100 pts</small></button>
+          <button id="next" class="menu-button menu-primary"><span id="next-label">Try again</span><small id="next-detail" hidden></small></button>
+          <button id="global-share-toggle" class="menu-button" aria-controls="global-share-panel" aria-expanded="false" hidden>Submit score</button>
         </div>
         <div class="result-footer">
-          <button id="result-home" class="text-button">Main menu</button>
-          <button id="result-leaderboard" class="text-button" hidden>Leaderboard</button>
+          <button id="result-home" class="menu-button">Main Menu</button>
+          <button id="result-leaderboard" class="menu-button" hidden>Leaderboard</button>
         </div>
       </div>
     </section>

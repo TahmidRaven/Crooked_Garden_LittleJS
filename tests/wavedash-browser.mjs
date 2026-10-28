@@ -109,17 +109,24 @@ try{
   assert.equal((await state()).phase,'result');
   assert.equal((await calls()).filter(c=>c[0]==='upload').length,0,'Partial-run clear does not upload');
   assert.equal(await page.locator('#score-status').isVisible(),false);
+  assert.equal(await page.locator('#result-rating').isVisible(),false,'A partial garden clear is not rated against a full-run leaderboard');
   for(const route of [
     [[425,570],[425,455],[205,420],[205,300],[405,275],[405,160]],
     [[205,590],[205,475],[410,450],[410,335],[205,310],[205,190]]
   ]){
     await page.locator('#next').click();await follow(route);assert.equal((await state()).phase,'result');
+    if((await state()).stage<2)assert.equal(await page.locator('#result-rating').isVisible(),false,'Stars stay hidden until all three gardens are complete');
   }
   await page.clock.runFor(2100);
   await waitForPage(page,()=>!document.getElementById('score-retry').hidden);
   const final=await state(),uploads=(await calls()).filter(c=>c[0]==='upload');
   await waitForPage(page,()=>document.getElementById('best-label').textContent==='8000');
-  assert.match(await page.locator('.result-stats').textContent(),/GLOBAL BEST/);
+  assert.equal(await page.locator('#result-rating').isVisible(),true);
+  const expectedStars=final.score>=8000?3:final.score>=6000?2:final.score>=4000?1:0;
+  assert.equal(await page.locator('#rating-stars .earned').count(),expectedStars);
+  assert.equal(await page.locator('#rating-stars .earned.star-pop').count(),expectedStars,'Newly earned stars receive a staggered pop animation');
+  assert.equal(await page.locator('#rating-caption').textContent(),`${Math.floor(final.score/8000*100)}% of global best`,'Stars compare scores, not an invented leaderboard rank');
+  assert.match(await page.locator('.result-stats').textContent(),/Global best/);
   assert.notEqual(await page.locator('#best-label').textContent(),'999999','Displayed best comes from Supabase, never browser storage');
   assert.equal(uploads.length,1);assert.deepEqual(uploads[0],['upload','garden-masters-id',final.score,true]);
   assert.ok(final.score<999999,'Do not upload the stored local best');
@@ -133,7 +140,9 @@ try{
   await page.locator('#result-leaderboard').click();await page.locator('#leaderboard-back').click();
   assert.equal((await state()).phase,'result');assert.equal((await calls()).filter(c=>c[0]==='upload').length,2,'Reopening results does not resubmit');
   await page.screenshot({path:'artifacts/wavedash-final-result.png'});
-  assert.equal(await page.locator('#global-share-panel').isVisible(),true,'Global sharing is offered only on a complete run');
+  assert.equal(await page.locator('#global-share-panel').isVisible(),false,'The sharing form stays collapsed until requested');
+  assert.equal(await page.locator('#global-share-toggle').isVisible(),true,'Global sharing is offered only on a complete run');
+  await page.locator('#global-share-toggle').click();assert.equal(await page.locator('#global-share-panel').isVisible(),true);
   await page.locator('#global-player-name').fill('<script>');await page.locator('#global-share').click();
   await waitForPage(page,()=>document.getElementById('global-score-status').textContent.includes('3–24'));
   assert.equal(globalCalls.filter(c=>c.url.includes('/auth/')).length,0,'Invalid names never create an account');
@@ -160,6 +169,7 @@ try{
     if(stage<2){assert.equal(await page.locator('#global-share-panel').isVisible(),false);await page.locator('#next').click();}
   }
   assert.equal(await page.locator('#global-share').isEnabled(),true,'Every completed run gets a fresh share action');
+  await page.locator('#global-share-toggle').click();
   await page.locator('#global-share').click();
   await waitForPage(page,()=>document.getElementById('global-score-status').textContent.includes('Run saved'));
   const submissions=globalCalls.filter(c=>c.url.includes('/functions/'));
@@ -170,6 +180,7 @@ try{
   await waitForPage(page,()=>document.getElementById('leaderboard-status').textContent.includes('Could not load'));
   await page.locator('#leaderboard-back').click();
   assert.equal(await page.locator('#best-label').textContent(),'—','Network failure never falls back to an unrelated local best');
+  assert.equal(await page.locator('#result-rating').isVisible(),false,'Unavailable leaderboard data does not fabricate stars');
   const offline=await browser.newPage();offline.on('pageerror',e=>errors.push(e.message));
   await offline.goto(url);await waitForPage(offline,()=>window.crookedGarden?.getState().phase==='title');
   await offline.route('https://jzixrgkpvbypiyfnshjq.supabase.co/**',route=>route.fulfill({status:503,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'{}'}));
